@@ -1,34 +1,22 @@
 export interface CatalogCardOptions {
-  icon: string;
   title: string;
-  description: string;
   href: string;
   delayMs: number;
 }
 
-export function catalogCardMarkup({ icon, title, description, href, delayMs }: CatalogCardOptions): string {
+export function catalogCardMarkup({ title, href, delayMs }: CatalogCardOptions): string {
   return /* html */ `
     <a
       href="${href}"
       target="_blank"
       rel="noopener noreferrer"
       data-reveal
-      style="transition-delay:${delayMs}ms"
-      class="group relative flex w-full flex-col items-start gap-5 overflow-hidden rounded-[28px] border border-black/5 bg-white/70 p-8 text-left shadow-[0_1px_2px_rgba(17,17,17,0.04),0_20px_45px_-20px_rgba(17,17,17,0.18)] backdrop-blur-xl transition-all duration-500 ease-out hover:-translate-y-1.5 hover:shadow-[0_1px_2px_rgba(17,17,17,0.06),0_30px_60px_-20px_rgba(17,17,17,0.22)] sm:p-10"
+      class="group relative flex w-full flex-col items-start justify-center gap-6 overflow-hidden rounded-[28px] border border-white/10 bg-white/[0.04] p-10 text-left backdrop-blur-xl transition-all duration-300 ease-out delay-[${delayMs}ms] hover:-translate-y-1.5 hover:border-white/20 hover:bg-white/[0.06] sm:p-12 sm:min-h-[220px]"
     >
-      <span
-        class="flex h-14 w-14 items-center justify-center rounded-2xl bg-vullz-black text-vullz-yellow transition-transform duration-500 ease-out group-hover:scale-105"
-        aria-hidden="true"
-        >${icon}</span
-      >
-
-      <div class="flex flex-col gap-2">
-        <h3 class="text-xl font-semibold tracking-tight text-vullz-black sm:text-2xl">${title}</h3>
-        <p class="text-sm leading-relaxed text-vullz-gray-700 sm:text-base">${description}</p>
-      </div>
+      <h3 class="text-balance text-3xl font-extrabold tracking-tight text-white sm:text-4xl">${title}</h3>
 
       <span
-        class="mt-2 inline-flex items-center gap-2 text-sm font-medium text-vullz-black transition-all duration-300 group-hover:gap-3"
+        class="inline-flex items-center gap-2 text-sm font-semibold text-vullz-yellow transition-all duration-200 group-hover:gap-3"
       >
         Acessar catálogo
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -38,7 +26,7 @@ export function catalogCardMarkup({ icon, title, description, href, delayMs }: C
       </span>
 
       <span
-        class="pointer-events-none absolute -right-8 -top-8 h-28 w-28 rounded-full bg-vullz-yellow/20 blur-2xl transition-opacity duration-500 group-hover:opacity-100 opacity-0"
+        class="pointer-events-none absolute -right-10 -top-10 h-40 w-40 rounded-full bg-vullz-yellow/10 opacity-0 blur-3xl transition-opacity duration-300 group-hover:opacity-100"
         aria-hidden="true"
       ></span>
     </a>

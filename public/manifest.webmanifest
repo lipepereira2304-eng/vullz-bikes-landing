@@ -4,8 +4,8 @@
   "description": "Catálogo digital da Vullz Bikes - bicicletas e mobilidade elétrica.",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#ffffff",
+  "background_color": "#1a1a1a",
+  "theme_color": "#1a1a1a",
   "icons": [
     {
       "src": "/apple-touch-icon.png",
