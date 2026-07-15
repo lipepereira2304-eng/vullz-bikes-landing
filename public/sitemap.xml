@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!--
+  Lista de páginas para os buscadores. O robots.txt já apontava para este
+  arquivo, mas ele não existia (404). Só a home entra: /em-breve.html é
+  noindex de propósito. Ao criar as páginas futuras (institucional, produtos,
+  assistência...), adicione um <url> para cada uma aqui.
+-->
+<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
+  <url>
+    <loc>https://vullzbikes.com.br/</loc>
+    <changefreq>monthly</changefreq>
+    <priority>1.0</priority>
+  </url>
+</urlset>
