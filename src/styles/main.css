@@ -27,6 +27,16 @@
     deslizar devagar sem travar.
   */
   --ease-glide: cubic-bezier(0.33, 1, 0.68, 1);
+
+  /*
+    Curva só da "subidinha" do hover. easeOutCubic (--ease-glide) serve bem para
+    luz e cor, mas não para deslocamento curto: ele entrega ~63% do movimento no
+    primeiro terço, então os 8px do card sobem quase instantâneo e depois rastejam
+    os 3px finais de forma invisível — lê como rápido, mesmo durando 900ms. Esta
+    curva (easeInOutCubic) distribui os 8px pela janela inteira, então a subida
+    ainda está acontecendo enquanto a luz acende: é o que alinha os dois efeitos.
+  */
+  --ease-lift: cubic-bezier(0.65, 0, 0.35, 1);
 }
 
 @layer base {
@@ -66,6 +76,28 @@
 
 @utility text-balance {
   text-wrap: balance;
+}
+
+/*
+  Movimento compartilhado de card e botão. Vive como @utility (camada utilities)
+  de propósito: assim vence `[data-reveal]`, que está em @layer components e
+  também declara `transition`. Um `.classe` solta em components empataria em
+  especificidade com `[data-reveal]` e quem ganharia dependeria da ordem do
+  arquivo — frágil demais para uma regra que decide se o hover funciona.
+
+  `transition-timing-function` aceita uma lista posicional casada com
+  `transition-property`. Por isso as duas ficam coladas aqui: reordenar uma sem
+  a outra troca as curvas de lugar silenciosamente.
+*/
+@utility btn-motion {
+  transition-property: opacity, transform, background-color, border-color, box-shadow;
+  transition-duration: 900ms;
+  transition-timing-function:
+    var(--ease-glide), /* opacity */
+    var(--ease-lift), /* transform  <- a subidinha */
+    var(--ease-glide), /* background-color */
+    var(--ease-glide), /* border-color */
+    var(--ease-glide); /* box-shadow <- a luz */
 }
 
 /*
@@ -133,6 +165,13 @@
     will-change: opacity, transform;
   }
 
+  /*
+    O stagger de entrada é aplicado inline (style="transition-delay:220ms"), e
+    inline vence qualquer regra de camada — não adianta tentar zerar o delay por
+    CSS aqui. Sem removê-lo, ele fica grudado no elemento depois da entrada e
+    vira zona morta antes de cada hover (o botão só reage 220ms após o cursor
+    chegar). Quem tira o inline no fim da entrada é o JS (ver animations.ts).
+  */
   [data-reveal].is-visible {
     opacity: 1;
     transform: translateY(0);

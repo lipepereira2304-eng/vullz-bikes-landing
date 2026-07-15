@@ -1,11 +1,4 @@
 /*
-  `[data-reveal]` declara `will-change: opacity, transform` para que o navegador
-  prepare uma camada antes da animação de entrada. Isso só faz sentido enquanto
-  a animação acontece: mantê-lo depois prende cada elemento numa camada de
-  composição para sempre, gastando memória de GPU à toa. Como a entrada roda uma
-  única vez, liberamos assim que a transição termina.
-*/
-/*
   Rede de segurança, não sincronia: é só um teto folgado acima de qualquer
   duração+delay de entrada plausível. Deliberadamente não espelha os valores do
   CSS — se espelhasse, mexer na duração lá silenciosamente quebraria o fallback
@@ -13,24 +6,38 @@
 */
 const REVEAL_FALLBACK_MS = 3000;
 
-function releaseWillChange(el: HTMLElement): void {
+/*
+  Faxina de fim de entrada. Duas coisas que só valem durante a animação de
+  entrada e viram problema se ficarem:
+
+  1. `will-change` (vem do CSS): prepara uma camada de composição antes da
+     animação. Mantê-lo depois prende o elemento numa camada para sempre,
+     gastando memória de GPU à toa.
+  2. `transition-delay` (vem do stagger inline): escalona a entrada. Depois dela
+     o delay continua valendo para TODA transição do elemento — inclusive hover.
+     Sem remover, o botão fica 220-440ms imóvel após o cursor chegar antes de
+     começar a subir. Precisa ser removido aqui, no inline: qualquer tentativa de
+     zerar por CSS perde para o style inline.
+*/
+function finishReveal(el: HTMLElement): void {
   el.style.willChange = "auto";
+  el.style.transitionDelay = "0s";
 }
 
 /*
-  Solta o `will-change` no fim da transição — com fallback por tempo porque
+  Roda a faxina no fim da transição — com fallback por tempo porque
   `transitionend` não é garantido: se o elemento é revelado com a aba em segundo
   plano, o navegador não renderiza, a transição nunca roda e o evento nunca
-  dispara, deixando o elemento promovido a camada para sempre.
+  dispara, deixando a limpeza por fazer.
 */
 function releaseAfterReveal(el: HTMLElement): void {
-  const timer = window.setTimeout(() => releaseWillChange(el), REVEAL_FALLBACK_MS);
+  const timer = window.setTimeout(() => finishReveal(el), REVEAL_FALLBACK_MS);
 
   el.addEventListener(
     "transitionend",
     () => {
       window.clearTimeout(timer);
-      releaseWillChange(el);
+      finishReveal(el);
     },
     { once: true }
   );
@@ -43,7 +50,7 @@ export function initRevealOnScroll(): void {
   if (prefersReducedMotion || !("IntersectionObserver" in window)) {
     revealEls.forEach((el) => {
       el.classList.add("is-visible");
-      releaseWillChange(el);
+      finishReveal(el);
     });
     return;
   }
