@@ -26,7 +26,7 @@ export function catalogCardMarkup({
       <h3 class="text-balance text-3xl font-extrabold tracking-tight text-white sm:text-4xl">${title}</h3>
 
       <span
-        class="inline-flex items-center gap-2 text-sm font-semibold text-vullz-yellow transition-[gap,color] duration-[900ms] ease-glide group-hover:gap-3.5"
+        class="inline-flex items-center gap-2 text-sm font-semibold text-vullz-yellow transition-[gap,color] duration-[var(--dur-hover)] ease-lift group-hover:gap-3.5"
       >
         ${linkLabel}
         <svg
@@ -35,7 +35,7 @@ export function catalogCardMarkup({
           viewBox="0 0 16 16"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
-          class="transition-transform duration-[900ms] ease-glide group-hover:translate-x-0.5"
+          class="transition-transform duration-[var(--dur-hover)] ease-lift group-hover:translate-x-0.5"
         >
           <path d="M3.5 8H12.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
           <path d="M8.5 3.5L13 8L8.5 12.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />

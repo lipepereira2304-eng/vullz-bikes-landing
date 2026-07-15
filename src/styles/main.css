@@ -29,14 +29,21 @@
   --ease-glide: cubic-bezier(0.33, 1, 0.68, 1);
 
   /*
-    Curva só da "subidinha" do hover. easeOutCubic (--ease-glide) serve bem para
-    luz e cor, mas não para deslocamento curto: ele entrega ~63% do movimento no
-    primeiro terço, então os 8px do card sobem quase instantâneo e depois rastejam
-    os 3px finais de forma invisível — lê como rápido, mesmo durando 900ms. Esta
-    curva (easeInOutCubic) distribui os 8px pela janela inteira, então a subida
-    ainda está acontecendo enquanto a luz acende: é o que alinha os dois efeitos.
+    Curva de tudo que se move no hover (subida, luz, cor). easeOutCubic
+    (--ease-glide) serve para a entrada da página, mas não aqui: ele entrega ~63%
+    do movimento no primeiro terço, então os 8px do card subiam quase instantâneo
+    e depois rastejavam os 3px finais de forma invisível — lia como rápido, mesmo
+    durando 900ms. Esta curva (easeInOutCubic) distribui o movimento pela janela
+    inteira.
+
+    Subida e luz usam esta mesma curva E a mesma duração de propósito: assim não
+    são dois efeitos parecidos tentando se acompanhar, são literalmente o mesmo
+    movimento. É o que faz a subida acontecer no compasso da luz.
   */
   --ease-lift: cubic-bezier(0.65, 0, 0.35, 1);
+
+  /* Lento de propósito: é o tempo que o hover inteiro leva para florescer. */
+  --dur-hover: 1400ms;
 }
 
 @layer base {
@@ -85,19 +92,14 @@
   especificidade com `[data-reveal]` e quem ganharia dependeria da ordem do
   arquivo — frágil demais para uma regra que decide se o hover funciona.
 
-  `transition-timing-function` aceita uma lista posicional casada com
-  `transition-property`. Por isso as duas ficam coladas aqui: reordenar uma sem
-  a outra troca as curvas de lugar silenciosamente.
+  Uma curva e uma duração para todas as propriedades: a subida e a luz precisam
+  ser o mesmo movimento, não dois parecidos. Dar curvas diferentes a cada uma foi
+  justamente o que fez elas parecerem descompassadas antes.
 */
 @utility btn-motion {
   transition-property: opacity, transform, background-color, border-color, box-shadow;
-  transition-duration: 900ms;
-  transition-timing-function:
-    var(--ease-glide), /* opacity */
-    var(--ease-lift), /* transform  <- a subidinha */
-    var(--ease-glide), /* background-color */
-    var(--ease-glide), /* border-color */
-    var(--ease-glide); /* box-shadow <- a luz */
+  transition-duration: var(--dur-hover);
+  transition-timing-function: var(--ease-lift);
 }
 
 /*

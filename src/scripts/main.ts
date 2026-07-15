@@ -5,6 +5,16 @@ import { socialButtonsMarkup } from "../components/social-buttons";
 import { initRevealOnScroll } from "./animations";
 import vullzLogo from "../assets/images/vullz-logo.png";
 
+/*
+  Este caminho é a URL pública do catálogo e também o nome que o cliente vê ao
+  baixar, então vale ser descritivo e versionado por ano. Trocar o caminho a cada
+  edição nova não é detalhe: um PDF não tem <head>, então o ícone daquela aba só
+  pode vir do /favicon.ico da raiz — e o navegador guarda, por URL, qual ícone já
+  viu. Numa URL nova ele é obrigado a rebuscar (pegando o ícone atual) e a baixar
+  o PDF novo, em vez de reaproveitar o que tinha guardado da URL antiga.
+*/
+const CATALOGO_BICICLETAS = "/catalogos/catalogo-bicicletas-2026.pdf";
+
 const app = document.querySelector<HTMLDivElement>("#app");
 
 if (app) {
@@ -35,7 +45,7 @@ if (app) {
         <div class="grid w-full max-w-3xl gap-5 sm:grid-cols-2 sm:gap-6">
           ${catalogCardMarkup({
             title: "Bicicletas",
-            href: "/catalogos/bicicletas.pdf",
+            href: CATALOGO_BICICLETAS,
             delayMs: 220,
           })}
           ${catalogCardMarkup({

@@ -39,7 +39,7 @@ export function socialButtonsMarkup({
           viewBox="0 0 24 24"
           fill="currentColor"
           xmlns="http://www.w3.org/2000/svg"
-          class="text-[#25D366] transition-transform duration-[900ms] ease-glide group-hover:scale-110"
+          class="text-[#25D366] transition-transform duration-[var(--dur-hover)] ease-lift group-hover:scale-110"
           aria-hidden="true"
         >
           <path
@@ -63,7 +63,7 @@ export function socialButtonsMarkup({
           viewBox="0 0 24 24"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
-          class="transition-transform duration-[900ms] ease-glide group-hover:scale-110"
+          class="transition-transform duration-[var(--dur-hover)] ease-lift group-hover:scale-110"
           aria-hidden="true"
         >
           <rect x="3" y="3" width="18" height="18" rx="5" stroke="#E1306C" stroke-width="1.6" />
