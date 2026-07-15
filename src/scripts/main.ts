@@ -54,7 +54,8 @@ if (app) {
         })}
       </main>
 
-      <footer class="relative z-10 pb-8 text-center text-xs text-white/35">
+      <!-- white/50 é o menor passo que atinge contraste AA (5.24:1) em 12px sobre o grafite. -->
+      <footer class="relative z-10 pb-8 text-center text-xs text-white/50">
         © ${new Date().getFullYear()} Vullz Bikes. Todos os direitos reservados.
       </footer>
     </div>

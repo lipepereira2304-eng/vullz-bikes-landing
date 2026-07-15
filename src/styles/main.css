@@ -102,6 +102,57 @@
   normalmente quando precisa.
 */
 @layer components {
+  /*
+    Fundo fluido. Sem filtro: o radial-gradient já desvanece para transparente,
+    então a suavidade é inerente e custa ~0 por frame. Só `transform` é animado,
+    o que o compositor resolve na GPU sem repaint.
+  */
+  .blob {
+    position: absolute;
+    border-radius: 9999px;
+    will-change: transform;
+  }
+
+  /*
+    Opacidades bem abaixo das do SVG original (0.38/0.10/0.14) de propósito:
+    lá o feGaussianBlur espalhava o gradiente por uma área enorme e diluía muito
+    o pico. Sem o filtro, o pico chega inteiro — então ele precisa nascer menor
+    para o resultado final ficar igual de sutil.
+  */
+  .blob--yellow {
+    background: radial-gradient(
+      closest-side,
+      rgba(245, 197, 24, 0.15),
+      rgba(245, 197, 24, 0)
+    );
+  }
+
+  .blob--white {
+    background: radial-gradient(
+      closest-side,
+      rgba(255, 255, 255, 0.05),
+      rgba(255, 255, 255, 0)
+    );
+  }
+
+  .blob--gray {
+    background: radial-gradient(
+      closest-side,
+      rgba(154, 154, 154, 0.06),
+      rgba(154, 154, 154, 0)
+    );
+  }
+
+  /* Brilho de hover do card: gradiente em vez de `filter: blur()`, mesmo motivo. */
+  .card-glow {
+    border-radius: 9999px;
+    background: radial-gradient(
+      closest-side,
+      rgba(245, 197, 24, 0.20),
+      rgba(245, 197, 24, 0)
+    );
+  }
+
   [data-reveal] {
     opacity: 0;
     transform: translateY(12px);

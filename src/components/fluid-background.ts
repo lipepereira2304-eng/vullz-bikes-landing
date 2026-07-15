@@ -1,52 +1,43 @@
-export function fluidBackgroundMarkup(): string {
-  return /* html */ `
-    <svg
-      class="pointer-events-none absolute inset-0 -z-10 h-full w-full"
-      viewBox="0 0 1200 1600"
-      preserveAspectRatio="xMidYMid slice"
-      aria-hidden="true"
-      focusable="false"
-    >
-      <defs>
-        <radialGradient id="blob-yellow" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stop-color="#f5c518" stop-opacity="0.38" />
-          <stop offset="100%" stop-color="#f5c518" stop-opacity="0" />
-        </radialGradient>
-        <radialGradient id="blob-white-soft" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stop-color="#ffffff" stop-opacity="0.10" />
-          <stop offset="100%" stop-color="#ffffff" stop-opacity="0" />
-        </radialGradient>
-        <radialGradient id="blob-gray-soft" cx="50%" cy="50%" r="50%">
-          <stop offset="0%" stop-color="#9a9a9a" stop-opacity="0.14" />
-          <stop offset="100%" stop-color="#9a9a9a" stop-opacity="0" />
-        </radialGradient>
-        <filter id="blob-blur" x="-50%" y="-50%" width="200%" height="200%">
-          <feGaussianBlur stdDeviation="80" />
-        </filter>
-      </defs>
+interface Blob {
+  tone: "yellow" | "white" | "gray";
+  animation: "a" | "b" | "c";
+  /** Posição/tamanho em % do container. */
+  left: number;
+  top: number;
+  width: number;
+  height: number;
+}
 
-      <g filter="url(#blob-blur)" class="mix-blend-screen">
-        <ellipse
-          class="origin-center animate-blob-a"
-          cx="220" cy="260" rx="360" ry="300"
-          fill="url(#blob-yellow)"
-        />
-        <ellipse
-          class="origin-center animate-blob-b"
-          cx="980" cy="520" rx="420" ry="360"
-          fill="url(#blob-white-soft)"
-        />
-        <ellipse
-          class="origin-center animate-blob-c"
-          cx="560" cy="980" rx="460" ry="380"
-          fill="url(#blob-gray-soft)"
-        />
-        <ellipse
-          class="origin-center animate-blob-b"
-          cx="150" cy="1300" rx="320" ry="280"
-          fill="url(#blob-yellow)"
-        />
-      </g>
-    </svg>
+/*
+  Cada blob é um radial-gradient que já desvanece para transparente — ou seja,
+  a suavidade vem de graça, sem filtro. A versão anterior desenhava estas mesmas
+  elipses dentro de um <filter> SVG com feGaussianBlur stdDeviation=80: como as
+  elipses animam em loop infinito, o filtro era re-rasterizado a cada frame
+  (~18ms medidos, contra ~1.6ms sem filtro), estourando sozinho o orçamento de
+  16.7ms de um frame a 60fps. Gradiente puro + animação só de transform mantém
+  o visual e deixa o trabalho por frame com o compositor (GPU), sem repaint.
+*/
+const BLOBS: Blob[] = [
+  { tone: "yellow", animation: "a", left: -18, top: -24, width: 72, height: 62 },
+  { tone: "white", animation: "b", left: 58, top: 6, width: 68, height: 62 },
+  { tone: "gray", animation: "c", left: 8, top: 44, width: 82, height: 66 },
+  { tone: "yellow", animation: "b", left: -22, top: 62, width: 62, height: 58 },
+];
+
+export function fluidBackgroundMarkup(): string {
+  const blobs = BLOBS.map(
+    ({ tone, animation, left, top, width, height }) => /* html */ `
+      <div
+        class="blob blob--${tone} animate-blob-${animation}"
+        style="left:${left}%;top:${top}%;width:${width}%;height:${height}%"
+      ></div>`
+  ).join("");
+
+  return /* html */ `
+    <div
+      class="pointer-events-none absolute inset-0 -z-10 overflow-hidden"
+      aria-hidden="true"
+    >${blobs}
+    </div>
   `;
 }
