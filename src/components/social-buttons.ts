@@ -5,8 +5,13 @@ export interface SocialButtonsOptions {
   delayMs: number;
 }
 
+/*
+  Mesma linguagem de movimento dos cards: `ease-glide` + 900ms, e o brilho
+  amarelo como halo externo (box-shadow, que por especificação só pinta fora da
+  borda — nunca por baixo do botão).
+*/
 const BASE_BUTTON_CLASSES =
-  "group inline-flex flex-1 items-center justify-center gap-2.5 rounded-2xl border border-white/10 bg-white/[0.04] px-6 py-4 text-sm font-semibold text-white transition-[transform,background-color,border-color,box-shadow] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-1 hover:border-white/20 hover:bg-white/[0.07] active:translate-y-0 active:scale-[0.985] active:duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vullz-yellow focus-visible:ring-offset-2 focus-visible:ring-offset-vullz-graphite sm:text-base";
+  "group inline-flex flex-1 items-center justify-center gap-2.5 rounded-2xl border border-white/10 bg-white/[0.04] px-6 py-4 text-sm font-semibold text-white transition-[opacity,transform,background-color,border-color,box-shadow] duration-[900ms] ease-glide hover:-translate-y-1 hover:border-white/25 hover:bg-white/[0.07] hover:shadow-[0_0_55px_-14px_rgba(245,197,24,0.34)] active:translate-y-0 active:scale-[0.985] active:duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vullz-yellow focus-visible:ring-offset-2 focus-visible:ring-offset-vullz-graphite sm:text-base";
 
 export function socialButtonsMarkup({
   whatsappNumber,
@@ -24,7 +29,7 @@ export function socialButtonsMarkup({
         href="${whatsappHref}"
         target="_blank"
         rel="noopener noreferrer"
-        class="${BASE_BUTTON_CLASSES} hover:shadow-[0_20px_40px_-24px_rgba(37,211,102,0.35)]"
+        class="${BASE_BUTTON_CLASSES}"
         style="transition-delay:${delayMs}ms"
         aria-label="Falar no WhatsApp"
       >
@@ -34,7 +39,7 @@ export function socialButtonsMarkup({
           viewBox="0 0 24 24"
           fill="currentColor"
           xmlns="http://www.w3.org/2000/svg"
-          class="text-[#25D366] transition-transform duration-[400ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-110"
+          class="text-[#25D366] transition-transform duration-[900ms] ease-glide group-hover:scale-110"
           aria-hidden="true"
         >
           <path
@@ -48,7 +53,7 @@ export function socialButtonsMarkup({
         href="${instagramHref}"
         target="_blank"
         rel="noopener noreferrer"
-        class="${BASE_BUTTON_CLASSES} hover:shadow-[0_20px_40px_-24px_rgba(221,42,123,0.35)]"
+        class="${BASE_BUTTON_CLASSES}"
         style="transition-delay:${delayMs + 60}ms"
         aria-label="Seguir no Instagram"
       >
@@ -58,7 +63,7 @@ export function socialButtonsMarkup({
           viewBox="0 0 24 24"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
-          class="transition-transform duration-[400ms] ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:scale-110"
+          class="transition-transform duration-[900ms] ease-glide group-hover:scale-110"
           aria-hidden="true"
         >
           <rect x="3" y="3" width="18" height="18" rx="5" stroke="#E1306C" stroke-width="1.6" />

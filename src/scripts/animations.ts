@@ -5,8 +5,13 @@
   composição para sempre, gastando memória de GPU à toa. Como a entrada roda uma
   única vez, liberamos assim que a transição termina.
 */
-const REVEAL_MS = 750;
-const REVEAL_MAX_DELAY_MS = 500;
+/*
+  Rede de segurança, não sincronia: é só um teto folgado acima de qualquer
+  duração+delay de entrada plausível. Deliberadamente não espelha os valores do
+  CSS — se espelhasse, mexer na duração lá silenciosamente quebraria o fallback
+  aqui. O que importa é que uma hora libere; o valor exato, não.
+*/
+const REVEAL_FALLBACK_MS = 3000;
 
 function releaseWillChange(el: HTMLElement): void {
   el.style.willChange = "auto";
@@ -19,7 +24,7 @@ function releaseWillChange(el: HTMLElement): void {
   dispara, deixando o elemento promovido a camada para sempre.
 */
 function releaseAfterReveal(el: HTMLElement): void {
-  const timer = window.setTimeout(() => releaseWillChange(el), REVEAL_MS + REVEAL_MAX_DELAY_MS + 100);
+  const timer = window.setTimeout(() => releaseWillChange(el), REVEAL_FALLBACK_MS);
 
   el.addEventListener(
     "transitionend",

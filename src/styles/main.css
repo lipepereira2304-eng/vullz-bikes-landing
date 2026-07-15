@@ -19,33 +19,14 @@
     -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter",
     "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 
-  --animate-fade-up: fade-up 0.9s cubic-bezier(0.16, 1, 0.3, 1) both;
-  --animate-blob-a: blob-a 26s ease-in-out infinite;
-  --animate-blob-b: blob-b 32s ease-in-out infinite;
-  --animate-blob-c: blob-c 22s ease-in-out infinite;
-
-  @keyframes fade-up {
-    from {
-      opacity: 0;
-      transform: translateY(18px);
-    }
-    to {
-      opacity: 1;
-      transform: translateY(0);
-    }
-  }
-  @keyframes blob-a {
-    0%, 100% { transform: translate(-4%, -2%) scale(1) rotate(0deg); }
-    50% { transform: translate(4%, 5%) scale(1.12) rotate(8deg); }
-  }
-  @keyframes blob-b {
-    0%, 100% { transform: translate(3%, 4%) scale(1) rotate(0deg); }
-    50% { transform: translate(-6%, -3%) scale(1.08) rotate(-10deg); }
-  }
-  @keyframes blob-c {
-    0%, 100% { transform: translate(0%, 0%) scale(1); }
-    50% { transform: translate(-3%, 6%) scale(1.15); }
-  }
+  /*
+    Easing único de todas as interações de hover. Antes usávamos um easeOutExpo
+    (0.16,1,0.3,1), que concentra ~60% do movimento nos primeiros 10% do tempo:
+    lê como "pulo e trava", não como lento. Esta curva (easeOutCubic) responde
+    na hora ao cursor, mas distribui o movimento — é o que dá a sensação de
+    deslizar devagar sem travar.
+  */
+  --ease-glide: cubic-bezier(0.33, 1, 0.68, 1);
 }
 
 @layer base {
@@ -103,14 +84,14 @@
 */
 @layer components {
   /*
-    Fundo fluido. Sem filtro: o radial-gradient já desvanece para transparente,
-    então a suavidade é inerente e custa ~0 por frame. Só `transform` é animado,
-    o que o compositor resolve na GPU sem repaint.
+    Fundo fluido, agora totalmente estático. A deriva lenta (22-32s) era
+    imperceptível na prática, então pagava trabalho contínuo de compositor sem
+    entregar nada ao olho. Sem animação não há `will-change`: os gradientes são
+    pintados uma vez e a página fica 100% parada quando ninguém interage.
   */
   .blob {
     position: absolute;
     border-radius: 9999px;
-    will-change: transform;
   }
 
   /*
@@ -143,22 +124,12 @@
     );
   }
 
-  /* Brilho de hover do card: gradiente em vez de `filter: blur()`, mesmo motivo. */
-  .card-glow {
-    border-radius: 9999px;
-    background: radial-gradient(
-      closest-side,
-      rgba(245, 197, 24, 0.20),
-      rgba(245, 197, 24, 0)
-    );
-  }
-
   [data-reveal] {
     opacity: 0;
     transform: translateY(12px);
     transition:
-      opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1),
-      transform 0.75s cubic-bezier(0.16, 1, 0.3, 1);
+      opacity 0.9s var(--ease-glide),
+      transform 0.9s var(--ease-glide);
     will-change: opacity, transform;
   }
 
