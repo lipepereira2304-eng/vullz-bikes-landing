@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="pt-BR">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <title>Em breve | Catálogo Vullz Elétricos</title>
+    <meta name="description" content="O catálogo digital de elétricos da Vullz Bikes está a caminho." />
+    <meta name="theme-color" content="#1a1a1a" />
+    <meta name="robots" content="noindex, follow" />
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+    <link rel="apple-touch-icon" href="/apple-touch-icon.png" />
+    <style>
+      :root {
+        color-scheme: dark;
+      }
+
+      * {
+        box-sizing: border-box;
+      }
+
+      html,
+      body {
+        height: 100%;
+        margin: 0;
+      }
+
+      body {
+        display: flex;
+        min-height: 100dvh;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 2rem;
+        padding: 1.5rem;
+        background: #1a1a1a;
+        color: #ffffff;
+        font-family:
+          -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter",
+          "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+        -webkit-font-smoothing: antialiased;
+        text-align: center;
+        overflow: hidden;
+        position: relative;
+      }
+
+      .glow {
+        position: absolute;
+        inset: 0;
+        z-index: 0;
+        pointer-events: none;
+        background:
+          radial-gradient(420px 420px at 18% 20%, rgba(245, 197, 24, 0.16), transparent 70%),
+          radial-gradient(480px 480px at 85% 75%, rgba(255, 255, 255, 0.06), transparent 70%);
+      }
+
+      .content {
+        position: relative;
+        z-index: 1;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 1.75rem;
+        opacity: 0;
+        transform: translateY(14px);
+        animation: fade-in-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.05s forwards;
+      }
+
+      .mark {
+        width: 56px;
+        height: 56px;
+      }
+
+      h1 {
+        margin: 0;
+        font-size: clamp(2.25rem, 6vw, 3.5rem);
+        font-weight: 800;
+        letter-spacing: -0.02em;
+        line-height: 1.05;
+      }
+
+      h1 span {
+        color: #f5c518;
+      }
+
+      p {
+        max-width: 26rem;
+        margin: 0;
+        color: rgba(255, 255, 255, 0.6);
+        font-size: clamp(1rem, 2.5vw, 1.125rem);
+        line-height: 1.5;
+      }
+
+      .back {
+        display: inline-flex;
+        align-items: center;
+        gap: 0.5rem;
+        margin-top: 0.5rem;
+        padding: 0.75rem 1.5rem;
+        border-radius: 999px;
+        border: 1px solid rgba(255, 255, 255, 0.14);
+        color: #ffffff;
+        text-decoration: none;
+        font-size: 0.9rem;
+        font-weight: 600;
+        background: rgba(255, 255, 255, 0.04);
+        transition:
+          background-color 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+          border-color 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+          transform 0.45s cubic-bezier(0.16, 1, 0.3, 1),
+          box-shadow 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+      }
+
+      .back:hover {
+        background: rgba(255, 255, 255, 0.08);
+        border-color: rgba(255, 255, 255, 0.24);
+        transform: translateY(-2px);
+        box-shadow: 0 12px 30px -18px rgba(0, 0, 0, 0.6);
+      }
+
+      .back:active {
+        transform: translateY(0) scale(0.98);
+      }
+
+      .back:focus-visible {
+        outline: 2px solid #f5c518;
+        outline-offset: 3px;
+      }
+
+      @keyframes fade-in-up {
+        to {
+          opacity: 1;
+          transform: translateY(0);
+        }
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        .content {
+          animation: none;
+          opacity: 1;
+          transform: none;
+        }
+        .back {
+          transition: none;
+        }
+      }
+    </style>
+  </head>
+  <body>
+    <div class="glow" aria-hidden="true"></div>
+    <div class="content">
+      <svg class="mark" viewBox="0 0 48 48" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <rect width="48" height="48" rx="12" fill="#111111" />
+        <path
+          d="M13 14L24 34L35 14"
+          stroke="#F5C518"
+          stroke-width="4.5"
+          stroke-linecap="round"
+          stroke-linejoin="round"
+          fill="none"
+        />
+      </svg>
+
+      <h1>EM BREVE<span>...</span></h1>
+      <p>Estamos preparando o catálogo digital dos nossos elétricos. Volte em breve para conferir a linha completa.</p>
+
+      <a class="back" href="/">
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12.5 8H3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+          <path d="M7.5 3.5L3 8L7.5 12.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+        Voltar para o catálogo
+      </a>
+    </div>
+  </body>
+</html>

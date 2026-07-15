@@ -1,6 +1,7 @@
 import "../styles/main.css";
 import { fluidBackgroundMarkup } from "../components/fluid-background";
 import { catalogCardMarkup } from "../components/catalog-card";
+import { socialButtonsMarkup } from "../components/social-buttons";
 import { initRevealOnScroll } from "./animations";
 import vullzLogo from "../assets/images/vullz-logo.png";
 
@@ -22,7 +23,7 @@ if (app) {
       </header>
 
       <main class="relative z-10 flex flex-1 flex-col items-center justify-center gap-12 px-6 py-16 text-center sm:gap-16 sm:py-20">
-        <div class="flex flex-col items-center gap-5 delay-[40ms]" data-reveal>
+        <div class="flex flex-col items-center gap-5 delay-[120ms]" data-reveal>
           <h1 class="text-balance text-4xl font-extrabold tracking-tight text-white sm:text-6xl md:text-7xl">
             Catálogos Digitais
           </h1>
@@ -35,14 +36,22 @@ if (app) {
           ${catalogCardMarkup({
             title: "Bicicletas",
             href: "/catalogos/bicicletas.pdf",
-            delayMs: 80,
+            delayMs: 220,
           })}
           ${catalogCardMarkup({
             title: "Elétricos",
-            href: "/catalogos/eletricos.pdf",
-            delayMs: 130,
+            href: "/em-breve.html",
+            newTab: false,
+            linkLabel: "Em breve",
+            delayMs: 300,
           })}
         </div>
+
+        ${socialButtonsMarkup({
+          whatsappNumber: "45998604743",
+          instagramHandle: "vullzbikes",
+          delayMs: 380,
+        })}
       </main>
 
       <footer class="relative z-10 pb-8 text-center text-xs text-white/35">
