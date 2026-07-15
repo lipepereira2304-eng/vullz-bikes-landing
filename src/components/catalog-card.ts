@@ -20,7 +20,8 @@ export function catalogCardMarkup({
       href="${href}"
       ${targetAttrs}
       data-reveal
-      class="group relative flex w-full flex-col items-start justify-center gap-6 overflow-hidden rounded-[28px] border border-white/10 bg-white/[0.04] p-10 text-left backdrop-blur-xl transition-[transform,background-color,border-color,box-shadow] duration-500 ease-[cubic-bezier(0.16,1,0.3,1)] delay-[${delayMs}ms] hover:-translate-y-2 hover:border-white/20 hover:bg-white/[0.06] hover:shadow-[0_24px_48px_-24px_rgba(245,197,24,0.22)] active:translate-y-0 active:scale-[0.985] active:duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vullz-yellow focus-visible:ring-offset-2 focus-visible:ring-offset-vullz-graphite sm:p-12 sm:min-h-[220px]"
+      style="transition-delay:${delayMs}ms"
+      class="group relative flex w-full flex-col items-start justify-center gap-6 overflow-hidden rounded-[28px] border border-white/10 bg-white/[0.04] p-10 text-left backdrop-blur-xl transition-[opacity,transform,background-color,border-color,box-shadow] duration-[750ms] ease-[cubic-bezier(0.16,1,0.3,1)] hover:-translate-y-2 hover:border-white/20 hover:bg-white/[0.06] hover:shadow-[0_24px_48px_-24px_rgba(245,197,24,0.22)] active:translate-y-0 active:scale-[0.985] active:duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vullz-yellow focus-visible:ring-offset-2 focus-visible:ring-offset-vullz-graphite sm:p-12 sm:min-h-[220px]"
     >
       <h3 class="text-balance text-3xl font-extrabold tracking-tight text-white sm:text-4xl">${title}</h3>
 

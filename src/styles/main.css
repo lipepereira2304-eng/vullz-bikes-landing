@@ -90,18 +90,29 @@
 /*
   Entrada de página: fade + leve deslocamento vertical, com curva de easing
   suave (mesma família do easeOutExpo usado em interfaces premium).
-*/
-[data-reveal] {
-  opacity: 0;
-  transform: translateY(12px);
-  transition:
-    opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1),
-    transform 0.75s cubic-bezier(0.16, 1, 0.3, 1);
-  will-change: opacity, transform;
-}
 
-[data-reveal].is-visible {
-  opacity: 1;
-  transform: translateY(0);
-  transition-delay: 0s;
+  IMPORTANTE: isto vive em @layer components (não solto no topo do arquivo)
+  de propósito. Regras CSS fora de qualquer @layer sempre vencem regras
+  dentro de @layer, não importa a especificidade — então, se declarássemos
+  isto sem camada, o `transition-property` daqui sequestraria/bloquearia
+  QUALQUER utilitário Tailwind de transição (ex.: hover:shadow, hover:bg)
+  aplicado no mesmo elemento, porque ambos definem a propriedade `transition`
+  e a versão "sem camada" sempre venceria. Ao colocar em @layer components,
+  qualquer utilitário Tailwind (que vive em @layer utilities) sobrepõe isto
+  normalmente quando precisa.
+*/
+@layer components {
+  [data-reveal] {
+    opacity: 0;
+    transform: translateY(12px);
+    transition:
+      opacity 0.75s cubic-bezier(0.16, 1, 0.3, 1),
+      transform 0.75s cubic-bezier(0.16, 1, 0.3, 1);
+    will-change: opacity, transform;
+  }
+
+  [data-reveal].is-visible {
+    opacity: 1;
+    transform: translateY(0);
+  }
 }
