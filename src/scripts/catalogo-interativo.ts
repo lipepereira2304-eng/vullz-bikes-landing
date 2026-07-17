@@ -12,8 +12,7 @@ import "../styles/main.css";
   (ou .jpeg/.png/.webp) é carregado automaticamente por este import.meta.glob —
   não precisa tocar neste arquivo de novo, só seguir a convenção de nome. Ver
   src/assets/bikes/README.md para a lista de ids de cada modelo/cor. Enquanto
-  o arquivo não existe, a silhueta de placeholder entra no lugar, tingida com a
-  cor escolhida (campo `tint` de cada ModelColor).
+  o arquivo não existe, aparece "Em breve..." no lugar da foto.
 */
 const bikePhotos = import.meta.glob<string>("../assets/bikes/*/*.{jpg,jpeg,png,webp}", {
   eager: true,
@@ -36,8 +35,6 @@ interface ModelColor {
   name: string;
   /** Cor (ou gradiente) usada na bolinha de seleção. */
   swatch: string;
-  /** Cor usada para tingir a silhueta de placeholder enquanto não há foto. */
-  tint: string;
 }
 
 interface Model {
@@ -81,7 +78,7 @@ const PALETTE_NAMES: Record<keyof typeof PALETTE, string> = {
 
 /** Cor sólida simples: nome e bolinha vêm direto da paleta. */
 function solid(id: keyof typeof PALETTE): ModelColor {
-  return { id, name: PALETTE_NAMES[id], swatch: PALETTE[id], tint: PALETTE[id] };
+  return { id, name: PALETTE_NAMES[id], swatch: PALETTE[id] };
 }
 
 /** Quadro de uma cor com dois acentos — bolinha dividida em 3 (como a Oregon). */
@@ -96,7 +93,6 @@ function framed(
     id,
     name,
     swatch: `conic-gradient(from 0deg, ${PALETTE[frame]} 0% 34%, ${PALETTE[accentA]} 34% 67%, ${PALETTE[accentB]} 67% 100%)`,
-    tint: PALETTE[frame],
   };
 }
 
@@ -158,30 +154,9 @@ const state: { modelId: string | null; colorId: string | null } = {
 };
 
 /*
-  Silhueta única reaproveitada enquanto não há fotografia real daquele
-  modelo+cor. `stroke="var(--bike-color)"` é o que permite trocar só a cor via
-  CSS, sem re-renderizar o SVG inteiro. A sombra suave (drop-shadow) é o que
-  separa a bike do fundo branco infinito mesmo quando a cor escolhida é branca.
+  Sem foto real ainda: mensagem simples em vez de qualquer desenho de
+  substituição — mais honesto que fingir um produto que não existe na tela.
 */
-function bikePlaceholderMarkup(tint: string): string {
-  return /* html */ `
-    <svg
-      id="bike-shape"
-      viewBox="0 0 200 120"
-      width="100%"
-      height="100%"
-      style="--bike-color:${tint}; filter: drop-shadow(0 12px 20px rgba(17,17,17,0.12));"
-    >
-      <g fill="none" stroke="var(--bike-color)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" class="transition-colors duration-200">
-        <circle cx="40" cy="90" r="22" />
-        <circle cx="160" cy="90" r="22" />
-        <path d="M40 90 L85 45 L130 90 M85 45 L70 20 M62 20 H82 M85 45 L160 90 M60 90 H110" />
-        <path d="M100 20 H120 L130 45" />
-      </g>
-    </svg>
-  `;
-}
-
 function bikeStageMarkup(model: Model, color: ModelColor): string {
   const photo = findBikePhoto(model.id, color.id);
 
@@ -196,7 +171,9 @@ function bikeStageMarkup(model: Model, color: ModelColor): string {
     `;
   }
 
-  return bikePlaceholderMarkup(color.tint);
+  return /* html */ `
+    <p class="text-lg font-medium tracking-wide text-vullz-gray-400">Em breve...</p>
+  `;
 }
 
 function sidebarItemMarkup(model: Model, active: boolean): string {
