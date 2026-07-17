@@ -18,11 +18,16 @@ interface Blob {
   imperceptível, então só custava trabalho contínuo à toa. O fundo agora é
   estático — o brilho continua, o movimento (que ninguém via) não.
 */
+/*
+  Sem amarelo aqui de propósito: o fundo é grafite puro, o amarelo fica
+  reservado para a marca (logo/foco), não para manchas decorativas atrás do
+  conteúdo. Só branco e cinza, bem sutis.
+*/
 const BLOBS: Blob[] = [
-  { tone: "yellow", left: -18, top: -24, width: 72, height: 62 },
+  { tone: "white", left: -18, top: -24, width: 72, height: 62 },
   { tone: "white", left: 58, top: 6, width: 68, height: 62 },
   { tone: "gray", left: 8, top: 44, width: 82, height: 66 },
-  { tone: "yellow", left: -22, top: 62, width: 62, height: 58 },
+  { tone: "gray", left: -22, top: 62, width: 62, height: 58 },
 ];
 
 export function fluidBackgroundMarkup(): string {

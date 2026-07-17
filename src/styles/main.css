@@ -29,21 +29,18 @@
   --ease-glide: cubic-bezier(0.33, 1, 0.68, 1);
 
   /*
-    Curva de tudo que se move no hover (subida, luz, cor). easeOutCubic
-    (--ease-glide) serve para a entrada da página, mas não aqui: ele entrega ~63%
-    do movimento no primeiro terço, então os 8px do card subiam quase instantâneo
-    e depois rastejavam os 3px finais de forma invisível — lia como rápido, mesmo
-    durando 900ms. Esta curva (easeInOutCubic) distribui o movimento pela janela
-    inteira.
+    Curva de tudo que se move no hover (subida, luz, cor). Simples ease-out:
+    resposta imediata ao cursor, sem a janela longa que uma curva
+    easeInOut precisaria pra não parecer cortada.
 
     Subida e luz usam esta mesma curva E a mesma duração de propósito: assim não
     são dois efeitos parecidos tentando se acompanhar, são literalmente o mesmo
     movimento. É o que faz a subida acontecer no compasso da luz.
   */
-  --ease-lift: cubic-bezier(0.65, 0, 0.35, 1);
+  --ease-lift: cubic-bezier(0.4, 0, 0.2, 1);
 
-  /* Lento de propósito: é o tempo que o hover inteiro leva para florescer. */
-  --dur-hover: 1400ms;
+  /* Rápido de propósito: feedback deve parecer instantâneo, não uma animação. */
+  --dur-hover: 120ms;
 }
 
 @layer base {
