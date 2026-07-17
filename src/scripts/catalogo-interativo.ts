@@ -129,7 +129,7 @@ function render(): void {
       <main class="relative z-10 flex flex-1 flex-col gap-8 px-6 pb-10 sm:px-10 lg:flex-row lg:gap-16 lg:py-16">
         <nav
           aria-label="Modelos"
-          class="flex gap-1.5 overflow-x-auto pb-2 lg:w-48 lg:h-full lg:shrink-0 lg:flex-col lg:justify-center lg:gap-1 lg:overflow-visible lg:pb-0"
+          class="flex gap-1.5 overflow-x-auto pb-2 lg:w-48 lg:shrink-0 lg:flex-col lg:justify-center lg:gap-1 lg:overflow-visible lg:pb-0"
         >
           ${MODELS.map((m) => sidebarItemMarkup(m, m.id === activeModel.id)).join("")}
         </nav>
