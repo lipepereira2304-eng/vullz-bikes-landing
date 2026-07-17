@@ -110,7 +110,7 @@ function bikePlaceholderMarkup(tint: string): string {
       viewBox="0 0 200 120"
       width="100%"
       height="100%"
-      style="--bike-color:${tint}; max-width: 380px; filter: drop-shadow(0 12px 20px rgba(17,17,17,0.12));"
+      style="--bike-color:${tint}; max-width: 1100px; filter: drop-shadow(0 12px 20px rgba(17,17,17,0.12));"
     >
       <g fill="none" stroke="var(--bike-color)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" class="transition-colors duration-200">
         <circle cx="40" cy="90" r="22" />
@@ -191,7 +191,7 @@ function render(): void {
         </a>
       </header>
 
-      <main class="relative z-10 flex flex-1 flex-col gap-8 px-6 pb-10 sm:px-10 lg:flex-row lg:gap-16 lg:py-16">
+      <main class="relative z-10 flex flex-1 flex-col gap-4 px-6 pb-6 sm:px-10 lg:flex-row lg:gap-16 lg:py-8">
         <nav
           aria-label="Modelos"
           class="flex gap-1.5 overflow-x-auto pb-2 lg:w-48 lg:shrink-0 lg:flex-col lg:justify-center lg:gap-1 lg:overflow-visible lg:pb-0"
@@ -199,12 +199,12 @@ function render(): void {
           ${MODELS.map((m) => sidebarItemMarkup(m, m.id === activeModel.id)).join("")}
         </nav>
 
-        <section class="flex flex-1 flex-col items-center justify-center gap-8 text-center">
-          <div class="flex aspect-square w-full max-w-md items-center justify-center">
+        <section class="flex flex-1 flex-col items-center justify-between gap-4 text-center">
+          <div class="flex w-full flex-1 items-center justify-center">
             ${bikeStageMarkup(activeModel, activeColor)}
           </div>
 
-          <div class="flex flex-col items-center gap-3">
+          <div class="flex flex-col items-center gap-3 pb-6 sm:pb-10">
             <div class="flex items-center gap-3" role="group" aria-label="Cores disponíveis">
               ${activeModel.colors
                 .map((c) => colorSwatchMarkup(c, c.id === activeColor.id))
