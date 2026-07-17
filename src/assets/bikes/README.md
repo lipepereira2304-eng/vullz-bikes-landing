@@ -23,21 +23,71 @@ Pasta: `src/assets/bikes/oregon/`
 | `verde.jpg`                               | Verde                             |
 | `laranja.jpg`                             | Laranja                           |
 
-## Outros modelos
+## Slim
 
-Ainda usam uma paleta genérica de placeholder (preto/branco/vermelho/azul/
-amarelo) até você me passar as cores reais de cada um — aí eu crio a pasta e
-a lista de ids certinha, do mesmo jeito que fiz com a Oregon:
+Pasta: `src/assets/bikes/slim/`
 
-```
-src/assets/bikes/slim/...
-src/assets/bikes/street/...
-src/assets/bikes/doble/...
-src/assets/bikes/pulse/...
-src/assets/bikes/majestic/...
-src/assets/bikes/pro-kids/...
-src/assets/bikes/love-kids/...
-```
+| Arquivo                    | Cor                    |
+| --------------------------- | ---------------------- |
+| `preto-azul-rosa.jpg`      | Preto (Azul + Rosa)    |
+
+## Street
+
+Pasta: `src/assets/bikes/street/`
+
+| Arquivo         | Cor      |
+| ---------------- | -------- |
+| `roxo.jpg`      | Roxo     |
+| `azul.jpg`      | Azul     |
+| `laranja.jpg`   | Laranja  |
+| `verde.jpg`     | Verde    |
+
+## Doble
+
+Pasta: `src/assets/bikes/doble/`
+
+| Arquivo         | Cor      |
+| ---------------- | -------- |
+| `laranja.jpg`   | Laranja  |
+| `verde.jpg`     | Verde    |
+| `rosa.jpg`      | Rosa     |
+
+## Pulse
+
+Pasta: `src/assets/bikes/pulse/`
+
+| Arquivo         | Cor      |
+| ---------------- | -------- |
+| `azul.jpg`      | Azul     |
+| `laranja.jpg`   | Laranja  |
+| `verde.jpg`     | Verde    |
+
+## Majestic
+
+Pasta: `src/assets/bikes/majestic/`
+
+| Arquivo         | Cor      |
+| ---------------- | -------- |
+| `rosa.jpg`      | Rosa     |
+| `preto.jpg`     | Preto    |
+
+## Pro Kids
+
+Pasta: `src/assets/bikes/pro-kids/`
+
+| Arquivo          | Cor       |
+| ----------------- | --------- |
+| `azul.jpg`       | Azul      |
+| `vermelho.jpg`   | Vermelho  |
+
+## Love Kids
+
+Pasta: `src/assets/bikes/love-kids/`
+
+| Arquivo         | Cor      |
+| ---------------- | -------- |
+| `rosa.jpg`      | Rosa     |
+| `branco.jpg`    | Branco   |
 
 ## Recomendações da foto
 

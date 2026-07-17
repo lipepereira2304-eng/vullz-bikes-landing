@@ -49,49 +49,86 @@ interface Model {
 }
 
 /*
-  Paleta genérica, só até cada modelo ter sua paleta real definida (como já
-  fizemos com a Oregon). Troque conforme as cores reais forem chegando.
+  Paleta única de referência: cada cor sólida usada em qualquer modelo vem
+  daqui, então "Azul" tem o mesmo tom em toda a Vullz, não um azul por modelo.
 */
-const PLACEHOLDER_COLORS: ModelColor[] = [
-  { id: "preto", name: "Preto", swatch: "#1a1a1a", tint: "#1a1a1a" },
-  { id: "branco", name: "Branco", swatch: "#f2f2f2", tint: "#f2f2f2" },
-  { id: "vermelho", name: "Vermelho", swatch: "#c23b2e", tint: "#c23b2e" },
-  { id: "azul", name: "Azul", swatch: "#2f6fb0", tint: "#2f6fb0" },
-  { id: "amarelo", name: "Amarelo", swatch: "#f5c518", tint: "#f5c518" },
-];
+const PALETTE = {
+  preto: "#1a1a1a",
+  branco: "#f2f2f2",
+  vermelho: "#c23b2e",
+  azul: "#2f6fb0",
+  amarelo: "#f5c518",
+  rosa: "#e85d9c",
+  verde: "#2f9e58",
+  laranja: "#e8791f",
+  roxo: "#7c4fb5",
+  // Dourado usado nos quadros "azul+dourado": mais metálico que o amarelo da marca.
+  dourado: "#c9a227",
+} as const;
 
-// Dourado usado nos quadros "azul+dourado": mais metálico que o amarelo da marca.
-const DOURADO = "#c9a227";
-const AZUL = "#2f6fb0";
+const PALETTE_NAMES: Record<keyof typeof PALETTE, string> = {
+  preto: "Preto",
+  branco: "Branco",
+  vermelho: "Vermelho",
+  azul: "Azul",
+  amarelo: "Amarelo",
+  rosa: "Rosa",
+  verde: "Verde",
+  laranja: "Laranja",
+  roxo: "Roxo",
+  dourado: "Dourado",
+};
+
+/** Cor sólida simples: nome e bolinha vêm direto da paleta. */
+function solid(id: keyof typeof PALETTE): ModelColor {
+  return { id, name: PALETTE_NAMES[id], swatch: PALETTE[id], tint: PALETTE[id] };
+}
+
+/** Quadro de uma cor com dois acentos — bolinha dividida em 3 (como a Oregon). */
+function framed(
+  id: string,
+  name: string,
+  frame: keyof typeof PALETTE,
+  accentA: keyof typeof PALETTE,
+  accentB: keyof typeof PALETTE
+): ModelColor {
+  return {
+    id,
+    name,
+    swatch: `conic-gradient(from 0deg, ${PALETTE[frame]} 0% 34%, ${PALETTE[accentA]} 34% 67%, ${PALETTE[accentB]} 67% 100%)`,
+    tint: PALETTE[frame],
+  };
+}
 
 const OREGON_COLORS: ModelColor[] = [
-  {
-    id: "quadro-preto-azul-dourado",
-    name: "Quadro Preto (Azul + Dourado)",
-    swatch: `conic-gradient(from 0deg, #1a1a1a 0% 34%, ${AZUL} 34% 67%, ${DOURADO} 67% 100%)`,
-    tint: "#1a1a1a",
-  },
-  {
-    id: "quadro-branco-azul-dourado",
-    name: "Quadro Branco (Azul + Dourado)",
-    swatch: `conic-gradient(from 0deg, #f2f2f2 0% 34%, ${AZUL} 34% 67%, ${DOURADO} 67% 100%)`,
-    tint: "#e4e4e4",
-  },
-  { id: "branco", name: "Branco", swatch: "#f2f2f2", tint: "#e4e4e4" },
-  { id: "rosa", name: "Rosa", swatch: "#e85d9c", tint: "#e85d9c" },
-  { id: "verde", name: "Verde", swatch: "#2f9e58", tint: "#2f9e58" },
-  { id: "laranja", name: "Laranja", swatch: "#e8791f", tint: "#e8791f" },
+  framed("quadro-preto-azul-dourado", "Quadro Preto (Azul + Dourado)", "preto", "azul", "dourado"),
+  framed("quadro-branco-azul-dourado", "Quadro Branco (Azul + Dourado)", "branco", "azul", "dourado"),
+  solid("branco"),
+  solid("rosa"),
+  solid("verde"),
+  solid("laranja"),
 ];
+
+const SLIM_COLORS: ModelColor[] = [
+  framed("preto-azul-rosa", "Preto (Azul + Rosa)", "preto", "azul", "rosa"),
+];
+
+const STREET_COLORS: ModelColor[] = [solid("roxo"), solid("azul"), solid("laranja"), solid("verde")];
+const DOBLE_COLORS: ModelColor[] = [solid("laranja"), solid("verde"), solid("rosa")];
+const PULSE_COLORS: ModelColor[] = [solid("azul"), solid("laranja"), solid("verde")];
+const MAJESTIC_COLORS: ModelColor[] = [solid("rosa"), solid("preto")];
+const PRO_KIDS_COLORS: ModelColor[] = [solid("azul"), solid("vermelho")];
+const LOVE_KIDS_COLORS: ModelColor[] = [solid("rosa"), solid("branco")];
 
 const MODELS: Model[] = [
   { id: "oregon", name: "Oregon", aro: 29, colors: OREGON_COLORS },
-  { id: "slim", name: "Slim", aro: 29, colors: PLACEHOLDER_COLORS },
-  { id: "street", name: "Street", aro: 26, colors: PLACEHOLDER_COLORS },
-  { id: "doble", name: "Doble", aro: 26, colors: PLACEHOLDER_COLORS },
-  { id: "pulse", name: "Pulse", aro: 20, colors: PLACEHOLDER_COLORS },
-  { id: "majestic", name: "Majestic", aro: 20, colors: PLACEHOLDER_COLORS },
-  { id: "pro-kids", name: "Pro Kids", aro: 16, colors: PLACEHOLDER_COLORS },
-  { id: "love-kids", name: "Love Kids", aro: 16, colors: PLACEHOLDER_COLORS },
+  { id: "slim", name: "Slim", aro: 29, colors: SLIM_COLORS },
+  { id: "street", name: "Street", aro: 26, colors: STREET_COLORS },
+  { id: "doble", name: "Doble", aro: 26, colors: DOBLE_COLORS },
+  { id: "pulse", name: "Pulse", aro: 20, colors: PULSE_COLORS },
+  { id: "majestic", name: "Majestic", aro: 20, colors: MAJESTIC_COLORS },
+  { id: "pro-kids", name: "Pro Kids", aro: 16, colors: PRO_KIDS_COLORS },
+  { id: "love-kids", name: "Love Kids", aro: 16, colors: LOVE_KIDS_COLORS },
 ];
 
 /*
