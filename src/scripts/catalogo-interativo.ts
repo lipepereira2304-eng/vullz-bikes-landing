@@ -147,10 +147,15 @@ function groupModelsByAro(models: Model[]): { aro: number; models: Model[] }[] {
 /*
   Nada selecionado até o cliente clicar num modelo na lateral: a tela abre
   numa mensagem de convite, não já direto na primeira bike.
+
+  `expandedAros`: por padrão a barra lateral abre mostrando só os rótulos de
+  aro (29/26/20/16) — os modelos de um aro só aparecem depois que o cliente
+  clica naquele aro.
 */
-const state: { modelId: string | null; colorId: string | null } = {
+const state: { modelId: string | null; colorId: string | null; expandedAros: number[] } = {
   modelId: null,
   colorId: null,
+  expandedAros: [],
 };
 
 /*
@@ -181,7 +186,7 @@ function sidebarItemMarkup(model: Model, active: boolean): string {
     <button
       type="button"
       data-model="${model.id}"
-      class="model-item shrink-0 whitespace-nowrap rounded-lg px-4 py-2.5 text-left text-sm font-semibold uppercase tracking-wide transition-[transform,color] duration-[var(--dur-hover)] ease-lift hover:translate-x-2 lg:w-full ${
+      class="model-item shrink-0 whitespace-nowrap rounded-lg px-4 py-2 text-left text-xl font-extrabold uppercase tracking-wide transition-[transform,color] duration-[var(--dur-hover)] ease-lift hover:translate-x-2 lg:w-full ${
         active ? "text-vullz-black" : "text-vullz-gray-400 hover:text-vullz-black"
       }"
     >
@@ -190,13 +195,41 @@ function sidebarItemMarkup(model: Model, active: boolean): string {
   `;
 }
 
-function sidebarGroupMarkup(aro: number, models: Model[], activeModelId: string | null): string {
+/*
+  Cabeçalho de cada aro agora é um botão (sanfona): controla se os modelos
+  daquele aro aparecem ou não. Só a seta gira — o texto do rótulo não muda de
+  peso/cor ao abrir, pra não competir com os nomes dos modelos.
+*/
+function sidebarGroupMarkup(aro: number, models: Model[], activeModelId: string | null, expanded: boolean): string {
   return /* html */ `
-    <div class="flex shrink-0 flex-col gap-1">
-      <span class="px-4 text-[11px] font-semibold uppercase tracking-widest text-vullz-gray-400">
+    <div class="flex shrink-0 flex-col gap-2">
+      <button
+        type="button"
+        data-aro="${aro}"
+        aria-expanded="${expanded}"
+        class="flex items-center gap-2 px-4 text-left text-sm font-bold uppercase tracking-widest text-vullz-black transition-colors duration-150"
+      >
+        <svg
+          width="10"
+          height="10"
+          viewBox="0 0 10 10"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          class="shrink-0 transition-transform duration-200 ease-out ${expanded ? "rotate-90" : ""}"
+        >
+          <path d="M2.5 1L7.5 5L2.5 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
         Aro ${aro}
-      </span>
-      ${models.map((m) => sidebarItemMarkup(m, m.id === activeModelId)).join("")}
+      </button>
+      ${
+        expanded
+          ? /* html */ `
+            <div class="flex flex-col gap-1">
+              ${models.map((m) => sidebarItemMarkup(m, m.id === activeModelId)).join("")}
+            </div>
+          `
+          : ""
+      }
     </div>
   `;
 }
@@ -234,7 +267,7 @@ function render(): void {
       ? /* html */ `
         <div
           id="bike-stage-inner"
-          class="flex h-full w-full items-center justify-center transition-opacity duration-200 ease-out"
+          class="flex h-full w-full items-center justify-center transition-opacity duration-[70ms] ease-linear"
           style="max-width:1030px; max-height:100vh;"
         >
           ${bikeStageMarkup(activeModel, activeColor)}
@@ -278,7 +311,14 @@ function render(): void {
           class="flex shrink-0 gap-4 overflow-x-auto pb-2 lg:w-52 lg:flex-col lg:justify-center lg:gap-5 lg:overflow-visible lg:pb-0"
         >
           ${groupModelsByAro(MODELS)
-            .map((g) => sidebarGroupMarkup(g.aro, g.models, activeModel?.id ?? null))
+            .map((g) =>
+              sidebarGroupMarkup(
+                g.aro,
+                g.models,
+                activeModel?.id ?? null,
+                state.expandedAros.includes(g.aro)
+              )
+            )
             .join("")}
         </nav>
 
@@ -301,10 +341,14 @@ function render(): void {
   a foto num corte seco (o elemento antigo é destruído e um novo já nasce na
   cor nova, sem chance de a transição de opacidade rodar). Em vez disso,
   esmaece só o palco, troca o conteúdo por baixo enquanto invisível, e traz de
-  volta — a mesma duração/easing do `transition-opacity` já declarado no
-  elemento (ver stageContent em `render`).
+  volta — a mesma duração do `transition-opacity` já declarado no elemento
+  (ver stageContent em `render`).
+
+  Bem curto de propósito: o pedido foi um esmaecer "quase imperceptível" — a
+  única coisa que deve registrar é "a cor mudou", não "a imagem sumiu e
+  voltou". 70ms é rápido o bastante pra não parecer uma animação.
 */
-const COLOR_FADE_MS = 200;
+const COLOR_FADE_MS = 70;
 
 function swapColor(model: Model, color: ModelColor): void {
   const stage = document.querySelector<HTMLElement>("#bike-stage-inner");
@@ -343,6 +387,16 @@ function swapColor(model: Model, color: ModelColor): void {
 function initInteractions(): void {
   document.addEventListener("click", (event) => {
     const target = event.target as HTMLElement;
+
+    const aroButton = target.closest<HTMLElement>("[data-aro]");
+    if (aroButton) {
+      const aro = Number(aroButton.dataset.aro);
+      state.expandedAros = state.expandedAros.includes(aro)
+        ? state.expandedAros.filter((a) => a !== aro)
+        : [...state.expandedAros, aro];
+      render();
+      return;
+    }
 
     const modelButton = target.closest<HTMLElement>("[data-model]");
     if (modelButton) {
