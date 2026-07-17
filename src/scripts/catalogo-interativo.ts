@@ -218,7 +218,11 @@ function render(): void {
   const stageContent =
     activeModel && activeColor
       ? /* html */ `
-        <div class="flex h-full w-full items-center justify-center" style="max-width:825px; max-height:90vh;">
+        <div
+          id="bike-stage-inner"
+          class="flex h-full w-full items-center justify-center transition-opacity duration-200 ease-out"
+          style="max-width:1030px; max-height:100vh;"
+        >
           ${bikeStageMarkup(activeModel, activeColor)}
         </div>
       `
@@ -279,6 +283,46 @@ function render(): void {
 }
 
 /*
+  Troca de cor não passa pelo `render()` cheio: recriar o app inteiro trocaria
+  a foto num corte seco (o elemento antigo é destruído e um novo já nasce na
+  cor nova, sem chance de a transição de opacidade rodar). Em vez disso,
+  esmaece só o palco, troca o conteúdo por baixo enquanto invisível, e traz de
+  volta — a mesma duração/easing do `transition-opacity` já declarado no
+  elemento (ver stageContent em `render`).
+*/
+const COLOR_FADE_MS = 200;
+
+function swapColor(model: Model, color: ModelColor): void {
+  const stage = document.querySelector<HTMLElement>("#bike-stage-inner");
+  if (!stage) {
+    state.colorId = color.id;
+    render();
+    return;
+  }
+
+  state.colorId = color.id;
+
+  // Feedback dos botões de cor e do rótulo é instantâneo — só a foto esmaece.
+  document.querySelectorAll<HTMLElement>("[data-color]").forEach((btn) => {
+    const isActive = btn.dataset.color === color.id;
+    btn.classList.toggle("border-vullz-black", isActive);
+    btn.classList.toggle("scale-110", isActive);
+    btn.classList.toggle("border-vullz-gray-200", !isActive);
+    btn.classList.toggle("hover:border-vullz-gray-500", !isActive);
+  });
+  const label = document.querySelector("#color-label");
+  if (label) label.textContent = color.name;
+
+  stage.style.opacity = "0";
+  window.setTimeout(() => {
+    stage.innerHTML = bikeStageMarkup(model, color);
+    requestAnimationFrame(() => {
+      stage.style.opacity = "1";
+    });
+  }, COLOR_FADE_MS);
+}
+
+/*
   Delegação de evento num único listener: sobrevive a cada re-render (que troca
   o innerHTML inteiro), sem precisar re-anexar listener em botão nenhum.
 */
@@ -298,8 +342,11 @@ function initInteractions(): void {
 
     const colorButton = target.closest<HTMLElement>("[data-color]");
     if (colorButton) {
-      state.colorId = colorButton.dataset.color!;
-      render();
+      const colorId = colorButton.dataset.color!;
+      const model = MODELS.find((m) => m.id === state.modelId);
+      const color = model?.colors.find((c) => c.id === colorId);
+      if (!model || !color || colorId === state.colorId) return;
+      swapColor(model, color);
       return;
     }
   });
