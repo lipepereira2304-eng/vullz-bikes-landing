@@ -92,9 +92,13 @@ const MODELS: Model[] = [
   { id: "love-kids", name: "Love Kids", colors: PLACEHOLDER_COLORS },
 ];
 
-const state = {
-  modelId: MODELS[0].id,
-  colorId: MODELS[0].colors[0].id,
+/*
+  Nada selecionado até o cliente clicar num modelo na lateral: a tela abre
+  numa mensagem de convite, não já direto na primeira bike.
+*/
+const state: { modelId: string | null; colorId: string | null } = {
+  modelId: null,
+  colorId: null,
 };
 
 /*
@@ -110,7 +114,7 @@ function bikePlaceholderMarkup(tint: string): string {
       viewBox="0 0 200 120"
       width="100%"
       height="100%"
-      style="--bike-color:${tint}; max-width: 1100px; filter: drop-shadow(0 12px 20px rgba(17,17,17,0.12));"
+      style="--bike-color:${tint}; filter: drop-shadow(0 12px 20px rgba(17,17,17,0.12));"
     >
       <g fill="none" stroke="var(--bike-color)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" class="transition-colors duration-200">
         <circle cx="40" cy="90" r="22" />
@@ -172,13 +176,42 @@ function render(): void {
   const app = document.querySelector<HTMLDivElement>("#app");
   if (!app) return;
 
-  const activeModel = MODELS.find((m) => m.id === state.modelId) ?? MODELS[0];
-  const activeColor =
-    activeModel.colors.find((c) => c.id === state.colorId) ?? activeModel.colors[0];
+  const activeModel = MODELS.find((m) => m.id === state.modelId) ?? null;
+  const activeColor = activeModel
+    ? activeModel.colors.find((c) => c.id === state.colorId) ?? activeModel.colors[0]
+    : null;
+
+  /*
+    Sem modelo escolhido: convite central, sem cores (não faz sentido mostrar
+    seletor de cor de um produto que ainda não apareceu na tela).
+  */
+  const stageContent =
+    activeModel && activeColor
+      ? /* html */ `
+        <div class="flex h-full w-full items-center justify-center" style="max-width:550px; max-height:60vh;">
+          ${bikeStageMarkup(activeModel, activeColor)}
+        </div>
+      `
+      : /* html */ `
+        <p class="max-w-xs text-balance text-base text-vullz-gray-500">
+          Escolha um modelo ao lado para ver a bike.
+        </p>
+      `;
+
+  const colorsContent = activeModel && activeColor
+    ? /* html */ `
+        <div class="flex items-center gap-3" role="group" aria-label="Cores disponíveis">
+          ${activeModel.colors
+            .map((c) => colorSwatchMarkup(c, c.id === activeColor.id))
+            .join("")}
+        </div>
+        <span id="color-label" class="text-xs text-vullz-gray-500">${activeColor.name}</span>
+      `
+    : "";
 
   app.innerHTML = /* html */ `
-    <div class="relative flex min-h-dvh flex-col bg-white text-vullz-black">
-      <header class="relative z-10 flex items-center px-6 pt-8 sm:px-10">
+    <div class="relative flex h-dvh flex-col overflow-hidden bg-white text-vullz-black">
+      <header class="relative z-10 flex shrink-0 items-center px-6 pt-8 sm:px-10">
         <a
           href="/"
           class="inline-flex items-center gap-1.5 text-sm font-medium text-vullz-gray-500 transition-colors duration-150 hover:text-vullz-black"
@@ -191,26 +224,21 @@ function render(): void {
         </a>
       </header>
 
-      <main class="relative z-10 flex flex-1 flex-col gap-4 px-6 pb-6 sm:px-10 lg:flex-row lg:gap-16 lg:py-8">
+      <main class="relative z-10 flex flex-1 flex-col gap-4 overflow-hidden px-6 pb-6 sm:px-10 lg:flex-row lg:gap-16 lg:py-8">
         <nav
           aria-label="Modelos"
-          class="flex gap-1.5 overflow-x-auto pb-2 lg:w-48 lg:shrink-0 lg:flex-col lg:justify-center lg:gap-1 lg:overflow-visible lg:pb-0"
+          class="flex shrink-0 gap-1.5 overflow-x-auto pb-2 lg:w-48 lg:flex-col lg:justify-center lg:gap-1 lg:overflow-visible lg:pb-0"
         >
-          ${MODELS.map((m) => sidebarItemMarkup(m, m.id === activeModel.id)).join("")}
+          ${MODELS.map((m) => sidebarItemMarkup(m, m.id === activeModel?.id)).join("")}
         </nav>
 
-        <section class="flex flex-1 flex-col items-center justify-between gap-4 text-center">
-          <div class="flex w-full flex-1 items-center justify-center">
-            ${bikeStageMarkup(activeModel, activeColor)}
+        <section class="flex flex-1 flex-col items-center justify-between gap-4 overflow-hidden text-center">
+          <div class="flex w-full flex-1 items-center justify-center overflow-hidden">
+            ${stageContent}
           </div>
 
-          <div class="flex flex-col items-center gap-3 pb-6 sm:pb-10">
-            <div class="flex items-center gap-3" role="group" aria-label="Cores disponíveis">
-              ${activeModel.colors
-                .map((c) => colorSwatchMarkup(c, c.id === activeColor.id))
-                .join("")}
-            </div>
-            <span id="color-label" class="text-xs text-vullz-gray-500">${activeColor.name}</span>
+          <div class="flex min-h-[2.75rem] flex-col items-center gap-3 pb-6 sm:pb-10">
+            ${colorsContent}
           </div>
         </section>
       </main>
