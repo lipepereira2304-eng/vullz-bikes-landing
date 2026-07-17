@@ -12,7 +12,7 @@ export default defineConfig({
     rollupOptions: {
       input: {
         main: resolve(__dirname, "index.html"),
-        eletricos: resolve(__dirname, "eletricos.html"),
+        catalogoInterativo: resolve(__dirname, "catalogo-interativo.html"),
       },
     },
   },

@@ -42,25 +42,32 @@ if (app) {
           </p>
         </div>
 
-        <div class="grid w-full max-w-3xl gap-5 sm:grid-cols-2 sm:gap-6">
+        <div class="grid w-full max-w-5xl gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
           ${catalogCardMarkup({
             title: "Bicicletas",
             href: CATALOGO_BICICLETAS,
             delayMs: 220,
           })}
           ${catalogCardMarkup({
+            title: "Catálogo Interativo",
+            href: "/catalogo-interativo.html",
+            newTab: false,
+            linkLabel: "Explorar modelos",
+            delayMs: 300,
+          })}
+          ${catalogCardMarkup({
             title: "Elétricos",
             href: "/em-breve.html",
             newTab: false,
             linkLabel: "Em breve",
-            delayMs: 300,
+            delayMs: 380,
           })}
         </div>
 
         ${socialButtonsMarkup({
           whatsappNumber: "45998604743",
           instagramHandle: "vullzbikes",
-          delayMs: 380,
+          delayMs: 460,
         })}
       </main>
 

@@ -4,11 +4,14 @@ import vullzLogo from "../assets/images/vullz-logo.png";
 
 /*
   Protótipo de navegação: nenhuma foto real ainda existe para estes modelos.
-  Cada cor aponta pra um espaço reservado (mesmo silhueta, cor trocada), só pra
+  Cada cor aponta pra um espaço reservado (mesma silhueta, cor trocada), só pra
   validar a interação (clicar modelo → troca a imagem central; clicar cor →
   troca só a cor, sem mudar de pose) antes de existir fotografia de produto.
   Quando as fotos chegarem, troca-se `image` de cada `ModelColor` pela URL real
   e o resto do mecanismo continua igual.
+
+  Este catálogo é o das bicicletas. O de elétricos vai ganhar sua própria
+  versão (modelos/cores diferentes) mais pra frente.
 */
 interface ModelColor {
   id: string;
