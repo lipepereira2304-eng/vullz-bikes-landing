@@ -43,6 +43,8 @@ interface ModelColor {
 interface Model {
   id: string;
   name: string;
+  /** Tamanho do aro, usado só pra agrupar a barra lateral (ex.: "Aro 29"). */
+  aro: number;
   colors: ModelColor[];
 }
 
@@ -82,15 +84,32 @@ const OREGON_COLORS: ModelColor[] = [
 ];
 
 const MODELS: Model[] = [
-  { id: "oregon", name: "Oregon", colors: OREGON_COLORS },
-  { id: "slim", name: "Slim", colors: PLACEHOLDER_COLORS },
-  { id: "street", name: "Street", colors: PLACEHOLDER_COLORS },
-  { id: "doble", name: "Doble", colors: PLACEHOLDER_COLORS },
-  { id: "pulse", name: "Pulse", colors: PLACEHOLDER_COLORS },
-  { id: "majestic", name: "Majestic", colors: PLACEHOLDER_COLORS },
-  { id: "pro-kids", name: "Pro Kids", colors: PLACEHOLDER_COLORS },
-  { id: "love-kids", name: "Love Kids", colors: PLACEHOLDER_COLORS },
+  { id: "oregon", name: "Oregon", aro: 29, colors: OREGON_COLORS },
+  { id: "slim", name: "Slim", aro: 29, colors: PLACEHOLDER_COLORS },
+  { id: "street", name: "Street", aro: 26, colors: PLACEHOLDER_COLORS },
+  { id: "doble", name: "Doble", aro: 26, colors: PLACEHOLDER_COLORS },
+  { id: "pulse", name: "Pulse", aro: 20, colors: PLACEHOLDER_COLORS },
+  { id: "majestic", name: "Majestic", aro: 20, colors: PLACEHOLDER_COLORS },
+  { id: "pro-kids", name: "Pro Kids", aro: 16, colors: PLACEHOLDER_COLORS },
+  { id: "love-kids", name: "Love Kids", aro: 16, colors: PLACEHOLDER_COLORS },
 ];
+
+/*
+  Agrupa a lista (já ordenada por aro) em blocos consecutivos, pra renderizar
+  um rótulo "Aro N" acima de cada dupla de modelos na barra lateral.
+*/
+function groupModelsByAro(models: Model[]): { aro: number; models: Model[] }[] {
+  const groups: { aro: number; models: Model[] }[] = [];
+  for (const model of models) {
+    const lastGroup = groups[groups.length - 1];
+    if (lastGroup && lastGroup.aro === model.aro) {
+      lastGroup.models.push(model);
+    } else {
+      groups.push({ aro: model.aro, models: [model] });
+    }
+  }
+  return groups;
+}
 
 /*
   Nada selecionado até o cliente clicar num modelo na lateral: a tela abre
@@ -157,6 +176,17 @@ function sidebarItemMarkup(model: Model, active: boolean): string {
   `;
 }
 
+function sidebarGroupMarkup(aro: number, models: Model[], activeModelId: string | null): string {
+  return /* html */ `
+    <div class="flex shrink-0 flex-col gap-1">
+      <span class="px-4 text-[11px] font-semibold uppercase tracking-widest text-vullz-gray-400">
+        Aro ${aro}
+      </span>
+      ${models.map((m) => sidebarItemMarkup(m, m.id === activeModelId)).join("")}
+    </div>
+  `;
+}
+
 function colorSwatchMarkup(color: ModelColor, active: boolean): string {
   return /* html */ `
     <button
@@ -188,7 +218,7 @@ function render(): void {
   const stageContent =
     activeModel && activeColor
       ? /* html */ `
-        <div class="flex h-full w-full items-center justify-center" style="max-width:550px; max-height:60vh;">
+        <div class="flex h-full w-full items-center justify-center" style="max-width:825px; max-height:90vh;">
           ${bikeStageMarkup(activeModel, activeColor)}
         </div>
       `
@@ -227,9 +257,11 @@ function render(): void {
       <main class="relative z-10 flex flex-1 flex-col gap-4 overflow-hidden px-6 pb-6 sm:px-10 lg:flex-row lg:gap-16 lg:py-8">
         <nav
           aria-label="Modelos"
-          class="flex shrink-0 gap-1.5 overflow-x-auto pb-2 lg:w-48 lg:flex-col lg:justify-center lg:gap-1 lg:overflow-visible lg:pb-0"
+          class="flex shrink-0 gap-4 overflow-x-auto pb-2 lg:w-52 lg:flex-col lg:justify-center lg:gap-5 lg:overflow-visible lg:pb-0"
         >
-          ${MODELS.map((m) => sidebarItemMarkup(m, m.id === activeModel?.id)).join("")}
+          ${groupModelsByAro(MODELS)
+            .map((g) => sidebarGroupMarkup(g.aro, g.models, activeModel?.id ?? null))
+            .join("")}
         </nav>
 
         <section class="flex flex-1 flex-col items-center justify-between gap-4 overflow-hidden text-center">
