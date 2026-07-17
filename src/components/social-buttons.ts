@@ -26,12 +26,13 @@ export function socialButtonsMarkup({
   const instagramHref = `https://www.instagram.com/${instagramHandle.replace(/^@/, "")}/`;
 
   return /* html */ `
-    <div class="flex w-full max-w-3xl gap-4" data-reveal>
+    <div class="flex w-full max-w-3xl gap-4">
       <a
         href="${whatsappHref}"
         target="_blank"
         rel="noopener noreferrer"
         class="${BASE_BUTTON_CLASSES}"
+        data-reveal
         style="transition-delay:${delayMs}ms"
         aria-label="Falar no WhatsApp"
       >
@@ -56,6 +57,7 @@ export function socialButtonsMarkup({
         target="_blank"
         rel="noopener noreferrer"
         class="${BASE_BUTTON_CLASSES}"
+        data-reveal
         style="transition-delay:${delayMs + 60}ms"
         aria-label="Seguir no Instagram"
       >

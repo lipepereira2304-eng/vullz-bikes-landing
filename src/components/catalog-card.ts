@@ -26,7 +26,7 @@ export function catalogCardMarkup({
       <h3 class="text-balance text-3xl font-extrabold tracking-tight text-white sm:text-4xl">${title}</h3>
 
       <span
-        class="inline-flex items-center gap-2 text-sm font-semibold text-white transition-[gap,color] duration-[var(--dur-hover)] ease-lift group-hover:gap-3.5"
+        class="inline-flex items-center gap-2 text-sm font-semibold text-vullz-yellow transition-[gap,color] duration-[var(--dur-hover)] ease-lift group-hover:gap-3.5"
       >
         ${linkLabel}
         <svg
