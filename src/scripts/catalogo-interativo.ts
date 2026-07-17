@@ -1,69 +1,116 @@
 import "../styles/main.css";
 
 /*
-  Protótipo de navegação: nenhuma foto real ainda existe para estes modelos.
-  Cada cor aponta pra um espaço reservado (mesma silhueta, cor trocada), só pra
-  validar a interação (clicar modelo → troca a imagem central; clicar cor →
-  troca só a cor, sem mudar de pose) antes de existir fotografia de produto.
-  Quando as fotos chegarem, troca-se `image` de cada `ModelColor` pela URL real
-  e o resto do mecanismo continua igual.
-
   Página em branco de propósito: as fotos reais das bikes têm fundo branco, e
   a ideia (referência: página de produto da Apple) é que a imagem pareça
   flutuar num fundo infinito, sem nenhuma borda de card cortando essa ilusão.
 
   Este catálogo é o das bicicletas. O de elétricos vai ganhar sua própria
   versão (modelos/cores diferentes) mais pra frente.
+
+  FOTOS: qualquer arquivo colocado em src/assets/bikes/<model-id>/<color-id>.jpg
+  (ou .jpeg/.png/.webp) é carregado automaticamente por este import.meta.glob —
+  não precisa tocar neste arquivo de novo, só seguir a convenção de nome. Ver
+  src/assets/bikes/README.md para a lista de ids de cada modelo/cor. Enquanto
+  o arquivo não existe, a silhueta de placeholder entra no lugar, tingida com a
+  cor escolhida (campo `tint` de cada ModelColor).
 */
+const bikePhotos = import.meta.glob<string>("../assets/bikes/*/*.{jpg,jpeg,png,webp}", {
+  eager: true,
+  import: "default",
+});
+
+function findBikePhoto(modelId: string, colorId: string): string | undefined {
+  for (const path in bikePhotos) {
+    const segments = path.split("/");
+    const file = segments[segments.length - 1];
+    const folder = segments[segments.length - 2];
+    const fileId = file.replace(/\.(jpe?g|png|webp)$/i, "");
+    if (folder === modelId && fileId === colorId) return bikePhotos[path];
+  }
+  return undefined;
+}
+
 interface ModelColor {
   id: string;
   name: string;
-  hex: string;
+  /** Cor (ou gradiente) usada na bolinha de seleção. */
+  swatch: string;
+  /** Cor usada para tingir a silhueta de placeholder enquanto não há foto. */
+  tint: string;
 }
 
 interface Model {
   id: string;
   name: string;
+  colors: ModelColor[];
 }
 
-const MODELS: Model[] = [
-  { id: "oregon", name: "Oregon" },
-  { id: "slim", name: "Slim" },
-  { id: "street", name: "Street" },
-  { id: "doble", name: "Doble" },
-  { id: "pulse", name: "Pulse" },
-  { id: "majestic", name: "Majestic" },
-  { id: "pro-kids", name: "Pro Kids" },
-  { id: "love-kids", name: "Love Kids" },
+/*
+  Paleta genérica, só até cada modelo ter sua paleta real definida (como já
+  fizemos com a Oregon). Troque conforme as cores reais forem chegando.
+*/
+const PLACEHOLDER_COLORS: ModelColor[] = [
+  { id: "preto", name: "Preto", swatch: "#1a1a1a", tint: "#1a1a1a" },
+  { id: "branco", name: "Branco", swatch: "#f2f2f2", tint: "#f2f2f2" },
+  { id: "vermelho", name: "Vermelho", swatch: "#c23b2e", tint: "#c23b2e" },
+  { id: "azul", name: "Azul", swatch: "#2f6fb0", tint: "#2f6fb0" },
+  { id: "amarelo", name: "Amarelo", swatch: "#f5c518", tint: "#f5c518" },
 ];
 
-const COLORS: ModelColor[] = [
-  { id: "preto", name: "Preto", hex: "#1a1a1a" },
-  { id: "branco", name: "Branco", hex: "#f2f2f2" },
-  { id: "vermelho", name: "Vermelho", hex: "#c23b2e" },
-  { id: "azul", name: "Azul", hex: "#2f6fb0" },
-  { id: "amarelo", name: "Amarelo", hex: "#f5c518" },
+// Dourado usado nos quadros "azul+dourado": mais metálico que o amarelo da marca.
+const DOURADO = "#c9a227";
+const AZUL = "#2f6fb0";
+
+const OREGON_COLORS: ModelColor[] = [
+  {
+    id: "quadro-preto-azul-dourado",
+    name: "Quadro Preto (Azul + Dourado)",
+    swatch: `conic-gradient(from 0deg, #1a1a1a 0% 34%, ${AZUL} 34% 67%, ${DOURADO} 67% 100%)`,
+    tint: "#1a1a1a",
+  },
+  {
+    id: "quadro-branco-azul-dourado",
+    name: "Quadro Branco (Azul + Dourado)",
+    swatch: `conic-gradient(from 0deg, #f2f2f2 0% 34%, ${AZUL} 34% 67%, ${DOURADO} 67% 100%)`,
+    tint: "#e4e4e4",
+  },
+  { id: "branco", name: "Branco", swatch: "#f2f2f2", tint: "#e4e4e4" },
+  { id: "rosa", name: "Rosa", swatch: "#e85d9c", tint: "#e85d9c" },
+  { id: "verde", name: "Verde", swatch: "#2f9e58", tint: "#2f9e58" },
+  { id: "laranja", name: "Laranja", swatch: "#e8791f", tint: "#e8791f" },
+];
+
+const MODELS: Model[] = [
+  { id: "oregon", name: "Oregon", colors: OREGON_COLORS },
+  { id: "slim", name: "Slim", colors: PLACEHOLDER_COLORS },
+  { id: "street", name: "Street", colors: PLACEHOLDER_COLORS },
+  { id: "doble", name: "Doble", colors: PLACEHOLDER_COLORS },
+  { id: "pulse", name: "Pulse", colors: PLACEHOLDER_COLORS },
+  { id: "majestic", name: "Majestic", colors: PLACEHOLDER_COLORS },
+  { id: "pro-kids", name: "Pro Kids", colors: PLACEHOLDER_COLORS },
+  { id: "love-kids", name: "Love Kids", colors: PLACEHOLDER_COLORS },
 ];
 
 const state = {
   modelId: MODELS[0].id,
-  colorId: COLORS[0].id,
+  colorId: MODELS[0].colors[0].id,
 };
 
 /*
-  Silhueta única reaproveitada por todos os modelos enquanto não há fotografia
-  real. `stroke="var(--bike-color)"` é o que permite trocar só a cor via CSS,
-  sem re-renderizar o SVG inteiro. A sombra suave (drop-shadow) é o que separa
-  a bike do fundo branco infinito mesmo quando a cor escolhida é branca.
+  Silhueta única reaproveitada enquanto não há fotografia real daquele
+  modelo+cor. `stroke="var(--bike-color)"` é o que permite trocar só a cor via
+  CSS, sem re-renderizar o SVG inteiro. A sombra suave (drop-shadow) é o que
+  separa a bike do fundo branco infinito mesmo quando a cor escolhida é branca.
 */
-function bikePlaceholderMarkup(hex: string): string {
+function bikePlaceholderMarkup(tint: string): string {
   return /* html */ `
     <svg
       id="bike-shape"
       viewBox="0 0 200 120"
       width="100%"
       height="100%"
-      style="--bike-color:${hex}; max-width: 380px; filter: drop-shadow(0 12px 20px rgba(17,17,17,0.12));"
+      style="--bike-color:${tint}; max-width: 380px; filter: drop-shadow(0 12px 20px rgba(17,17,17,0.12));"
     >
       <g fill="none" stroke="var(--bike-color)" stroke-width="6" stroke-linecap="round" stroke-linejoin="round" class="transition-colors duration-200">
         <circle cx="40" cy="90" r="22" />
@@ -73,6 +120,23 @@ function bikePlaceholderMarkup(hex: string): string {
       </g>
     </svg>
   `;
+}
+
+function bikeStageMarkup(model: Model, color: ModelColor): string {
+  const photo = findBikePhoto(model.id, color.id);
+
+  if (photo) {
+    return /* html */ `
+      <img
+        src="${photo}"
+        alt="${model.name} — ${color.name}"
+        class="h-full w-full object-contain"
+        style="filter: drop-shadow(0 16px 24px rgba(17,17,17,0.12));"
+      />
+    `;
+  }
+
+  return bikePlaceholderMarkup(color.tint);
 }
 
 function sidebarItemMarkup(model: Model, active: boolean): string {
@@ -96,7 +160,7 @@ function colorSwatchMarkup(color: ModelColor, active: boolean): string {
       data-color="${color.id}"
       aria-label="${color.name}"
       aria-pressed="${active}"
-      style="background:${color.hex}"
+      style="background:${color.swatch}"
       class="color-swatch h-8 w-8 shrink-0 rounded-full border-2 transition-[border-color,transform] duration-150 ${
         active ? "border-vullz-black scale-110" : "border-vullz-gray-200 hover:border-vullz-gray-500"
       }"
@@ -109,7 +173,8 @@ function render(): void {
   if (!app) return;
 
   const activeModel = MODELS.find((m) => m.id === state.modelId) ?? MODELS[0];
-  const activeColor = COLORS.find((c) => c.id === state.colorId) ?? COLORS[0];
+  const activeColor =
+    activeModel.colors.find((c) => c.id === state.colorId) ?? activeModel.colors[0];
 
   app.innerHTML = /* html */ `
     <div class="relative flex min-h-dvh flex-col bg-white text-vullz-black">
@@ -136,12 +201,14 @@ function render(): void {
 
         <section class="flex flex-1 flex-col items-center justify-center gap-8 text-center">
           <div class="flex aspect-square w-full max-w-md items-center justify-center">
-            ${bikePlaceholderMarkup(activeColor.hex)}
+            ${bikeStageMarkup(activeModel, activeColor)}
           </div>
 
           <div class="flex flex-col items-center gap-3">
             <div class="flex items-center gap-3" role="group" aria-label="Cores disponíveis">
-              ${COLORS.map((c) => colorSwatchMarkup(c, c.id === activeColor.id)).join("")}
+              ${activeModel.colors
+                .map((c) => colorSwatchMarkup(c, c.id === activeColor.id))
+                .join("")}
             </div>
             <span id="color-label" class="text-xs text-vullz-gray-500">${activeColor.name}</span>
           </div>
@@ -161,8 +228,10 @@ function initInteractions(): void {
 
     const modelButton = target.closest<HTMLElement>("[data-model]");
     if (modelButton) {
-      state.modelId = modelButton.dataset.model!;
-      state.colorId = COLORS[0].id;
+      const modelId = modelButton.dataset.model!;
+      const model = MODELS.find((m) => m.id === modelId);
+      state.modelId = modelId;
+      state.colorId = model ? model.colors[0].id : state.colorId;
       render();
       return;
     }
