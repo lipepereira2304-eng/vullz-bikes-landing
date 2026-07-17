@@ -1,7 +1,10 @@
 # Prompt para Claude Code (usar modelo Opus)
 
 Cole o texto abaixo inteiro no Claude Code, dentro da pasta do projeto
-(`/Applications/vullz-bikes-landing`), depois de ativar o modelo Opus.
+(`/Applications/vullz-bikes-landing`), depois de ativar o modelo Opus. Pode
+colar na mesma janela/contexto que já vinha sendo usado neste projeto — é
+só texto de instrução, não gera conflito. Só rode `git status` e `git pull`
+antes, pra garantir que está enxergando os commits mais recentes.
 
 ---
 
@@ -9,99 +12,97 @@ Este é um projeto Vite + TypeScript + Tailwind CSS v4 (sem framework, HTML
 gerado via template strings em `src/scripts/main.ts` e componentes em
 `src/components/*.ts`). É a landing page de catálogo digital da Vullz Bikes,
 publicada em produção na Vercel (vullzbikes.com.br), conectada a um repo no
-GitHub via git remoto SSH.
+GitHub via git remoto SSH. Deploy é automático a cada push na branch `main`.
 
-## Contexto do que já foi feito
+## PRIORIDADE MÁXIMA: investigar lentidão real de performance
 
-1. Favicon: recortei o "V" estilizado da logo (`src/assets/images/vullz-logo.png`,
-   bounding box aproximado rows 0-320, cols 200-717 do PNG original) e apliquei
-   como ícone em `public/favicon.svg` (SVG com `<image>` embutido em base64,
-   512x512, fundo grafite `#111111` arredondado) e `public/apple-touch-icon.png`
-   (180x180, mesmo design). Também corrigi um segundo ícone que estava
-   escondido dentro de `public/em-breve.html` (um `<svg>` com um V genérico
-   desenhado à mão) — troquei pelo mesmo PNG em base64.
+O usuário reportou que o site "parece lento" e as animações "travadas" —
+mas ele mesmo suspeita agora que não é sobre easing/duração de CSS, e sim
+sobre **performance real de renderização**, testando no computador (ainda
+não testou no celular). Ele quer uma varredura completa: identifique e
+corrija (ou aponte, se não tiver certeza) qualquer imperfeição de
+performance ou qualidade que encontrar.
 
-2. Bug de animação identificado e corrigido: havia uma regra `[data-reveal]`
-   em `src/styles/main.css` declarada **fora de qualquer `@layer`**. Em CSS
-   moderno (cascade layers), qualquer regra sem `@layer` sempre vence
-   qualquer regra dentro de `@layer` (Tailwind gera utilitários dentro de
-   `@layer utilities`), não importa a especificidade. Isso fazia o
-   `transition-property` dessa regra global (só `opacity, transform`)
-   sequestrar silenciosamente as transições de hover dos cards (que
-   precisavam também de `background-color`, `border-color`, `box-shadow`).
-   Corrigi movendo a regra pra dentro de `@layer components` em
-   `src/styles/main.css`, e ajustei `src/components/catalog-card.ts` pra
-   declarar a lista completa de propriedades
-   (`transition-[opacity,transform,background-color,border-color,box-shadow]`)
-   com duração `duration-[750ms]` e easing `ease-[cubic-bezier(0.16,1,0.3,1)]`.
+**Suspeita principal, já levantada (mas não comprovada — valide com
+profiling antes de mexer):** `src/components/fluid-background.ts` renderiza
+um `<svg>` de fundo com 4 elipses grandes dentro de um `<g filter="url(#blob-blur)">`
+usando `<feGaussianBlur stdDeviation="80" />` — um blur muito pesado —
+combinado com `mix-blend-screen`, e essas elipses são animadas via CSS em
+loop infinito (`animate-blob-a/b/c`, 22-32s cada, ver `@keyframes` em
+`src/styles/main.css`). Por cima disso, os cards de catálogo (
+`src/components/catalog-card.ts`) e os botões de WhatsApp/Instagram
+(`src/components/social-buttons.ts`) usam `backdrop-blur-xl`, que precisa
+recalcular constantemente o que está atrás — e o que está atrás é esse
+blur SVG animado sem parar. Essa combinação (filtro SVG pesado + animação
+infinita + backdrop-filter por cima) é um padrão clássico de jank/lentidão
+contínua em navegadores, mesmo em páginas "paradas".
 
-3. Também descobri que `delay-[${delayMs}ms]` (classe Tailwind com valor
-   interpolado dinamicamente via template string JS) nunca funcionava — o
-   scanner do Tailwind não consegue extrair valores de expressões JS em
-   tempo de build. Troquei para `style="transition-delay:${delayMs}ms"`
-   (inline style) nos cards, que funciona de forma confiável.
+Passos sugeridos:
 
-4. Verifiquei via JavaScript (`getComputedStyle`) rodando direto no site
-   publicado que o `transitionProperty`, `transitionDuration`,
-   `transitionDelay` e `transitionTimingFunction` finais estão corretos.
-   O usuário, porém, continua percebendo as animações como "travadas" mesmo
-   depois do deploy — hipótese mais provável é cache de navegador (favicon
-   principalmente é cacheado de forma muito agressiva por navegadores/celulares),
-   mas pode haver algo mais sutil que não percebi. **Não assuma que já está
-   tudo certo só porque o CSS computado bate — teste de fato no navegador,
-   force reload sem cache, e avalie com olhos críticos se a sensação de
-   suavidade realmente corresponde ao que foi pedido.**
+1. Abra o site localmente (`npm run dev`) e no Chrome DevTools, aba
+   **Performance**, grave um perfil de ~5s parado na página (sem interagir)
+   e outro fazendo hover nos cards. Veja se o uso de CPU/GPU está alto de
+   forma contínua e se há frames longos (jank) durante o hover.
+2. Se confirmar que o fundo animado é o problema, considere:
+   - Reduzir drasticamente o `stdDeviation` do blur (ex.: de 80 para 30-40).
+   - Trocar o blur SVG ao vivo por uma imagem estática pré-borrada (PNG/WebP
+     exportada já com o blur "assado"), animando só `transform`/`opacity`
+     dessa imagem em vez de recalcular blur a cada frame.
+   - Remover ou aliviar o `mix-blend-screen`.
+   - Reduzir ou remover o `backdrop-blur-xl` dos cards/botões (ou trocar por
+     um `background-color` sólido com leve transparência, sem blur).
+   - Pausar as animações de blob quando a aba não está visível
+     (`document.visibilityState`) ou usar `prefers-reduced-motion` com mais
+     rigor.
+3. Meça de novo depois da mudança pra confirmar que realmente melhorou
+   (não assuma — compare os perfis antes/depois).
 
-## O que fazer agora
+## Contexto do que já foi feito nesta pasta (histórico, pra não repetir trabalho)
 
-1. **Revalide tudo do zero, com ceticismo.** Rode `npm run build` e
-   `npm run preview` (ou `npm run dev`), abra no navegador, force um hard
-   reload (Cmd+Shift+R) e teste manualmente: hover nos cards de "Bicicletas"
-   e "Elétricos", clique nos botões de WhatsApp/Instagram, veja a página
-   `/em-breve.html`. Confirme visualmente que:
-   - O favicon (aba do navegador, favoritos) mostra o V estilizado da marca,
-     não um ícone genérico.
-   - Ao carregar a página, o conteúdo aparece com fade + leve deslocamento
-     vertical suave (não instantâneo, não "pulando").
-   - Ao passar o mouse sobre os cards de catálogo, eles sobem levemente,
-     ganham uma sombra amarela suave, e tudo isso transiciona suavemente
-     (nada "pisca" ou muda instantaneamente).
+1. **Favicon**: troquei o V genérico por um recorte real do V estilizado da
+   logo (`src/assets/images/vullz-logo.png`) em `public/favicon.svg` e
+   `public/apple-touch-icon.png` (SVG com `<image>` base64 embutido, PNG
+   180x180). Também havia um segundo ícone escondido em
+   `public/em-breve.html` com um V genérico desenhado à mão — troquei pelo
+   mesmo PNG em base64. **Confirmado publicado em produção** via fetch
+   direto do arquivo servido pela Vercel — se o usuário ainda estiver vendo
+   o ícone antigo, é cache de navegador, não código. Ainda assim, pode valer
+   adicionar cache-busting (versionar o nome do arquivo, ex. `favicon.svg?v=2`
+   nos `<link>` do `index.html`) já que favicons são notoriamente difíceis
+   de invalidar em cache de navegador/celular.
 
-2. **Se ainda sentir que as animações estão rígidas/mecânicas**, considere:
-   - Aumentar ainda mais a duração (testar 900ms-1000ms para entrada).
-   - Revisar se existe algum outro CSS/JS no projeto que force
-     `transition: none` ou reset em algum momento (procure por
-     `prefers-reduced-motion`, `will-change`, ou qualquer JS que manipule
-     classes de forma abrupta).
-   - Verificar se o `IntersectionObserver` em `src/scripts/animations.ts`
-     está disparando a tempo (pode haver flash-of-unstyled-content se o CSS
-     carrega depois do primeiro paint).
-   - Considerar adicionar cache-busting no favicon (ex.: renomear para
-     `favicon.svg?v=2` nos links do `index.html`, ou versionar o nome do
-     arquivo) já que favicons são notoriamente difíceis de invalidar em cache
-     de navegador — isso pode ser a causa raiz do usuário ainda ver o ícone
-     antigo mesmo com o deploy correto.
+2. **Bug de cascade layer corrigido**: havia uma regra `[data-reveal]` em
+   `src/styles/main.css` declarada fora de qualquer `@layer`. Regras sem
+   `@layer` sempre vencem regras dentro de `@layer` (Tailwind gera
+   utilitários em `@layer utilities`), então essa regra global sequestrava
+   silenciosamente o `transition-property` dos cards, cancelando as
+   transições de hover (background, borda, sombra mudavam instantaneamente,
+   sem suavização). Corrigido movendo pra `@layer components`, e os cards
+   agora declaram a lista completa de propriedades em
+   `transition-[opacity,transform,background-color,border-color,box-shadow]`
+   com `duration-[750ms]` e `ease-[cubic-bezier(0.16,1,0.3,1)]`. Também troquei
+   `delay-[${delayMs}ms]` (classe Tailwind com valor JS interpolado, que
+   nunca compilava) por `style="transition-delay:${delayMs}ms"` inline.
+   **Verificado via `getComputedStyle` direto no site publicado** — os
+   valores finais batem com o esperado.
 
-3. **Ajustes de conteúdo pendentes** (podem já estar corrigidos numa sessão
-   anterior — confirme lendo os arquivos antes de mexer):
-   - `public/em-breve.html`: o texto "EM BREVE..." deveria estar inteiro na
-     mesma cor (branco, sem destaque amarelo nas reticências) e as
-     reticências "..." menores que o resto do texto.
+3. **`public/em-breve.html`**: já corrigido — "EM BREVE..." numa cor só
+   (branco), reticências menores (`font-size: 0.55em` no `span`).
 
-4. **Faça uma revisão de qualidade geral** em cima de tudo: espaçamento,
-   tipografia, proporções, consistência de easing/duração entre todos os
-   elementos interativos da página (cards, botões de WhatsApp/Instagram,
-   página em-breve). O objetivo é uma landing page com sensação de produto
-   finalizado e premium (referências: Stripe, Linear, Apple, Nothing), não
-   de protótipo.
+## O que fazer
 
-5. Depois de qualquer mudança, rode `npx tsc --noEmit` para garantir que não
-   quebrou tipagem, e `git status` antes de commitar pra conferir exatamente
-   o que está sendo enviado (o usuário já teve pelo menos um caso de token
-   sensível colado sem querer no chat — cuidado redobrado pra não commitar
-   nada sensível).
-
-6. Ao final, rode `git add -A && git commit -m "..." && git push origin main`
-   você mesmo (você tem acesso direto ao terminal, diferente da sessão
-   anterior que precisava pedir pro usuário colar comandos manualmente).
-   O deploy na Vercel é automático a cada push na branch `main`.
+1. Foque primeiro na investigação de performance descrita acima — é a
+   prioridade do usuário agora.
+2. Depois, faça uma varredura geral de qualidade: espaçamento, tipografia,
+   proporções, consistência de easing/duração entre todos os elementos
+   interativos (cards, botões sociais, página em-breve), acessibilidade
+   (contraste, foco visível, `prefers-reduced-motion`). Corrija o que puder
+   com segurança; aponte em texto o que for subjetivo/precisar de decisão do
+   usuário.
+3. Rode `npx tsc --noEmit` depois de qualquer mudança em `.ts`.
+4. Confira `git status` antes de commitar (o usuário já colou um token por
+   engano no chat uma vez — redobre o cuidado pra não commitar nada
+   sensível, tipo chaves ou tokens, mesmo que venham em arquivos novos).
+5. Você tem acesso direto ao terminal aqui — pode rodar
+   `git add -A && git commit -m "..." && git push origin main` você mesmo.
+   O deploy na Vercel acontece automaticamente a cada push em `main`.
