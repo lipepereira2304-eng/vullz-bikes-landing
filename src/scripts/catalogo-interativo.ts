@@ -318,25 +318,24 @@ function render(): void {
       `;
 
   /*
-    O nome da cor mora ACIMA da pilha de bolinhas, não embaixo: como as
-    bolinhas agora ficam coladas na borda direita (coluna vertical), colocar o
-    rótulo embaixo da pilha inteira faria ele "flutuar" solto, longe de tudo
-    o resto, sem uma bolinha específica pra ancorar visualmente. Em cima, ele
-    funciona como um mini-cabeçalho da coluna — sempre no mesmo lugar,
-    igual ao "Aro N" faz pra cada grupo de modelos.
+    O nome da cor NÃO mora na coluna de bolinhas: os nomes têm tamanhos muito
+    diferentes ("Rosa" vs. "Quadro Preto (Azul + Dourado) (REF. 000/00)"), e
+    aquela coluna é estreita de propósito (só precisa caber uma bolinha). Texto
+    variável numa coluna estreita quebra de um jeito diferente pra cada cor —
+    daí as quebras "aleatórias". Resolvido botando o texto embaixo da bike, que
+    tem largura de sobra pra qualquer nome caber numa linha só, sempre no
+    mesmo lugar.
   */
-  const colorsContent = activeModel && activeColor
-    ? /* html */ `
-        <span id="color-label" class="text-xs text-vullz-gray-500">
-          ${colorLabelMarkup(activeColor)}
-        </span>
+  const colorRailContent =
+    activeModel && activeColor
+      ? /* html */ `
         <div class="flex flex-row gap-3 lg:flex-col" role="group" aria-label="Cores disponíveis">
           ${activeModel.colors
             .map((c, i) => colorSwatchMarkup(c, c.id === activeColor.id, i * 35))
             .join("")}
         </div>
       `
-    : "";
+      : "";
 
   app.innerHTML = /* html */ `
     <div class="relative flex h-dvh flex-col overflow-hidden bg-white text-vullz-black">
@@ -371,15 +370,29 @@ function render(): void {
             .join("")}
         </nav>
 
-        <section ${revealAttrs(170)} class="flex min-w-0 flex-1 items-center justify-center overflow-hidden">
-          ${stageContent}
+        <section
+          ${revealAttrs(170)}
+          class="flex min-w-0 flex-1 flex-col items-center justify-center gap-4 overflow-hidden"
+        >
+          <div class="flex min-h-0 w-full flex-1 items-center justify-center overflow-hidden">
+            ${stageContent}
+          </div>
+          ${
+            activeModel && activeColor
+              ? /* html */ `
+                <span id="color-label" class="max-w-full text-center text-xs text-vullz-gray-500">
+                  ${colorLabelMarkup(activeColor)}
+                </span>
+              `
+              : ""
+          }
         </section>
 
         <aside
           ${revealAttrs(220)}
-          class="flex shrink-0 flex-col items-center gap-2 pb-2 lg:w-28 lg:items-end lg:justify-center lg:gap-4 lg:pb-0 lg:text-right"
+          class="flex shrink-0 flex-col items-center gap-2 pb-2 lg:w-auto lg:items-end lg:justify-center lg:gap-4 lg:pb-0"
         >
-          ${colorsContent}
+          ${colorRailContent}
         </aside>
       </main>
     </div>
