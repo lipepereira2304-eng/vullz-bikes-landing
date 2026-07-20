@@ -181,12 +181,13 @@ function bikeStageMarkup(model: Model, color: ModelColor): string {
   `;
 }
 
-function sidebarItemMarkup(model: Model, active: boolean): string {
+function sidebarItemMarkup(model: Model, active: boolean, revealDelayMs: number): string {
   return /* html */ `
     <button
       type="button"
       data-model="${model.id}"
-      class="model-item shrink-0 whitespace-nowrap rounded-lg px-4 py-2 text-left text-xl font-extrabold uppercase tracking-wide transition-[transform,color] duration-[var(--dur-hover)] ease-lift hover:translate-x-2 lg:w-full ${
+      style="animation-delay:${revealDelayMs}ms"
+      class="model-item reveal-left-in shrink-0 whitespace-nowrap rounded-lg px-4 py-2 text-left text-xl font-extrabold uppercase tracking-wide transition-[transform,color] duration-[var(--dur-hover)] ease-lift hover:translate-x-2 lg:w-full ${
         active ? "text-vullz-black" : "text-vullz-gray-400 hover:text-vullz-black"
       }"
     >
@@ -225,7 +226,9 @@ function sidebarGroupMarkup(aro: number, models: Model[], activeModelId: string 
         expanded
           ? /* html */ `
             <div class="flex flex-col gap-1">
-              ${models.map((m) => sidebarItemMarkup(m, m.id === activeModelId)).join("")}
+              ${models
+                .map((m, i) => sidebarItemMarkup(m, m.id === activeModelId, i * 45))
+                .join("")}
             </div>
           `
           : ""
@@ -234,15 +237,15 @@ function sidebarGroupMarkup(aro: number, models: Model[], activeModelId: string 
   `;
 }
 
-function colorSwatchMarkup(color: ModelColor, active: boolean): string {
+function colorSwatchMarkup(color: ModelColor, active: boolean, revealDelayMs: number): string {
   return /* html */ `
     <button
       type="button"
       data-color="${color.id}"
       aria-label="${color.name}"
       aria-pressed="${active}"
-      style="background:${color.swatch}"
-      class="color-swatch h-8 w-8 shrink-0 rounded-full border-2 transition-[border-color,transform] duration-150 ${
+      style="background:${color.swatch}; animation-delay:${revealDelayMs}ms"
+      class="color-swatch reveal-left-in h-8 w-8 shrink-0 rounded-full border-2 transition-[border-color,transform] duration-150 ${
         active ? "border-vullz-black scale-110" : "border-vullz-gray-200 hover:border-vullz-gray-500"
       }"
     ></button>
@@ -267,11 +270,9 @@ function render(): void {
       ? /* html */ `
         <div
           id="bike-stage-inner"
-          class="flex h-full w-full items-center justify-center transition-opacity duration-[70ms] ease-linear"
+          class="relative h-full w-full"
           style="max-width:1030px; max-height:100vh;"
-        >
-          ${bikeStageMarkup(activeModel, activeColor)}
-        </div>
+        ></div>
       `
       : /* html */ `
         <p class="max-w-xs text-balance text-base text-vullz-gray-500">
@@ -283,7 +284,7 @@ function render(): void {
     ? /* html */ `
         <div class="flex items-center gap-3" role="group" aria-label="Cores disponíveis">
           ${activeModel.colors
-            .map((c) => colorSwatchMarkup(c, c.id === activeColor.id))
+            .map((c, i) => colorSwatchMarkup(c, c.id === activeColor.id, i * 35))
             .join("")}
         </div>
         <span id="color-label" class="text-xs text-vullz-gray-500">${activeColor.name}</span>
@@ -334,30 +335,56 @@ function render(): void {
       </main>
     </div>
   `;
+
+  if (activeModel && activeColor) {
+    paintStage(activeModel, activeColor);
+  }
 }
 
 /*
-  Troca de cor não passa pelo `render()` cheio: recriar o app inteiro trocaria
-  a foto num corte seco (o elemento antigo é destruído e um novo já nasce na
-  cor nova, sem chance de a transição de opacidade rodar). Em vez disso,
-  esmaece só o palco, troca o conteúdo por baixo enquanto invisível, e traz de
-  volta — a mesma duração do `transition-opacity` já declarado no elemento
-  (ver stageContent em `render`).
-
-  Bem curto de propósito: o pedido foi um esmaecer "quase imperceptível" — a
-  única coisa que deve registrar é "a cor mudou", não "a imagem sumiu e
-  voltou". 70ms é rápido o bastante pra não parecer uma animação.
+  Crossfade de verdade: a camada nova nasce por cima (opacity 0) e sobe pra 1
+  enquanto QUALQUER camada anterior desce pra 0 ao mesmo tempo — as duas
+  ficam visíveis e se misturando durante a transição inteira. A versão
+  anterior escondia a foto (opacity 0), só então trocava o conteúdo por baixo
+  e reaparecia: isso cria um instante em que nada aparece, e mesmo rápido
+  aquele "nada" lê como um flash/pisca, não como uma dissolução suave. Com
+  duas camadas sobrepostas nunca existe esse vazio.
 */
-const COLOR_FADE_MS = 70;
+const STAGE_FADE_MS = 220;
+
+function paintStage(model: Model, color: ModelColor): void {
+  const container = document.querySelector<HTMLElement>("#bike-stage-inner");
+  if (!container) return;
+
+  const layer = document.createElement("div");
+  layer.className = "absolute inset-0 flex items-center justify-center";
+  layer.style.opacity = "0";
+  layer.style.transition = `opacity ${STAGE_FADE_MS}ms linear`;
+  layer.innerHTML = bikeStageMarkup(model, color);
+  container.appendChild(layer);
+
+  const previousLayers = Array.from(container.children).filter(
+    (el): el is HTMLElement => el !== layer
+  );
+
+  // Força o navegador a "commitar" o opacity:0 antes de animar — senão ele
+  // agrupa criação + transição no mesmo frame e a transição não roda.
+  void layer.offsetHeight;
+
+  requestAnimationFrame(() => {
+    layer.style.opacity = "1";
+    previousLayers.forEach((el) => {
+      el.style.transition = `opacity ${STAGE_FADE_MS}ms linear`;
+      el.style.opacity = "0";
+    });
+  });
+
+  window.setTimeout(() => {
+    previousLayers.forEach((el) => el.remove());
+  }, STAGE_FADE_MS + 50);
+}
 
 function swapColor(model: Model, color: ModelColor): void {
-  const stage = document.querySelector<HTMLElement>("#bike-stage-inner");
-  if (!stage) {
-    state.colorId = color.id;
-    render();
-    return;
-  }
-
   state.colorId = color.id;
 
   // Feedback dos botões de cor e do rótulo é instantâneo — só a foto esmaece.
@@ -371,13 +398,7 @@ function swapColor(model: Model, color: ModelColor): void {
   const label = document.querySelector("#color-label");
   if (label) label.textContent = color.name;
 
-  stage.style.opacity = "0";
-  window.setTimeout(() => {
-    stage.innerHTML = bikeStageMarkup(model, color);
-    requestAnimationFrame(() => {
-      stage.style.opacity = "1";
-    });
-  }, COLOR_FADE_MS);
+  paintStage(model, color);
 }
 
 /*

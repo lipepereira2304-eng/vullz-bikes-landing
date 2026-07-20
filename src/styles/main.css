@@ -83,6 +83,27 @@
 }
 
 /*
+  Entrada de itens que aparecem por interação (sanfona de aro, bolinhas de
+  cor) — não por rolagem, por isso não usa [data-reveal]/IntersectionObserver.
+  @keyframes toca sozinho quando o elemento nasce no DOM, sem precisar de JS
+  pra orquestrar "de onde" pra "onde": browser já sabe que é entrada.
+*/
+@utility reveal-left-in {
+  animation: reveal-left 240ms var(--ease-glide) both;
+}
+
+@keyframes reveal-left {
+  from {
+    opacity: 0;
+    transform: translateX(-14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0);
+  }
+}
+
+/*
   Movimento compartilhado de card e botão. Vive como @utility (camada utilities)
   de propósito: assim vence `[data-reveal]`, que está em @layer components e
   também declara `transition`. Um `.classe` solta em components empataria em
