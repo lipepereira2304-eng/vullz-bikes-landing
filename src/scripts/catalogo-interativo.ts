@@ -525,7 +525,7 @@ function render(): void {
           ${revealAttrs(90)}
           data-role="model-nav"
           aria-label="Modelos"
-          class="flex shrink-0 gap-4 overflow-x-auto pb-2 lg:w-64 lg:flex-col lg:justify-center lg:gap-8 lg:overflow-visible lg:rounded-xl lg:border lg:border-vullz-gray-200 lg:px-6 lg:py-6"
+          class="flex shrink-0 gap-4 overflow-x-auto pb-2 lg:w-52 lg:flex-col lg:justify-center lg:gap-8 lg:overflow-visible"
         >
           ${groupModelsByAro(MODELS)
             .map((g) =>
