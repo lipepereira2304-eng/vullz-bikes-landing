@@ -148,14 +148,15 @@ function groupModelsByAro(models: Model[]): { aro: number; models: Model[] }[] {
   Nada selecionado até o cliente clicar num modelo na lateral: a tela abre
   numa mensagem de convite, não já direto na primeira bike.
 
-  `expandedAros`: por padrão a barra lateral abre mostrando só os rótulos de
+  `expandedAro`: por padrão a barra lateral abre mostrando só os rótulos de
   aro (29/26/20/16) — os modelos de um aro só aparecem depois que o cliente
-  clica naquele aro.
+  clica naquele aro. Só um aro fica aberto por vez: abrir outro fecha o
+  anterior automaticamente, pra não poluir a lista com vários abertos juntos.
 */
-const state: { modelId: string | null; colorId: string | null; expandedAros: number[] } = {
+const state: { modelId: string | null; colorId: string | null; expandedAro: number | null } = {
   modelId: null,
   colorId: null,
-  expandedAros: [],
+  expandedAro: null,
 };
 
 /*
@@ -187,7 +188,7 @@ function sidebarItemMarkup(model: Model, active: boolean, revealDelayMs: number)
       type="button"
       data-model="${model.id}"
       style="animation-delay:${revealDelayMs}ms"
-      class="model-item reveal-left-in shrink-0 whitespace-nowrap rounded-lg px-4 py-2 text-left text-xl font-extrabold uppercase tracking-wide transition-[transform,color] duration-[var(--dur-hover)] ease-lift hover:translate-x-2 lg:w-full ${
+      class="model-item reveal-left-in shrink-0 whitespace-nowrap rounded-lg px-4 py-2 text-left text-sm font-bold uppercase tracking-widest transition-[transform,color] duration-[var(--dur-hover)] ease-lift hover:translate-x-2 lg:w-full ${
         active ? "text-vullz-black" : "text-vullz-gray-400 hover:text-vullz-black"
       }"
     >
@@ -208,11 +209,11 @@ function sidebarGroupMarkup(aro: number, models: Model[], activeModelId: string 
         type="button"
         data-aro="${aro}"
         aria-expanded="${expanded}"
-        class="flex items-center gap-2 px-4 text-left text-sm font-bold uppercase tracking-widest text-vullz-black transition-colors duration-150"
+        class="flex items-center gap-2 px-4 text-left text-xl font-extrabold uppercase tracking-wide text-vullz-black transition-colors duration-150"
       >
         <svg
-          width="10"
-          height="10"
+          width="14"
+          height="14"
           viewBox="0 0 10 10"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
@@ -317,7 +318,7 @@ function render(): void {
                 g.aro,
                 g.models,
                 activeModel?.id ?? null,
-                state.expandedAros.includes(g.aro)
+                state.expandedAro === g.aro
               )
             )
             .join("")}
@@ -412,9 +413,7 @@ function initInteractions(): void {
     const aroButton = target.closest<HTMLElement>("[data-aro]");
     if (aroButton) {
       const aro = Number(aroButton.dataset.aro);
-      state.expandedAros = state.expandedAros.includes(aro)
-        ? state.expandedAros.filter((a) => a !== aro)
-        : [...state.expandedAros, aro];
+      state.expandedAro = state.expandedAro === aro ? null : aro;
       render();
       return;
     }
