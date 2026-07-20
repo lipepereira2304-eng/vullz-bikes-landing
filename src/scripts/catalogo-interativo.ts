@@ -61,21 +61,26 @@ interface Model {
 }
 
 /*
-  Paleta única de referência: cada cor sólida usada em qualquer modelo vem
-  daqui, então "Azul" tem o mesmo tom em toda a Vullz, não um azul por modelo.
+  Paleta de referência: valores reais passados pelo cliente, usando a tabela
+  da Oregon como base (foi a mais completa que ele mandou). Uma cor com o
+  mesmo NOME pode ter um tom levemente diferente por modelo — ver
+  MODEL_COLOR_OVERRIDES logo abaixo — mas quando ele não especificou um tom
+  próprio pra um modelo, é este valor daqui que é usado ("pode usar o mesmo
+  que eu já citei acima").
 */
 const PALETTE = {
-  preto: "#1a1a1a",
-  branco: "#f2f2f2",
-  vermelho: "#c23b2e",
-  azul: "#2f6fb0",
+  preto: "#060606",
+  branco: "#fcfefd",
+  // Só a Pro Kids usa vermelho hoje; valor já é o tom que o cliente mandou pra ela.
+  vermelho: "#c60314",
+  azul: "#0084d2",
   amarelo: "#f5c518",
-  rosa: "#e85d9c",
-  verde: "#2f9e58",
-  laranja: "#e8791f",
-  roxo: "#7c4fb5",
-  // Dourado usado nos quadros "azul+dourado": mais metálico que o amarelo da marca.
-  dourado: "#c9a227",
+  rosa: "#fa1589",
+  verde: "#82fc03",
+  laranja: "#fc3901",
+  // Só a Street usa roxo hoje; valor já é o tom que o cliente mandou pra ela.
+  roxo: "#2a1359",
+  dourado: "#d9a553",
 } as const;
 
 const PALETTE_NAMES: Record<keyof typeof PALETTE, string> = {
@@ -91,13 +96,33 @@ const PALETTE_NAMES: Record<keyof typeof PALETTE, string> = {
   dourado: "Dourado",
 };
 
-/** Cor sólida simples: nome e bolinha vêm direto da paleta. */
-function solid(id: keyof typeof PALETTE): ModelColor {
-  return { id, name: PALETTE_NAMES[id], swatch: PALETTE[id] };
+/*
+  Alguns modelos pintam a mesma cor (mesmo nome) num tom próprio — ex.: o
+  "azul" da Slim não é o mesmo azul da Oregon. Isso só existe pros casos que o
+  cliente destacou explicitamente; qualquer modelo/cor fora daqui cai no valor
+  compartilhado de PALETTE acima.
+*/
+const MODEL_COLOR_OVERRIDES: Partial<Record<string, Partial<Record<keyof typeof PALETTE, string>>>> = {
+  slim: { azul: "#00b2f4", rosa: "#ec4891" },
+  street: { azul: "#00cbfa" },
+  pulse: { azul: "#01aaaf" },
+  majestic: { rosa: "#fd35a2" },
+  "pro-kids": { azul: "#054493" },
+  "love-kids": { rosa: "#fd7ec1" },
+};
+
+function resolveColor(modelId: string, key: keyof typeof PALETTE): string {
+  return MODEL_COLOR_OVERRIDES[modelId]?.[key] ?? PALETTE[key];
+}
+
+/** Cor sólida simples: nome vem da paleta, tom pode ser específico do modelo. */
+function solid(modelId: string, id: keyof typeof PALETTE): ModelColor {
+  return { id, name: PALETTE_NAMES[id], swatch: resolveColor(modelId, id) };
 }
 
 /** Quadro de uma cor com dois acentos — bolinha dividida em 3 (como a Oregon). */
 function framed(
+  modelId: string,
   id: string,
   name: string,
   frame: keyof typeof PALETTE,
@@ -107,29 +132,34 @@ function framed(
   return {
     id,
     name,
-    swatch: `conic-gradient(from 0deg, ${PALETTE[frame]} 0% 34%, ${PALETTE[accentA]} 34% 67%, ${PALETTE[accentB]} 67% 100%)`,
+    swatch: `conic-gradient(from 0deg, ${resolveColor(modelId, frame)} 0% 34%, ${resolveColor(modelId, accentA)} 34% 67%, ${resolveColor(modelId, accentB)} 67% 100%)`,
   };
 }
 
 const OREGON_COLORS: ModelColor[] = [
-  framed("quadro-preto-azul-dourado", "Quadro Preto (Azul + Dourado)", "preto", "azul", "dourado"),
-  framed("quadro-branco-azul-dourado", "Quadro Branco (Azul + Dourado)", "branco", "azul", "dourado"),
-  solid("branco"),
-  solid("rosa"),
-  solid("verde"),
-  solid("laranja"),
+  framed("oregon", "quadro-preto-azul-dourado", "Quadro Preto (Azul + Dourado)", "preto", "azul", "dourado"),
+  framed("oregon", "quadro-branco-azul-dourado", "Quadro Branco (Azul + Dourado)", "branco", "azul", "dourado"),
+  solid("oregon", "branco"),
+  solid("oregon", "rosa"),
+  solid("oregon", "verde"),
+  solid("oregon", "laranja"),
 ];
 
 const SLIM_COLORS: ModelColor[] = [
-  framed("preto-azul-rosa", "Preto (Azul + Rosa)", "preto", "azul", "rosa"),
+  framed("slim", "preto-azul-rosa", "Preto (Azul + Rosa)", "preto", "azul", "rosa"),
 ];
 
-const STREET_COLORS: ModelColor[] = [solid("roxo"), solid("azul"), solid("laranja"), solid("verde")];
-const DOBLE_COLORS: ModelColor[] = [solid("laranja"), solid("verde"), solid("rosa")];
-const PULSE_COLORS: ModelColor[] = [solid("azul"), solid("laranja"), solid("verde")];
-const MAJESTIC_COLORS: ModelColor[] = [solid("rosa"), solid("preto")];
-const PRO_KIDS_COLORS: ModelColor[] = [solid("azul"), solid("vermelho")];
-const LOVE_KIDS_COLORS: ModelColor[] = [solid("rosa"), solid("branco")];
+const STREET_COLORS: ModelColor[] = [
+  solid("street", "roxo"),
+  solid("street", "azul"),
+  solid("street", "laranja"),
+  solid("street", "verde"),
+];
+const DOBLE_COLORS: ModelColor[] = [solid("doble", "laranja"), solid("doble", "verde"), solid("doble", "rosa")];
+const PULSE_COLORS: ModelColor[] = [solid("pulse", "azul"), solid("pulse", "laranja"), solid("pulse", "verde")];
+const MAJESTIC_COLORS: ModelColor[] = [solid("majestic", "rosa"), solid("majestic", "preto")];
+const PRO_KIDS_COLORS: ModelColor[] = [solid("pro-kids", "azul"), solid("pro-kids", "vermelho")];
+const LOVE_KIDS_COLORS: ModelColor[] = [solid("love-kids", "rosa"), solid("love-kids", "branco")];
 
 const MODELS: Model[] = [
   { id: "oregon", name: "Oregon", aro: 29, colors: OREGON_COLORS },
