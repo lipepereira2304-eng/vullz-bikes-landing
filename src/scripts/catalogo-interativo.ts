@@ -14,8 +14,20 @@ import { initRevealOnScroll } from "./animations";
   não precisa tocar neste arquivo de novo, só seguir a convenção de nome. Ver
   src/assets/bikes/README.md para a lista de ids de cada modelo/cor. Enquanto
   o arquivo não existe, aparece "Em breve..." no lugar da foto.
+
+  LOGOS: mesma ideia, mas em src/assets/bikes/<model-id>/logo.svg (ou .png/
+  .webp) — a imagem/nome estilizado de cada modelo, que aparece acima da bike
+  no lugar do texto simples. Enquanto não existe, cai de volta no nome em
+  texto (ver modelNameMarkup). O "!.../logo.*" abaixo existe só pra excluir
+  esses arquivos do glob de fotos — sem isso, logo.webp seria também testado
+  (inutilmente) como se fosse a foto de uma cor chamada "logo".
 */
-const bikePhotos = import.meta.glob<string>("../assets/bikes/*/*.{jpg,jpeg,png,webp}", {
+const bikePhotos = import.meta.glob<string>(
+  ["../assets/bikes/*/*.{jpg,jpeg,png,webp}", "!../assets/bikes/*/logo.*"],
+  { eager: true, import: "default" }
+);
+
+const modelLogos = import.meta.glob<string>("../assets/bikes/*/logo.{svg,png,webp}", {
   eager: true,
   import: "default",
 });
@@ -31,15 +43,24 @@ function findBikePhoto(modelId: string, colorId: string): string | undefined {
   return undefined;
 }
 
+function findModelLogo(modelId: string): string | undefined {
+  for (const path in modelLogos) {
+    const segments = path.split("/");
+    const folder = segments[segments.length - 2];
+    if (folder === modelId) return modelLogos[path];
+  }
+  return undefined;
+}
+
 /*
-  Sem isso, o navegador só baixa a foto de um modelo/cor na primeira vez que
-  ela aparece na tela — daí aquele delayzinho perceptível na primeira troca
-  (depois fica em cache e é instantâneo). Disparando o download de todas em
-  segundo plano assim que a página carrega, a primeira troca já vem rápida
+  Sem isso, o navegador só baixa a foto de um modelo/cor (ou logo) na primeira
+  vez que ela aparece na tela — daí aquele delayzinho perceptível na primeira
+  troca (depois fica em cache e é instantâneo). Disparando o download de todas
+  em segundo plano assim que a página carrega, a primeira troca já vem rápida
   também. `new Image()` sem inserir no DOM só existe pra forçar o fetch.
 */
 function preloadAllBikePhotos(): void {
-  Object.values(bikePhotos).forEach((url) => {
+  [...Object.values(bikePhotos), ...Object.values(modelLogos)].forEach((url) => {
     const img = new Image();
     img.src = url;
   });
@@ -235,11 +256,27 @@ function bikeStageMarkup(model: Model, color: ModelColor): string {
 }
 
 /*
-  Placeholder reservado: por enquanto repete o nome do modelo em texto puro.
-  Mais pra frente esse espaço recebe uma imagem/logo específica de cada
-  modelo no lugar do texto — a marcação já fica no lugar certo pra troca.
+  Com logo (src/assets/bikes/<model-id>/logo.*): mostra a imagem, um pouco
+  maior que o texto que ela substitui e num tamanho que ainda faz sentido
+  perto da bike inteira — nem discreta feito legenda, nem competindo com o
+  produto. h-full+object-contain (mesma técnica da foto da bike) garante que
+  o logo nunca estica: encolhe pra caber na largura da seção se precisar.
+
+  Sem logo ainda: cai de volta pro nome em texto puro — é o que faz os outros
+  modelos continuarem funcionando normalmente enquanto só a Oregon tem
+  imagem própria.
 */
 function modelNameMarkup(model: Model): string {
+  const logo = findModelLogo(model.id);
+
+  if (logo) {
+    return /* html */ `
+      <div class="flex h-16 w-full max-w-2xl items-center justify-center sm:h-20 lg:h-28">
+        <img src="${logo}" alt="${model.name}" class="h-full w-full object-contain" />
+      </div>
+    `;
+  }
+
   return /* html */ `
     <h1 class="text-center text-2xl font-extrabold uppercase tracking-wide text-vullz-black">
       ${model.name}

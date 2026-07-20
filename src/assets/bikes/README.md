@@ -96,3 +96,30 @@ Pasta: `src/assets/bikes/love-kids/`
   de cor, sem a bike "pular" de posição.
 - Tamanho generoso (pelo menos ~1600px no lado maior); a página redimensiona
   pra caber, então maior é sempre mais seguro que menor.
+
+## Logos (nome estilizado de cada modelo)
+
+Mesma pasta do modelo, arquivo `logo.svg` (ou `.png`/`.webp`), fundo
+transparente. Aparece acima da bike no lugar do nome em texto — enquanto não
+existe, o nome em texto continua aparecendo normalmente.
+
+```
+src/assets/bikes/<id-do-modelo>/logo.svg
+```
+
+| Modelo     | Status                                  |
+| ---------- | ---------------------------------------- |
+| Oregon     | `oregon/logo.webp` (configurado)         |
+| Slim       | pendente — usa nome em texto             |
+| Street     | pendente — usa nome em texto             |
+| Doble      | pendente — usa nome em texto             |
+| Pulse      | pendente — usa nome em texto             |
+| Majestic   | pendente — usa nome em texto             |
+| Pro Kids   | pendente — usa nome em texto             |
+| Love Kids  | pendente — usa nome em texto             |
+
+Recomendações: SVG se for vetor puro; PNG/WebP com transparência se não for.
+Cor com bom contraste em fundo branco (preto ou cor da marca). Proporção mais
+larga que alta (tipo wordmark) encaixa melhor no espaço reservado. Exportar
+em resolução alta (a arte da Oregon, por exemplo, tem 3237×382px pra caber
+nítida em qualquer tela, incluindo retina).
