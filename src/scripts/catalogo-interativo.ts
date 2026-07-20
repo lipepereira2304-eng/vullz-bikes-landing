@@ -168,10 +168,17 @@ function groupModelsByAro(models: Model[]): { aro: number; models: Model[] }[] {
   clica naquele aro. Só um aro fica aberto por vez: abrir outro fecha o
   anterior automaticamente, pra não poluir a lista com vários abertos juntos.
 */
-const state: { modelId: string | null; colorId: string | null; expandedAro: number | null } = {
+const state: {
+  modelId: string | null;
+  colorId: string | null;
+  expandedAro: number | null;
+  /** Modo foco: ficha técnica aberta, aro/cores recolhidos. */
+  focusMode: boolean;
+} = {
   modelId: null,
   colorId: null,
   expandedAro: null,
+  focusMode: false,
 };
 
 /*
@@ -194,6 +201,19 @@ function bikeStageMarkup(model: Model, color: ModelColor): string {
 
   return /* html */ `
     <p class="text-lg font-medium tracking-wide text-vullz-gray-400">Em breve...</p>
+  `;
+}
+
+/*
+  Placeholder reservado: por enquanto repete o nome do modelo em texto puro.
+  Mais pra frente esse espaço recebe uma imagem/logo específica de cada
+  modelo no lugar do texto — a marcação já fica no lugar certo pra troca.
+*/
+function modelNameMarkup(model: Model): string {
+  return /* html */ `
+    <h1 class="text-center text-2xl font-extrabold uppercase tracking-wide text-vullz-black">
+      ${model.name}
+    </h1>
   `;
 }
 
@@ -337,11 +357,27 @@ function render(): void {
       `
       : "";
 
+  const specsContent =
+    activeModel && activeColor
+      ? /* html */ `
+        <div class="specs-panel-inner">
+          <h2 class="text-lg font-extrabold uppercase tracking-wide text-vullz-black">Ficha técnica</h2>
+          <p class="mt-1 text-xs text-vullz-gray-500">
+            ${activeModel.name} — ${colorLabelMarkup(activeColor)}
+          </p>
+          <div class="mt-6 text-sm leading-relaxed text-vullz-gray-500">
+            Em breve, as especificações completas deste modelo vão aparecer aqui.
+          </div>
+        </div>
+      `
+      : "";
+
   app.innerHTML = /* html */ `
     <div class="relative flex h-dvh flex-col overflow-hidden bg-white text-vullz-black">
       <header ${revealAttrs(0)} class="relative z-10 flex shrink-0 items-center px-6 pt-8 sm:px-10">
         <a
           href="/"
+          data-role="header-back"
           class="inline-flex items-center gap-1.5 text-sm font-medium text-vullz-gray-500 transition-colors duration-150 hover:text-vullz-black"
         >
           <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -355,6 +391,7 @@ function render(): void {
       <main class="relative z-10 flex flex-1 flex-col gap-4 overflow-hidden px-6 pb-6 sm:px-10 lg:flex-row lg:gap-16 lg:py-8">
         <nav
           ${revealAttrs(90)}
+          data-role="model-nav"
           aria-label="Modelos"
           class="flex shrink-0 gap-4 overflow-x-auto pb-2 lg:w-52 lg:flex-col lg:justify-center lg:gap-5 lg:overflow-visible lg:pb-0"
         >
@@ -372,8 +409,10 @@ function render(): void {
 
         <section
           ${revealAttrs(170)}
+          data-role="stage-section"
           class="flex min-w-0 flex-1 flex-col items-center justify-center gap-4 overflow-hidden"
         >
+          ${activeModel ? modelNameMarkup(activeModel) : ""}
           <div class="flex min-h-0 w-full flex-1 items-center justify-center overflow-hidden">
             ${stageContent}
           </div>
@@ -383,6 +422,13 @@ function render(): void {
                 <span id="color-label" class="max-w-full text-center text-xs text-vullz-gray-500">
                   ${colorLabelMarkup(activeColor)}
                 </span>
+                <button
+                  type="button"
+                  data-action="open-specs"
+                  class="inline-flex items-center gap-1.5 rounded-full border border-vullz-gray-200 px-4 py-1.5 text-xs font-medium text-vullz-gray-700 transition-colors duration-150 hover:border-vullz-black hover:text-vullz-black"
+                >
+                  Ficha técnica
+                </button>
               `
               : ""
           }
@@ -390,10 +436,21 @@ function render(): void {
 
         <aside
           ${revealAttrs(220)}
+          data-role="color-rail"
           class="flex shrink-0 flex-col items-center gap-2 pb-2 lg:w-auto lg:items-end lg:justify-center lg:gap-4 lg:pb-0"
         >
           ${colorRailContent}
         </aside>
+
+        <div
+          id="specs-panel"
+          data-role="specs-panel"
+          aria-label="Ficha técnica"
+          aria-hidden="${state.focusMode ? "false" : "true"}"
+          class="${state.focusMode ? "is-focus-open" : ""}"
+        >
+          ${specsContent}
+        </div>
       </main>
     </div>
   `;
@@ -469,12 +526,58 @@ function swapColor(model: Model, color: ModelColor): void {
 }
 
 /*
+  Modo foco (ficha técnica): NÃO passa por render(). Se passasse, o
+  app.innerHTML inteiro seria trocado por uma string nova e as classes que
+  acabamos de ligar/desligar não teriam "antes" pra transicionar a partir de
+  — só apareceriam já no estado final, sem animação nenhuma. Manipulando os
+  mesmos elementos que já estão na tela (nav/aside/painel), o navegador anima
+  a mudança de classe normalmente, sem nenhum truque de rAF.
+
+  Aro e cores ficam com pointer-events:none enquanto o painel está aberto
+  (ver main.css), então nenhum clique neles pode disparar um render() no meio
+  da transição — não precisa se preocupar com esse caso.
+*/
+function setFocusMode(on: boolean): void {
+  state.focusMode = on;
+
+  const nav = document.querySelector<HTMLElement>('[data-role="model-nav"]');
+  const rail = document.querySelector<HTMLElement>('[data-role="color-rail"]');
+  const panel = document.querySelector<HTMLElement>('[data-role="specs-panel"]');
+  const stage = document.querySelector<HTMLElement>('[data-role="stage-section"]');
+
+  nav?.classList.toggle("is-focus-collapsed", on);
+  rail?.classList.toggle("is-focus-collapsed", on);
+  stage?.classList.toggle("is-focus-aligned", on);
+
+  if (panel) {
+    panel.classList.toggle("is-focus-open", on);
+    panel.setAttribute("aria-hidden", on ? "false" : "true");
+  }
+}
+
+/*
   Delegação de evento num único listener: sobrevive a cada re-render (que troca
   o innerHTML inteiro), sem precisar re-anexar listener em botão nenhum.
 */
 function initInteractions(): void {
   document.addEventListener("click", (event) => {
     const target = event.target as HTMLElement;
+
+    // Enquanto o modo foco está aberto, o "Voltar" do cabeçalho sai da ficha
+    // técnica em vez de navegar pra home — mesmo botão, mesmo lugar, ação
+    // contextual conforme o que está na tela.
+    const backLink = target.closest<HTMLElement>('[data-role="header-back"]');
+    if (backLink && state.focusMode) {
+      event.preventDefault();
+      setFocusMode(false);
+      return;
+    }
+
+    const specsButton = target.closest<HTMLElement>('[data-action="open-specs"]');
+    if (specsButton) {
+      setFocusMode(true);
+      return;
+    }
 
     const aroButton = target.closest<HTMLElement>("[data-aro]");
     if (aroButton) {
