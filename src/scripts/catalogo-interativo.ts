@@ -225,11 +225,14 @@ const state: {
   expandedAro: number | null;
   /** Modo foco: ficha técnica aberta, aro/cores recolhidos. */
   focusMode: boolean;
+  /** Modal de zoom da foto aberto. */
+  zoomOpen: boolean;
 } = {
   modelId: null,
   colorId: null,
   expandedAro: null,
   focusMode: false,
+  zoomOpen: false,
 };
 
 /*
@@ -256,29 +259,98 @@ function bikeStageMarkup(model: Model, color: ModelColor): string {
 }
 
 /*
-  Com logo (src/assets/bikes/<model-id>/logo.*): mostra a imagem, um pouco
-  maior que o texto que ela substitui e num tamanho que ainda faz sentido
-  perto da bike inteira — nem discreta feito legenda, nem competindo com o
-  produto. h-full+object-contain (mesma técnica da foto da bike) garante que
-  o logo nunca estica: encolhe pra caber na largura da seção se precisar.
+  Modal de zoom: sempre presente no DOM (fica escondido via opacity/
+  pointer-events, não removido) pra abrir/fechar sem precisar de render() —
+  mesma lógica do modo foco. Só existe conteúdo quando há modelo/cor ativos;
+  sem isso, o botão "Zoom" nem aparece (ver render()), então o modal nunca
+  seria aberto vazio.
+
+  Clique na própria imagem alterna entre "ajustada à tela" e "ampliada" (a
+  classe `is-zoomed`, ver main.css); ampliada ela estoura o tamanho do
+  contêiner, que tem overflow:auto — dá pra arrastar/rolar pra ver os
+  detalhes. Fecha com o X, clicando fora da imagem, ou Esc.
+*/
+function zoomModalMarkup(model: Model | null, color: ModelColor | null): string {
+  if (!model || !color) {
+    return /* html */ `
+      <div id="zoom-modal" data-role="zoom-modal" aria-hidden="true"></div>
+    `;
+  }
+
+  const photo = findBikePhoto(model.id, color.id);
+
+  return /* html */ `
+    <div
+      id="zoom-modal"
+      data-role="zoom-modal"
+      data-action="close-zoom"
+      aria-hidden="true"
+      aria-label="Foto ampliada — ${model.name} ${color.name}"
+      class="fixed inset-0 z-50 flex items-center justify-center bg-vullz-black/85 opacity-0 pointer-events-none"
+    >
+      <button
+        type="button"
+        data-action="close-zoom"
+        aria-label="Fechar zoom"
+        class="absolute right-5 top-5 inline-flex h-10 w-10 items-center justify-center rounded-full border border-white/25 text-white transition-colors duration-150 hover:border-white/60"
+      >
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M2.5 2.5L13.5 13.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+          <path d="M13.5 2.5L2.5 13.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+        </svg>
+      </button>
+      <div class="max-h-[88vh] max-w-[92vw] overflow-auto">
+        ${
+          photo
+            ? /* html */ `
+              <img
+                id="zoom-image"
+                data-action="toggle-zoom-scale"
+                src="${photo}"
+                alt="${model.name} — ${color.name}"
+                class="block h-auto max-h-[88vh] w-auto max-w-[92vw] cursor-zoom-in object-contain"
+              />
+            `
+            : /* html */ `
+              <p class="text-lg font-medium tracking-wide text-white/70">Em breve...</p>
+            `
+        }
+      </div>
+    </div>
+  `;
+}
+
+/*
+  Com logo (src/assets/bikes/<model-id>/logo.*): um detalhe pequeno, não o
+  protagonista — a bike é o foco máximo. Por isso o logo é `absolute`,
+  flutuando por cima do topo do PRÓPRIO contêiner da bike (não mais um item
+  de flex-col em sequência com ele): assim ele nunca disputa altura com a
+  bike, que continua recebendo exatamente o mesmo espaço que teria se o logo
+  não existisse. h-full+object-contain (mesma técnica da foto da bike)
+  garante que o logo nunca estica: encolhe pra caber na largura se precisar.
 
   Sem logo ainda: cai de volta pro nome em texto puro — é o que faz os outros
   modelos continuarem funcionando normalmente enquanto só a Oregon tem
-  imagem própria.
+  imagem própria. Também `absolute` (mesma posição), e não só por
+  consistência: o contêiner-pai é `flex` sem `flex-col`, então um item
+  normal ficaria lado a lado com a bike (linha), não acima dela.
 */
 function modelNameMarkup(model: Model): string {
   const logo = findModelLogo(model.id);
 
   if (logo) {
     return /* html */ `
-      <div data-role="model-logo" class="flex h-16 w-full max-w-2xl items-center justify-center sm:h-20 lg:h-28">
+      <div
+        data-role="model-logo"
+        class="absolute left-1/2 top-0 z-10 h-11 w-full max-w-xl -translate-x-1/2 sm:h-14 lg:h-[77px]"
+      >
         <img src="${logo}" alt="${model.name}" class="h-full w-full object-contain" />
       </div>
     `;
   }
 
   return /* html */ `
-    <h1 class="text-center text-2xl font-extrabold uppercase tracking-wide text-vullz-black">
+    <h1 class="absolute left-1/2 top-0 z-10 w-full max-w-xl -translate-x-1/2 text-center text-2xl font-extrabold uppercase tracking-wide text-vullz-black">
       ${model.name}
     </h1>
   `;
@@ -504,8 +576,8 @@ function render(): void {
           data-role="stage-section"
           class="flex min-w-0 flex-1 flex-col items-center justify-center gap-4 overflow-hidden"
         >
-          ${activeModel ? modelNameMarkup(activeModel) : ""}
-          <div class="flex min-h-0 w-full flex-1 items-center justify-center overflow-hidden">
+          <div class="relative flex min-h-0 w-full flex-1 items-center justify-center overflow-hidden">
+            ${activeModel ? modelNameMarkup(activeModel) : ""}
             ${stageContent}
           </div>
           ${
@@ -514,13 +586,22 @@ function render(): void {
                 <span id="color-label" class="max-w-full text-center text-xs text-vullz-gray-500">
                   ${colorLabelMarkup(activeColor)}
                 </span>
-                <button
-                  type="button"
-                  data-action="open-specs"
-                  class="inline-flex items-center gap-1.5 rounded-full border border-vullz-gray-200 px-4 py-1.5 text-xs font-medium text-vullz-gray-700 transition-colors duration-150 hover:border-vullz-black hover:text-vullz-black"
-                >
-                  Ficha técnica
-                </button>
+                <div class="flex items-center gap-2">
+                  <button
+                    type="button"
+                    data-action="open-specs"
+                    class="inline-flex items-center gap-1.5 rounded-full border border-vullz-gray-200 px-4 py-1.5 text-xs font-medium text-vullz-gray-700 transition-colors duration-150 hover:border-vullz-black hover:text-vullz-black"
+                  >
+                    Ficha técnica
+                  </button>
+                  <button
+                    type="button"
+                    data-action="open-zoom"
+                    class="inline-flex items-center gap-1.5 rounded-full border border-vullz-gray-200 px-4 py-1.5 text-xs font-medium text-vullz-gray-700 transition-colors duration-150 hover:border-vullz-black hover:text-vullz-black"
+                  >
+                    Zoom
+                  </button>
+                </div>
               `
               : ""
           }
@@ -545,6 +626,8 @@ function render(): void {
         </div>
       </main>
     </div>
+
+    ${zoomModalMarkup(activeModel, activeColor)}
   `;
 
   if (isFirstRender) {
@@ -637,6 +720,16 @@ function swapColor(model: Model, color: ModelColor): void {
   const label = document.querySelector("#color-label");
   if (label) label.innerHTML = colorLabelMarkup(color);
 
+  // swapColor() não passa por render(), então o modal de zoom (que guarda a
+  // foto no atributo src de #zoom-image) ficaria mostrando a cor antiga se
+  // não atualizássemos aqui também.
+  const zoomImage = document.querySelector<HTMLImageElement>("#zoom-image");
+  const photo = findBikePhoto(model.id, color.id);
+  if (zoomImage && photo) {
+    zoomImage.src = photo;
+    zoomImage.alt = `${model.name} — ${color.name}`;
+  }
+
   paintStage(model, color);
 }
 
@@ -686,10 +779,35 @@ function setFocusMode(on: boolean): void {
 }
 
 /*
+  Modal de zoom: abre/fecha só com classes (mesma lógica do modo foco, sem
+  render()). Ao fechar, também desfaz o zoom da imagem (`is-zoomed`) — senão
+  a próxima abertura já começaria ampliada, sem o cliente ter clicado nela.
+*/
+function setZoomOpen(on: boolean): void {
+  state.zoomOpen = on;
+
+  const modal = document.querySelector<HTMLElement>('[data-role="zoom-modal"]');
+  if (!modal) return;
+
+  modal.classList.toggle("is-open", on);
+  modal.setAttribute("aria-hidden", on ? "false" : "true");
+
+  if (!on) {
+    document.querySelector<HTMLElement>("#zoom-image")?.classList.remove("is-zoomed");
+  }
+}
+
+/*
   Delegação de evento num único listener: sobrevive a cada re-render (que troca
   o innerHTML inteiro), sem precisar re-anexar listener em botão nenhum.
 */
 function initInteractions(): void {
+  document.addEventListener("keydown", (event) => {
+    if (event.key !== "Escape") return;
+    if (state.zoomOpen) setZoomOpen(false);
+    else if (state.focusMode) setFocusMode(false);
+  });
+
   document.addEventListener("click", (event) => {
     const target = event.target as HTMLElement;
 
@@ -706,6 +824,24 @@ function initInteractions(): void {
     const specsButton = target.closest<HTMLElement>('[data-action="open-specs"]');
     if (specsButton) {
       setFocusMode(true);
+      return;
+    }
+
+    const zoomImage = target.closest<HTMLElement>('[data-action="toggle-zoom-scale"]');
+    if (zoomImage) {
+      zoomImage.classList.toggle("is-zoomed");
+      return;
+    }
+
+    const openZoomButton = target.closest<HTMLElement>('[data-action="open-zoom"]');
+    if (openZoomButton) {
+      setZoomOpen(true);
+      return;
+    }
+
+    const closeZoomTarget = target.closest<HTMLElement>('[data-action="close-zoom"]');
+    if (closeZoomTarget) {
+      setZoomOpen(false);
       return;
     }
 
