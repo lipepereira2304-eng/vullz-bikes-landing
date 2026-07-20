@@ -144,16 +144,19 @@
 }
 
 /*
-  `display:flex` + `justify-content:center` aqui de propósito: o painel reserva
-  uma FAIXA de espaço (a mesma largura do padding-right que a bike ganha, ver
-  --focus-zone abaixo), e o conteúdo real (.specs-panel-inner, mais estreito)
-  fica centralizado dentro dessa faixa — em vez de grudado na borda da tela,
-  que era a reclamação original.
+  `width` explícito aqui (não só max-width) de propósito: um flex item sem
+  width definido encolhe pro tamanho do conteúdo, então mesmo com
+  justify-content:center a faixa não tinha espaço de sobra nenhum pra
+  centralizar dentro — o painel só parecia "colado" onde o conteúdo acabava.
+  Com width real reservando a faixa toda, o card (.specs-panel-inner, mais
+  estreito) agora tem de fato espaço dos dois lados para ficar centralizado.
+  align-items:center centraliza verticalmente também, pelo mesmo motivo.
 */
 [data-role="specs-panel"] {
   display: flex;
+  align-items: center;
   justify-content: center;
-  max-width: 0;
+  width: 0;
   max-height: 0;
   opacity: 0;
   transform: translateY(16px);
@@ -161,7 +164,7 @@
 }
 
 [data-role="specs-panel"].is-focus-open {
-  max-width: 100%;
+  width: 100%;
   max-height: 60vh;
   opacity: 1;
   transform: translateY(0);
@@ -169,19 +172,22 @@
 }
 
 /*
-  Conteúdo interno com largura fixa (não acompanha a largura ainda animando
-  do contêiner pai): sem isso o texto reflui e "amassa" durante a transição,
-  em vez de simplesmente aparecer atrás de um retângulo que cresce. Mais
-  estreito que a faixa reservada (--focus-zone) de propósito, pra sobrar
-  espaço igual dos dois lados quando centralizado. O scroll interno (pedido
-  explicitamente, pra ficha técnica longa) mora aqui, não no contêiner de
-  fora — o de fora precisa do overflow:hidden pro colapso.
+  Card de verdade: borda + cantos arredondados, largura própria (menor que a
+  faixa reservada, pra sobrar respiro nos dois lados) e altura livre (só cresce
+  até o tamanho do conteúdo, sem esticar pra preencher a faixa toda) — por
+  isso o align-items:center acima consegue centralizar de verdade, e não só
+  "grudar" o card esticado do tamanho da faixa. max-height + overflow-y cobre
+  o pedido de rolagem interna pra ficha técnica longa.
 */
 .specs-panel-inner {
   width: min(21rem, 100%);
-  height: 100%;
+  max-height: 70vh;
   overflow-y: auto;
-  padding: 4px 4px 24px 4px;
+  padding: 24px;
+  border: 1px solid var(--color-vullz-gray-200);
+  border-radius: 20px;
+  background: var(--color-vullz-white);
+  box-shadow: 0 16px 32px rgba(17, 17, 17, 0.06);
 }
 
 @media (min-width: 1024px) {
@@ -192,13 +198,13 @@
   /* 28rem aqui precisa bater com o padding-right de stage-section abaixo —
      é a mesma faixa de espaço vista dos dois lados (painel e bike). */
   [data-role="specs-panel"].is-focus-open {
-    max-width: 28rem;
+    width: 28rem;
     max-height: 100%;
     transform: translateX(0);
   }
 
   .specs-panel-inner {
-    padding: 0 4px 24px 4px;
+    max-height: 85vh;
   }
 }
 
