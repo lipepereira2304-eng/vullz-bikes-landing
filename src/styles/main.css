@@ -114,12 +114,16 @@
   media query por dispositivo.
 
   `overflow: hidden` é o que permite max-width/max-height chegarem a 0 sem o
-  conteúdo vazar durante os 420ms de transição.
+  conteúdo vazar durante os 420ms de transição — mas só entra JUNTO com
+  `.is-focus-collapsed`, não o tempo todo: se ficasse sempre ligado, ele
+  também cortava qualquer coisa que crescesse um pouco além da caixa em uso
+  normal (foi exatamente isso que cortava as bolinhas de cor ativas, que
+  crescem com `scale-110` no hover/seleção — a bolinha cortava porque estava
+  tentando crescer para fora de uma caixa com overflow:hidden permanente).
 */
 [data-role="model-nav"],
 [data-role="color-rail"],
 [data-role="specs-panel"] {
-  overflow: hidden;
   transition:
     max-width 420ms var(--ease-glide),
     max-height 420ms var(--ease-glide),
@@ -129,6 +133,7 @@
 
 [data-role="model-nav"].is-focus-collapsed,
 [data-role="color-rail"].is-focus-collapsed {
+  overflow: hidden;
   max-width: 0;
   max-height: 0;
   opacity: 0;
@@ -156,6 +161,7 @@
   display: flex;
   align-items: center;
   justify-content: center;
+  overflow: hidden;
   width: 0;
   max-height: 0;
   opacity: 0;
@@ -172,16 +178,22 @@
 }
 
 /*
-  Card de verdade: borda + cantos arredondados, largura própria (menor que a
-  faixa reservada, pra sobrar respiro nos dois lados) e altura livre (só cresce
-  até o tamanho do conteúdo, sem esticar pra preencher a faixa toda) — por
-  isso o align-items:center acima consegue centralizar de verdade, e não só
-  "grudar" o card esticado do tamanho da faixa. max-height + overflow-y cobre
-  o pedido de rolagem interna pra ficha técnica longa.
+  Card de verdade: borda + cantos arredondados. Largura preenche a faixa
+  inteira reservada pro painel (sem sobrar vão de cada lado) — largura não é
+  mais o que centraliza aqui. Quem centraliza é a ALTURA: o card tem uma
+  altura proporcional (78% do espaço disponível, mesma faixa vertical que a
+  bike ocupa), e o align-items:center do contêiner pai (acima) o centraliza
+  nessa faixa de cima a baixo, sobrando respiro simétrico em cima e embaixo —
+  era isso que "centralizado" queria dizer. overflow-y cobre o pedido de
+  rolagem interna pra ficha técnica longa.
 */
 .specs-panel-inner {
-  width: min(21rem, 100%);
-  max-height: 70vh;
+  /* 100% menos uma folga mínima (12px de cada lado): só o suficiente pra
+     sombra do card não ser cortada pelo overflow:hidden do contêiner de
+     fora — visualmente ainda é "preenchendo a faixa toda", não uma
+     centralização horizontal com respiro de verdade. */
+  width: calc(100% - 24px);
+  height: 78%;
   overflow-y: auto;
   padding: 24px;
   border: 1px solid var(--color-vullz-gray-200);
@@ -201,10 +213,6 @@
     width: 28rem;
     max-height: 100%;
     transform: translateX(0);
-  }
-
-  .specs-panel-inner {
-    max-height: 85vh;
   }
 }
 
