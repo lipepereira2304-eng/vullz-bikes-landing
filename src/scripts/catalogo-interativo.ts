@@ -423,17 +423,40 @@ function revealAttrs(delayMs: number): string {
 let lastPaintedModelId: string | null = null;
 
 /*
-  Ícone de casinha + logo Vullz no canto direito do cabeçalho — reintroduz um
-  toque de identidade da marca nesta página (que não tem mais o logo grande
-  em cima, removido lá no início). O link da casinha vai direto pra home,
-  sempre — ao contrário do "Voltar" à esquerda, que sai do modo foco antes de
-  navegar (ver initInteractions). Os dois levarem ao mesmo lugar não é
-  redundância à toa: a casinha é um atalho reconhecível por ícone, útil
-  conforme a página crescer e o "Voltar" ganhar outros significados também.
+  Logo Vullz no canto direito do cabeçalho — reintroduz um toque de
+  identidade da marca nesta página (que não tem mais o logo grande em cima,
+  removido lá no início).
 */
 function headerBrandMarkup(): string {
   return /* html */ `
-    <div class="flex items-center gap-4">
+    <a href="/" aria-label="Vullz" class="inline-flex items-center">
+      <img src="${vullzLogo}" alt="Vullz" class="h-[30px] w-auto sm:h-9" />
+    </a>
+  `;
+}
+
+/*
+  "Voltar" com contorno (mesmo tom cinza do texto) + ícone de casinha ao
+  lado, os dois à esquerda. A casinha vai direto pra home sempre — diferente
+  do "Voltar", que sai do modo foco antes de navegar quando a ficha técnica
+  está aberta (ver initInteractions). Os dois levarem ao mesmo lugar não é
+  redundância à toa: a casinha é um atalho reconhecível por ícone, útil
+  conforme a página crescer e o "Voltar" ganhar outros significados também.
+*/
+function headerBackMarkup(): string {
+  return /* html */ `
+    <div class="flex items-center gap-3">
+      <a
+        href="/"
+        data-role="header-back"
+        class="inline-flex items-center gap-1.5 rounded-full border border-vullz-gray-500 px-4 py-1.5 text-sm font-medium text-vullz-gray-500 transition-colors duration-150 hover:border-vullz-black hover:text-vullz-black"
+      >
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M12.5 8H3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+          <path d="M7.5 3.5L3 8L7.5 12.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+        Voltar
+      </a>
       <a
         href="/"
         aria-label="Página inicial"
@@ -444,9 +467,6 @@ function headerBrandMarkup(): string {
           <path d="M3.5 6.5V13.5H12.5V6.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
           <path d="M6.5 13.5V9.5H9.5V13.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
         </svg>
-      </a>
-      <a href="/" aria-label="Vullz" class="inline-flex items-center">
-        <img src="${vullzLogo}" alt="Vullz" class="h-5 w-auto sm:h-6" />
       </a>
     </div>
   `;
@@ -537,18 +557,7 @@ function render(): void {
   app.innerHTML = /* html */ `
     <div class="relative flex h-dvh flex-col overflow-hidden bg-white text-vullz-black">
       <header ${revealAttrs(0)} class="relative z-10 flex shrink-0 items-center justify-between px-6 pt-8 sm:px-10">
-        <a
-          href="/"
-          data-role="header-back"
-          class="inline-flex items-center gap-1.5 text-sm font-medium text-vullz-gray-500 transition-colors duration-150 hover:text-vullz-black"
-        >
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M12.5 8H3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-            <path d="M7.5 3.5L3 8L7.5 12.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-          </svg>
-          Voltar
-        </a>
-
+        ${headerBackMarkup()}
         ${headerBrandMarkup()}
       </header>
 
