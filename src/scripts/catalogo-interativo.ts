@@ -1,5 +1,8 @@
 import "../styles/main.css";
 import { initRevealOnScroll } from "./animations";
+// Mesmo arquivo da home, mas com "VULLZ" recolorido de branco pra preto: o
+// original foi feito pra fundo grafite, e aqui a página é branca.
+import vullzLogo from "../assets/images/vullz-logo-dark-text.webp";
 
 /*
   Página em branco de propósito: as fotos reais das bikes têm fundo branco, e
@@ -420,6 +423,36 @@ function revealAttrs(delayMs: number): string {
 let lastPaintedModelId: string | null = null;
 
 /*
+  Ícone de casinha + logo Vullz no canto direito do cabeçalho — reintroduz um
+  toque de identidade da marca nesta página (que não tem mais o logo grande
+  em cima, removido lá no início). O link da casinha vai direto pra home,
+  sempre — ao contrário do "Voltar" à esquerda, que sai do modo foco antes de
+  navegar (ver initInteractions). Os dois levarem ao mesmo lugar não é
+  redundância à toa: a casinha é um atalho reconhecível por ícone, útil
+  conforme a página crescer e o "Voltar" ganhar outros significados também.
+*/
+function headerBrandMarkup(): string {
+  return /* html */ `
+    <div class="flex items-center gap-4">
+      <a
+        href="/"
+        aria-label="Página inicial"
+        class="inline-flex h-8 w-8 items-center justify-center rounded-full text-vullz-gray-500 transition-colors duration-150 hover:text-vullz-black"
+      >
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+          <path d="M2 7.5L8 2.5L14 7.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M3.5 6.5V13.5H12.5V6.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+          <path d="M6.5 13.5V9.5H9.5V13.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+      </a>
+      <a href="/" aria-label="Vullz" class="inline-flex items-center">
+        <img src="${vullzLogo}" alt="Vullz" class="h-5 w-auto sm:h-6" />
+      </a>
+    </div>
+  `;
+}
+
+/*
   pt-4 aqui empurra só a BIKE pra baixo, sem mexer no logo. O logo é
   `position:absolute` com `top:0`, e a referência desse `top:0` é a borda do
   próprio contêiner — ela não se move quando o padding muda, só o conteúdo em
@@ -503,7 +536,7 @@ function render(): void {
 
   app.innerHTML = /* html */ `
     <div class="relative flex h-dvh flex-col overflow-hidden bg-white text-vullz-black">
-      <header ${revealAttrs(0)} class="relative z-10 flex shrink-0 items-center px-6 pt-8 sm:px-10">
+      <header ${revealAttrs(0)} class="relative z-10 flex shrink-0 items-center justify-between px-6 pt-8 sm:px-10">
         <a
           href="/"
           data-role="header-back"
@@ -515,6 +548,8 @@ function render(): void {
           </svg>
           Voltar
         </a>
+
+        ${headerBrandMarkup()}
       </header>
 
       <main
