@@ -110,18 +110,15 @@ src/assets/bikes/<id-do-modelo>/logo.svg
 | Modelo     | Status                                  |
 | ---------- | ---------------------------------------- |
 | Oregon     | `oregon/logo.webp` (configurado)         |
-| Slim       | pendente (arquivo travado, ver nota)     |
-| Street     | pendente (arquivo travado, ver nota)     |
+| Slim       | `slim/logo.webp` (configurado)           |
+| Street     | `street/logo.webp` (configurado)         |
 | Doble      | `doble/logo.webp` (configurado)          |
 | Pulse      | `pulse/logo.webp` (configurado)          |
 | Majestic   | `majestic/logo.webp` (configurado)       |
 | Pro Kids   | `pro-kids/logo.webp` (configurado)       |
 | Love Kids  | `love-kids/logo.webp` (configurado)      |
 
-Nota: `slim.png` e `street.png` (em Desktop/tinified/modelos) não puderam ser
-lidos — erro de sistema de arquivos ("Resource deadlock avoided"), possivelmente
-por estarem abertos em outro programa ou ainda sincronizando. Assim que
-liberarem, é só reexportar/resalvar e avisar para eu aplicar.
+Todos os 8 modelos têm logo configurado.
 
 Recomendações: SVG se for vetor puro; PNG/WebP com transparência se não for.
 Cor com bom contraste em fundo branco (preto ou cor da marca). Proporção mais
