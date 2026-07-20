@@ -276,35 +276,6 @@
 }
 
 /*
-  Modal de zoom: some via opacity/pointer-events (não display), pra poder
-  animar a entrada/saída com uma transição simples de CSS — sem precisar do
-  truque de reflow que o crossfade da bike usa, porque aqui não há duas
-  camadas se misturando, só um mostra/esconde.
-*/
-[data-role="zoom-modal"] {
-  transition: opacity 200ms ease;
-}
-
-[data-role="zoom-modal"].is-open {
-  opacity: 1;
-  pointer-events: auto;
-}
-
-/*
-  Imagem "ajustada à tela" por padrão (limitada pelas max-width/max-height do
-  Tailwind no elemento). Ampliada (`is-zoomed`, ligada por clique na própria
-  imagem), ela ganha uma largura real bem maior que a tela — estourando o
-  contêiner pai, que tem overflow:auto — permitindo arrastar/rolar pra ver o
-  detalhe, em vez de só um scale visual (que não habilitaria rolagem real).
-*/
-#zoom-image.is-zoomed {
-  max-width: none;
-  max-height: none;
-  width: 1400px;
-  cursor: zoom-out;
-}
-
-/*
   Movimento compartilhado de card e botão. Vive como @utility (camada utilities)
   de propósito: assim vence `[data-reveal]`, que está em @layer components e
   também declara `transition`. Um `.classe` solta em components empataria em
