@@ -276,6 +276,20 @@
 }
 
 /*
+  Reforça o respiro entre logo e bike quando a ficha técnica está aberta —
+  o pt-4 sozinho (ver bikeWrapperMarkup) não bastava porque a bike some com
+  menos largura disponível ali, o que muda a distância percebida por conta
+  própria. Some ao pt-4 de base (16px), não substitui.
+*/
+[data-role="bike-wrapper"] {
+  transition: padding-top 420ms var(--ease-glide);
+}
+
+[data-role="bike-wrapper"].is-focus-open {
+  padding-top: 2.5rem;
+}
+
+/*
   Movimento compartilhado de card e botão. Vive como @utility (camada utilities)
   de propósito: assim vence `[data-reveal]`, que está em @layer components e
   também declara `transition`. Um `.classe` solta em components empataria em

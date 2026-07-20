@@ -484,7 +484,7 @@ function headerBackMarkup(): string {
 */
 function bikeWrapperMarkup(activeModel: Model | null, stageContent: string): string {
   return /* html */ `
-    <div class="relative flex min-h-0 w-full flex-1 items-center justify-center overflow-hidden pt-4">
+    <div data-role="bike-wrapper" class="relative flex min-h-0 w-full flex-1 items-center justify-center overflow-hidden pt-4">
       ${activeModel ? modelNameMarkup(activeModel) : ""}
       ${stageContent}
     </div>
@@ -531,7 +531,11 @@ function render(): void {
   const colorRailContent =
     activeModel && activeColor
       ? /* html */ `
-        <div class="flex flex-row gap-3 lg:flex-col" role="group" aria-label="Cores disponíveis">
+        <div
+          class="flex flex-row items-center gap-3 rounded-full border border-vullz-gray-500 px-3 py-2 lg:flex-col lg:gap-4 lg:px-2.5 lg:py-4"
+          role="group"
+          aria-label="Cores disponíveis"
+        >
           ${activeModel.colors
             .map((c, i) => colorSwatchMarkup(c, c.id === activeColor.id, i * 35))
             .join("")}
@@ -742,6 +746,7 @@ function setFocusMode(on: boolean): void {
   const panel = document.querySelector<HTMLElement>('[data-role="specs-panel"]');
   const stage = document.querySelector<HTMLElement>('[data-role="stage-section"]');
   const logo = document.querySelector<HTMLElement>('[data-role="model-logo"]');
+  const bikeWrapper = document.querySelector<HTMLElement>('[data-role="bike-wrapper"]');
 
   /*
     A tentativa anterior de fechar o vão fantasma da coluna de cores recolhida
@@ -759,6 +764,11 @@ function setFocusMode(on: boolean): void {
   // Logo acima da bike encolhe junto, na mesma duração — fica proporcional
   // ao tamanho que a bike também está assumindo enquanto o painel abre.
   logo?.classList.toggle("is-focus-open", on);
+  // O respiro entre logo e bike (pt-4) sozinho não bastava dentro da ficha
+  // técnica — a bike acaba renderizando menor ali (menos largura disponível
+  // com o painel aberto), o que por si só já mudava a distância percebida.
+  // Este reforço garante a mesma folga em ambos os estados.
+  bikeWrapper?.classList.toggle("is-focus-open", on);
 
   if (panel) {
     panel.classList.toggle("is-focus-open", on);
