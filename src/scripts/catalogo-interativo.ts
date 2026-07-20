@@ -291,14 +291,24 @@ function modelNameMarkup(model: Model): string {
   `;
 }
 
+/*
+  No desktop cada modelo vira uma linha com sublinhado (não mais um "pill"
+  solto): resolve a reclamação de tudo parecer "flutuando" sem alinhamento.
+  A linha do modelo ATIVO fica mais grossa e preta em vez de preencher o
+  fundo — mantém a paleta clean, só reforça o traço. No mobile mantém o
+  visual anterior (chip arredondado numa tira horizontal) — não foi pedido
+  mexer nesse layout, só na barra lateral do desktop.
+*/
 function sidebarItemMarkup(model: Model, active: boolean, revealDelayMs: number): string {
   return /* html */ `
     <button
       type="button"
       data-model="${model.id}"
       style="animation-delay:${revealDelayMs}ms; animation-duration:380ms"
-      class="model-item reveal-left-in shrink-0 whitespace-nowrap rounded-lg px-4 py-2 text-left text-sm font-bold uppercase tracking-widest transition-[transform,color] duration-[var(--dur-hover)] ease-lift hover:translate-x-2 lg:w-full ${
-        active ? "text-vullz-black" : "text-vullz-gray-400 hover:text-vullz-black"
+      class="model-item reveal-left-in shrink-0 whitespace-nowrap rounded-lg px-4 py-2 text-left text-sm font-bold uppercase tracking-widest transition-[transform,color,border-color] duration-[var(--dur-hover)] ease-lift hover:translate-x-2 lg:block lg:w-full lg:whitespace-normal lg:rounded-none lg:px-0 lg:py-3 ${
+        active
+          ? "text-vullz-black lg:border-b-2 lg:border-vullz-black"
+          : "text-vullz-gray-400 hover:text-vullz-black lg:border-b lg:border-vullz-gray-200"
       }"
     >
       ${model.name}
@@ -310,15 +320,19 @@ function sidebarItemMarkup(model: Model, active: boolean, revealDelayMs: number)
   Cabeçalho de cada aro agora é um botão (sanfona): controla se os modelos
   daquele aro aparecem ou não. Só a seta gira — o texto do rótulo não muda de
   peso/cor ao abrir, pra não competir com os nomes dos modelos.
+
+  No desktop, o cabeçalho também ganha o mesmo sublinhado dos modelos (mesma
+  linguagem visual, uma lista contínua de "linhas"), e o espaçamento entre
+  aros vem do gap do <nav> (ver render()) — bem maior que antes.
 */
 function sidebarGroupMarkup(aro: number, models: Model[], activeModelId: string | null, expanded: boolean): string {
   return /* html */ `
-    <div class="flex shrink-0 flex-col gap-2">
+    <div class="flex shrink-0 flex-col gap-2 lg:gap-0">
       <button
         type="button"
         data-aro="${aro}"
         aria-expanded="${expanded}"
-        class="flex items-center gap-2 px-4 text-left text-xl font-extrabold uppercase tracking-wide text-vullz-black transition-colors duration-150"
+        class="flex items-center gap-2 px-4 text-left text-xl font-extrabold uppercase tracking-wide text-vullz-black transition-colors duration-150 lg:border-b lg:border-vullz-gray-200 lg:px-0 lg:pb-3"
       >
         <svg
           width="14"
@@ -335,7 +349,7 @@ function sidebarGroupMarkup(aro: number, models: Model[], activeModelId: string 
       ${
         expanded
           ? /* html */ `
-            <div class="flex flex-col gap-1">
+            <div class="flex flex-col gap-1 lg:mt-2 lg:gap-0">
               ${models
                 .map((m, i) => sidebarItemMarkup(m, m.id === activeModelId, i * 70))
                 .join("")}
@@ -511,7 +525,7 @@ function render(): void {
           ${revealAttrs(90)}
           data-role="model-nav"
           aria-label="Modelos"
-          class="flex shrink-0 gap-4 overflow-x-auto pb-2 lg:w-52 lg:flex-col lg:justify-center lg:gap-5 lg:overflow-visible lg:pb-0"
+          class="flex shrink-0 gap-4 overflow-x-auto pb-2 lg:w-64 lg:flex-col lg:justify-center lg:gap-8 lg:overflow-visible lg:rounded-xl lg:border lg:border-vullz-gray-200 lg:px-6 lg:py-6"
         >
           ${groupModelsByAro(MODELS)
             .map((g) =>
