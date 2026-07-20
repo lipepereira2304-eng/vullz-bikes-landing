@@ -577,6 +577,8 @@ function swapColor(model: Model, color: ModelColor): void {
   (ver main.css), então nenhum clique neles pode disparar um render() no meio
   da transição — não precisa se preocupar com esse caso.
 */
+const FOCUS_TRANSITION_MS = 420;
+
 function setFocusMode(on: boolean): void {
   state.focusMode = on;
 
@@ -586,12 +588,34 @@ function setFocusMode(on: boolean): void {
   const stage = document.querySelector<HTMLElement>('[data-role="stage-section"]');
 
   nav?.classList.toggle("is-focus-collapsed", on);
-  rail?.classList.toggle("is-focus-collapsed", on);
   stage?.classList.toggle("is-focus-aligned", on);
 
   if (panel) {
     panel.classList.toggle("is-focus-open", on);
     panel.setAttribute("aria-hidden", on ? "false" : "true");
+  }
+
+  /*
+    A coluna de cores recolhida (width:0) ainda "gasta" o gap do flex dos dois
+    lados — mesmo invisível, ela empurrava o painel pra mais longe da bike do
+    que precisava. `is-focus-hidden` tira ela do fluxo (display:none) de
+    verdade, fechando esse vão fantasma — só depois que ela já terminou de
+    encolher (senão o "sumiço" seria instantâneo, sem a animação de recolher).
+    Pra abrir de novo, a ordem inverte: primeiro volta pro fluxo (ainda
+    encolhida), força um reflow, só então libera o crescimento — senão o
+    navegador não tem um "antes" pra animar a partir dele.
+  */
+  if (!rail) return;
+
+  if (on) {
+    rail.classList.add("is-focus-collapsed");
+    window.setTimeout(() => {
+      if (state.focusMode) rail.classList.add("is-focus-hidden");
+    }, FOCUS_TRANSITION_MS);
+  } else {
+    rail.classList.remove("is-focus-hidden");
+    void rail.offsetHeight;
+    rail.classList.remove("is-focus-collapsed");
   }
 }
 

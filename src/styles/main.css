@@ -149,6 +149,17 @@
 }
 
 /*
+  Só a coluna de cores usa isso: mesmo em width:0, ela ainda reservava os
+  gaps do flex dos dois lados, deixando o painel de ficha técnica mais longe
+  da bike do que devia. Isto tira ela do fluxo de vez (o JS só liga esta
+  classe depois que a transição de recolher já terminou — ver setFocusMode
+  em catalogo-interativo.ts).
+*/
+[data-role="color-rail"].is-focus-hidden {
+  display: none;
+}
+
+/*
   `width` explícito aqui (não só max-width) de propósito: um flex item sem
   width definido encolhe pro tamanho do conteúdo, então mesmo com
   justify-content:center a faixa não tinha espaço de sobra nenhum pra
@@ -207,10 +218,10 @@
     transform: translateX(16px);
   }
 
-  /* 28rem aqui precisa bater com o padding-right de stage-section abaixo —
+  /* 32rem aqui precisa bater com o padding-right de stage-section abaixo —
      é a mesma faixa de espaço vista dos dois lados (painel e bike). */
   [data-role="specs-panel"].is-focus-open {
-    width: 28rem;
+    width: 32rem;
     max-height: 100%;
     transform: translateX(0);
   }
@@ -222,7 +233,7 @@
   da seção pra esquerda com padding-right — padding, ao contrário de
   justify-content, é uma propriedade que o navegador interpola de verdade.
 
-  28rem aqui precisa bater com o max-width de specs-panel acima: é a mesma
+  32rem aqui precisa bater com o width de specs-panel acima: é a mesma
   faixa de espaço vista dos dois lados (painel e bike).
 */
 [data-role="stage-section"] {
@@ -231,7 +242,7 @@
 
 @media (min-width: 1024px) {
   [data-role="stage-section"].is-focus-aligned {
-    padding-right: 28rem;
+    padding-right: 32rem;
   }
 }
 
