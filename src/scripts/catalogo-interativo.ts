@@ -74,6 +74,8 @@ interface ModelColor {
   name: string;
   /** Cor (ou gradiente) usada na bolinha de seleção. */
   swatch: string;
+  /** Código de referência real do produto, ex.: "268/01". */
+  ref: string;
 }
 
 interface Model {
@@ -139,9 +141,9 @@ function resolveColor(modelId: string, key: keyof typeof PALETTE): string {
   return MODEL_COLOR_OVERRIDES[modelId]?.[key] ?? PALETTE[key];
 }
 
-/** Cor sólida simples: nome vem da paleta, tom pode ser específico do modelo. */
-function solid(modelId: string, id: keyof typeof PALETTE): ModelColor {
-  return { id, name: PALETTE_NAMES[id], swatch: resolveColor(modelId, id) };
+/** Cor sólida simples: nome vem da paleta (ou de um override), tom pode ser específico do modelo. */
+function solid(modelId: string, id: keyof typeof PALETTE, ref: string, nameOverride?: string): ModelColor {
+  return { id, name: nameOverride ?? PALETTE_NAMES[id], swatch: resolveColor(modelId, id), ref };
 }
 
 /** Quadro de uma cor com dois acentos — bolinha dividida em 3 (como a Oregon). */
@@ -149,6 +151,7 @@ function framed(
   modelId: string,
   id: string,
   name: string,
+  ref: string,
   frame: keyof typeof PALETTE,
   accentA: keyof typeof PALETTE,
   accentB: keyof typeof PALETTE
@@ -156,34 +159,43 @@ function framed(
   return {
     id,
     name,
+    ref,
     swatch: `conic-gradient(from 0deg, ${resolveColor(modelId, frame)} 0% 34%, ${resolveColor(modelId, accentA)} 34% 67%, ${resolveColor(modelId, accentB)} 67% 100%)`,
   };
 }
 
 const OREGON_COLORS: ModelColor[] = [
-  framed("oregon", "quadro-preto-azul-dourado", "Quadro Preto (Azul + Dourado)", "preto", "azul", "dourado"),
-  framed("oregon", "quadro-branco-azul-dourado", "Quadro Branco (Azul + Dourado)", "branco", "azul", "dourado"),
-  solid("oregon", "branco"),
-  solid("oregon", "rosa"),
-  solid("oregon", "verde"),
-  solid("oregon", "laranja"),
+  framed("oregon", "quadro-preto-azul-dourado", "Quadro Preto (Azul + Dourado)", "268/10", "preto", "azul", "dourado"),
+  framed("oregon", "quadro-branco-azul-dourado", "Quadro Branco (Azul + Dourado)", "268/11", "branco", "azul", "dourado"),
+  solid("oregon", "branco", "268/05"),
+  solid("oregon", "rosa", "268/03", "Rosa Neon"),
+  solid("oregon", "verde", "268/02", "Verde Neon"),
+  solid("oregon", "laranja", "268/01", "Laranja Neon"),
 ];
 
 const SLIM_COLORS: ModelColor[] = [
-  framed("slim", "preto-azul-rosa", "Preto (Azul + Rosa)", "preto", "azul", "rosa"),
+  framed("slim", "preto-azul-rosa", "Preto (Azul + Rosa)", "269/06", "preto", "azul", "rosa"),
 ];
 
 const STREET_COLORS: ModelColor[] = [
-  solid("street", "roxo"),
-  solid("street", "azul"),
-  solid("street", "laranja"),
-  solid("street", "verde"),
+  solid("street", "roxo", "270/08"),
+  solid("street", "azul", "270/04"),
+  solid("street", "laranja", "270/01", "Laranja Neon"),
+  solid("street", "verde", "270/02", "Verde Neon"),
 ];
-const DOBLE_COLORS: ModelColor[] = [solid("doble", "laranja"), solid("doble", "verde"), solid("doble", "rosa")];
-const PULSE_COLORS: ModelColor[] = [solid("pulse", "azul"), solid("pulse", "laranja"), solid("pulse", "verde")];
-const MAJESTIC_COLORS: ModelColor[] = [solid("majestic", "rosa"), solid("majestic", "preto")];
-const PRO_KIDS_COLORS: ModelColor[] = [solid("pro-kids", "azul"), solid("pro-kids", "vermelho")];
-const LOVE_KIDS_COLORS: ModelColor[] = [solid("love-kids", "rosa"), solid("love-kids", "branco")];
+const DOBLE_COLORS: ModelColor[] = [
+  solid("doble", "laranja", "271/01", "Laranja Neon"),
+  solid("doble", "verde", "271/02", "Verde Neon"),
+  solid("doble", "rosa", "271/03", "Rosa Neon"),
+];
+const PULSE_COLORS: ModelColor[] = [
+  solid("pulse", "azul", "272/04"),
+  solid("pulse", "laranja", "272/01", "Laranja Neon"),
+  solid("pulse", "verde", "272/02", "Verde Neon"),
+];
+const MAJESTIC_COLORS: ModelColor[] = [solid("majestic", "rosa", "273/03"), solid("majestic", "preto", "273/06")];
+const PRO_KIDS_COLORS: ModelColor[] = [solid("pro-kids", "azul", "274/04"), solid("pro-kids", "vermelho", "274/07")];
+const LOVE_KIDS_COLORS: ModelColor[] = [solid("love-kids", "rosa", "275/03"), solid("love-kids", "branco", "275/05")];
 
 const MODELS: Model[] = [
   { id: "oregon", name: "Oregon", aro: 29, colors: OREGON_COLORS },
@@ -364,13 +376,8 @@ function sidebarGroupMarkup(aro: number, models: Model[], activeModelId: string 
   `;
 }
 
-/*
-  "(REF. 000/00)" é placeholder de propósito — cada bike vai ganhar seu
-  próprio código de referência depois; por enquanto todo mundo mostra zero
-  só pra validar onde o texto entra no layout.
-*/
 function colorLabelMarkup(color: ModelColor): string {
-  return /* html */ `${color.name} <span class="text-vullz-gray-400">(REF. 000/00)</span>`;
+  return /* html */ `${color.name} <span class="text-vullz-gray-400">(REF. ${color.ref})</span>`;
 }
 
 /*
