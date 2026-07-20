@@ -1,4 +1,5 @@
 import "../styles/main.css";
+import { initRevealOnScroll } from "./animations";
 
 /*
   Página em branco de propósito: as fotos reais das bikes têm fundo branco, e
@@ -28,6 +29,20 @@ function findBikePhoto(modelId: string, colorId: string): string | undefined {
     if (folder === modelId && fileId === colorId) return bikePhotos[path];
   }
   return undefined;
+}
+
+/*
+  Sem isso, o navegador só baixa a foto de um modelo/cor na primeira vez que
+  ela aparece na tela — daí aquele delayzinho perceptível na primeira troca
+  (depois fica em cache e é instantâneo). Disparando o download de todas em
+  segundo plano assim que a página carrega, a primeira troca já vem rápida
+  também. `new Image()` sem inserir no DOM só existe pra forçar o fetch.
+*/
+function preloadAllBikePhotos(): void {
+  Object.values(bikePhotos).forEach((url) => {
+    const img = new Image();
+    img.src = url;
+  });
 }
 
 interface ModelColor {
@@ -187,7 +202,7 @@ function sidebarItemMarkup(model: Model, active: boolean, revealDelayMs: number)
     <button
       type="button"
       data-model="${model.id}"
-      style="animation-delay:${revealDelayMs}ms"
+      style="animation-delay:${revealDelayMs}ms; animation-duration:380ms"
       class="model-item reveal-left-in shrink-0 whitespace-nowrap rounded-lg px-4 py-2 text-left text-sm font-bold uppercase tracking-widest transition-[transform,color] duration-[var(--dur-hover)] ease-lift hover:translate-x-2 lg:w-full ${
         active ? "text-vullz-black" : "text-vullz-gray-400 hover:text-vullz-black"
       }"
@@ -228,7 +243,7 @@ function sidebarGroupMarkup(aro: number, models: Model[], activeModelId: string 
           ? /* html */ `
             <div class="flex flex-col gap-1">
               ${models
-                .map((m, i) => sidebarItemMarkup(m, m.id === activeModelId, i * 45))
+                .map((m, i) => sidebarItemMarkup(m, m.id === activeModelId, i * 70))
                 .join("")}
             </div>
           `
@@ -251,6 +266,18 @@ function colorSwatchMarkup(color: ModelColor, active: boolean, revealDelayMs: nu
       }"
     ></button>
   `;
+}
+
+/*
+  Entrada suave só na primeira renderização — a mesma linguagem da home
+  ([data-reveal], ver main.css/animations.ts). Nas renderizações seguintes
+  (clique em aro/modelo) isto fica de fora, senão a página inteira reapareceria
+  do zero a cada clique, já que `render()` reconstrói o innerHTML inteiro.
+*/
+let isFirstRender = true;
+
+function revealAttrs(delayMs: number): string {
+  return isFirstRender ? `data-reveal style="transition-delay:${delayMs}ms"` : "";
 }
 
 function render(): void {
@@ -294,7 +321,7 @@ function render(): void {
 
   app.innerHTML = /* html */ `
     <div class="relative flex h-dvh flex-col overflow-hidden bg-white text-vullz-black">
-      <header class="relative z-10 flex shrink-0 items-center px-6 pt-8 sm:px-10">
+      <header ${revealAttrs(0)} class="relative z-10 flex shrink-0 items-center px-6 pt-8 sm:px-10">
         <a
           href="/"
           class="inline-flex items-center gap-1.5 text-sm font-medium text-vullz-gray-500 transition-colors duration-150 hover:text-vullz-black"
@@ -309,6 +336,7 @@ function render(): void {
 
       <main class="relative z-10 flex flex-1 flex-col gap-4 overflow-hidden px-6 pb-6 sm:px-10 lg:flex-row lg:gap-16 lg:py-8">
         <nav
+          ${revealAttrs(90)}
           aria-label="Modelos"
           class="flex shrink-0 gap-4 overflow-x-auto pb-2 lg:w-52 lg:flex-col lg:justify-center lg:gap-5 lg:overflow-visible lg:pb-0"
         >
@@ -324,7 +352,7 @@ function render(): void {
             .join("")}
         </nav>
 
-        <section class="flex flex-1 flex-col items-center justify-between gap-4 overflow-hidden text-center">
+        <section ${revealAttrs(170)} class="flex flex-1 flex-col items-center justify-between gap-4 overflow-hidden text-center">
           <div class="flex w-full flex-1 items-center justify-center overflow-hidden">
             ${stageContent}
           </div>
@@ -336,6 +364,11 @@ function render(): void {
       </main>
     </div>
   `;
+
+  if (isFirstRender) {
+    initRevealOnScroll();
+    isFirstRender = false;
+  }
 
   if (activeModel && activeColor) {
     paintStage(activeModel, activeColor);
@@ -442,3 +475,7 @@ function initInteractions(): void {
 
 render();
 initInteractions();
+
+// Depois que a página e seus recursos críticos (CSS, JS, logo) já carregaram
+// — pra não competir com eles por banda — começa a baixar todas as fotos.
+window.addEventListener("load", preloadAllBikePhotos);
