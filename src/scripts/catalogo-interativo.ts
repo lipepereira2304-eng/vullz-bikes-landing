@@ -282,6 +282,14 @@ function colorLabelMarkup(color: ModelColor): string {
   return /* html */ `${color.name} <span class="text-vullz-gray-400">(REF. 000/00)</span>`;
 }
 
+/*
+  Preenchimento e anel de borda são dois elementos separados de propósito:
+  quando o background e o border-radius vivem no MESMO elemento, o navegador
+  às vezes deixa um fiapo de 1px sem cobrir num ponto do círculo (mais visível
+  em elementos pequenos e animados) — lê como um "corte" na borda. Um span
+  interno, recuado a distância exata da borda, cobre tudo com folga e não
+  depende desse alinhamento de sub-pixel.
+*/
 function colorSwatchMarkup(color: ModelColor, active: boolean, revealDelayMs: number): string {
   return /* html */ `
     <button
@@ -289,11 +297,13 @@ function colorSwatchMarkup(color: ModelColor, active: boolean, revealDelayMs: nu
       data-color="${color.id}"
       aria-label="${color.name}"
       aria-pressed="${active}"
-      style="background:${color.swatch}; animation-delay:${revealDelayMs}ms"
-      class="color-swatch reveal-left-in h-8 w-8 shrink-0 rounded-full border-2 transition-[border-color,transform] duration-150 ${
+      style="animation-delay:${revealDelayMs}ms"
+      class="color-swatch reveal-left-in relative h-8 w-8 shrink-0 rounded-full border-2 transition-[border-color,transform] duration-150 ${
         active ? "border-vullz-black scale-110" : "border-vullz-gray-200 hover:border-vullz-gray-500"
       }"
-    ></button>
+    >
+      <span class="absolute inset-[2px] rounded-full" style="background:${color.swatch};"></span>
+    </button>
   `;
 }
 
