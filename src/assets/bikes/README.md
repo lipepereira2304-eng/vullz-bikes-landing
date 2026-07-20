@@ -110,13 +110,18 @@ src/assets/bikes/<id-do-modelo>/logo.svg
 | Modelo     | Status                                  |
 | ---------- | ---------------------------------------- |
 | Oregon     | `oregon/logo.webp` (configurado)         |
-| Slim       | pendente — usa nome em texto             |
-| Street     | pendente — usa nome em texto             |
-| Doble      | pendente — usa nome em texto             |
-| Pulse      | pendente — usa nome em texto             |
-| Majestic   | pendente — usa nome em texto             |
-| Pro Kids   | pendente — usa nome em texto             |
-| Love Kids  | pendente — usa nome em texto             |
+| Slim       | pendente (arquivo travado, ver nota)     |
+| Street     | pendente (arquivo travado, ver nota)     |
+| Doble      | `doble/logo.webp` (configurado)          |
+| Pulse      | `pulse/logo.webp` (configurado)          |
+| Majestic   | `majestic/logo.webp` (configurado)       |
+| Pro Kids   | `pro-kids/logo.webp` (configurado)       |
+| Love Kids  | `love-kids/logo.webp` (configurado)      |
+
+Nota: `slim.png` e `street.png` (em Desktop/tinified/modelos) não puderam ser
+lidos — erro de sistema de arquivos ("Resource deadlock avoided"), possivelmente
+por estarem abertos em outro programa ou ainda sincronizando. Assim que
+liberarem, é só reexportar/resalvar e avisar para eu aplicar.
 
 Recomendações: SVG se for vetor puro; PNG/WebP com transparência se não for.
 Cor com bom contraste em fundo branco (preto ou cor da marca). Proporção mais
