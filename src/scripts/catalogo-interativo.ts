@@ -253,6 +253,15 @@ function sidebarGroupMarkup(aro: number, models: Model[], activeModelId: string 
   `;
 }
 
+/*
+  "(REF. 000/00)" é placeholder de propósito — cada bike vai ganhar seu
+  próprio código de referência depois; por enquanto todo mundo mostra zero
+  só pra validar onde o texto entra no layout.
+*/
+function colorLabelMarkup(color: ModelColor): string {
+  return /* html */ `${color.name} <span class="text-vullz-gray-400">(REF. 000/00)</span>`;
+}
+
 function colorSwatchMarkup(color: ModelColor, active: boolean, revealDelayMs: number): string {
   return /* html */ `
     <button
@@ -308,14 +317,24 @@ function render(): void {
         </p>
       `;
 
+  /*
+    O nome da cor mora ACIMA da pilha de bolinhas, não embaixo: como as
+    bolinhas agora ficam coladas na borda direita (coluna vertical), colocar o
+    rótulo embaixo da pilha inteira faria ele "flutuar" solto, longe de tudo
+    o resto, sem uma bolinha específica pra ancorar visualmente. Em cima, ele
+    funciona como um mini-cabeçalho da coluna — sempre no mesmo lugar,
+    igual ao "Aro N" faz pra cada grupo de modelos.
+  */
   const colorsContent = activeModel && activeColor
     ? /* html */ `
-        <div class="flex items-center gap-3" role="group" aria-label="Cores disponíveis">
+        <span id="color-label" class="text-xs text-vullz-gray-500">
+          ${colorLabelMarkup(activeColor)}
+        </span>
+        <div class="flex flex-row gap-3 lg:flex-col" role="group" aria-label="Cores disponíveis">
           ${activeModel.colors
             .map((c, i) => colorSwatchMarkup(c, c.id === activeColor.id, i * 35))
             .join("")}
         </div>
-        <span id="color-label" class="text-xs text-vullz-gray-500">${activeColor.name}</span>
       `
     : "";
 
@@ -352,15 +371,16 @@ function render(): void {
             .join("")}
         </nav>
 
-        <section ${revealAttrs(170)} class="flex flex-1 flex-col items-center justify-between gap-4 overflow-hidden text-center">
-          <div class="flex w-full flex-1 items-center justify-center overflow-hidden">
-            ${stageContent}
-          </div>
-
-          <div class="flex min-h-[2.75rem] flex-col items-center gap-3 pb-6 sm:pb-10">
-            ${colorsContent}
-          </div>
+        <section ${revealAttrs(170)} class="flex min-w-0 flex-1 items-center justify-center overflow-hidden">
+          ${stageContent}
         </section>
+
+        <aside
+          ${revealAttrs(220)}
+          class="flex shrink-0 flex-col items-center gap-2 pb-2 lg:w-28 lg:items-end lg:justify-center lg:gap-4 lg:pb-0 lg:text-right"
+        >
+          ${colorsContent}
+        </aside>
       </main>
     </div>
   `;
@@ -430,7 +450,7 @@ function swapColor(model: Model, color: ModelColor): void {
     btn.classList.toggle("hover:border-vullz-gray-500", !isActive);
   });
   const label = document.querySelector("#color-label");
-  if (label) label.textContent = color.name;
+  if (label) label.innerHTML = colorLabelMarkup(color);
 
   paintStage(model, color);
 }
