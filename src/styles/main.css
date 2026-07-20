@@ -149,14 +149,23 @@
 }
 
 /*
-  Só a coluna de cores usa isso: mesmo em width:0, ela ainda reservava os
-  gaps do flex dos dois lados, deixando o painel de ficha técnica mais longe
-  da bike do que devia. Isto tira ela do fluxo de vez (o JS só liga esta
-  classe depois que a transição de recolher já terminou — ver setFocusMode
-  em catalogo-interativo.ts).
+  Mesmo em width:0, nav e aside recolhidos ainda reservam o `gap` do flex dos
+  dois lados — inclusive o vão entre a seção da bike e o painel de ficha
+  técnica, deixando os dois mais longe um do outro do que precisava. Reduzir
+  o gap do `main` NA MESMA transição (420ms, mesma curva) fecha esse vão em
+  um passo só, junto com o resto — nada de segundo estágio depois (uma
+  tentativa anterior tirava a coluna do fluxo com display:none *depois* que a
+  transição já tinha terminado, e isso causava um reajuste de layout visível
+  bem no fim: a "piscada com aumentadinha" reportada).
 */
-[data-role="color-rail"].is-focus-hidden {
-  display: none;
+[data-role="catalog-main"] {
+  transition: column-gap 420ms var(--ease-glide);
+}
+
+@media (min-width: 1024px) {
+  [data-role="catalog-main"].is-focus-open {
+    column-gap: 1rem;
+  }
 }
 
 /*
@@ -243,6 +252,26 @@
 @media (min-width: 1024px) {
   [data-role="stage-section"].is-focus-aligned {
     padding-right: 32rem;
+  }
+}
+
+/*
+  Logo do modelo (acima da bike) encolhe junto, na mesma duração/curva que a
+  bike leva pra se ajustar ao espaço menor — fica proporcional ao tamanho que
+  a bike está assumindo, em vez de continuar do tamanho original enquanto
+  tudo ao redor diminui.
+*/
+[data-role="model-logo"] {
+  transition: height 420ms var(--ease-glide);
+}
+
+[data-role="model-logo"].is-focus-open {
+  height: 2.5rem;
+}
+
+@media (min-width: 1024px) {
+  [data-role="model-logo"].is-focus-open {
+    height: 4rem;
   }
 }
 

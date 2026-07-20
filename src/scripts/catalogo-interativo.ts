@@ -271,7 +271,7 @@ function modelNameMarkup(model: Model): string {
 
   if (logo) {
     return /* html */ `
-      <div class="flex h-16 w-full max-w-2xl items-center justify-center sm:h-20 lg:h-28">
+      <div data-role="model-logo" class="flex h-16 w-full max-w-2xl items-center justify-center sm:h-20 lg:h-28">
         <img src="${logo}" alt="${model.name}" class="h-full w-full object-contain" />
       </div>
     `;
@@ -386,6 +386,18 @@ function revealAttrs(delayMs: number): string {
   return isFirstRender ? `data-reveal style="transition-delay:${delayMs}ms"` : "";
 }
 
+/*
+  render() reconstrói o app.innerHTML inteiro toda vez (clique em aro, clique
+  em modelo, etc.) — então #bike-stage-inner é sempre um contêiner novo e
+  vazio, mesmo quando o modelo continuou o mesmo (ex.: só abriu/fechou um
+  aro na lateral). paintStage() precisa rodar de qualquer jeito pra preencher
+  esse contêiner novo, mas a VELOCIDADE da entrada deve mudar conforme o
+  motivo: guardamos qual foi o último modelo pintado pra saber se isto é uma
+  troca de modelo de verdade (entrada lenta, tipo home) ou só um re-render
+  incidental do mesmo modelo (entrada rápida, quase imperceptível).
+*/
+let lastPaintedModelId: string | null = null;
+
 function render(): void {
   const app = document.querySelector<HTMLDivElement>("#app");
   if (!app) return;
@@ -465,7 +477,10 @@ function render(): void {
         </a>
       </header>
 
-      <main class="relative z-10 flex flex-1 flex-col gap-4 overflow-hidden px-6 pb-6 sm:px-10 lg:flex-row lg:gap-16 lg:py-8">
+      <main
+        data-role="catalog-main"
+        class="relative z-10 flex flex-1 flex-col gap-4 overflow-hidden px-6 pb-6 sm:px-10 lg:flex-row lg:gap-16 lg:py-8"
+      >
         <nav
           ${revealAttrs(90)}
           data-role="model-nav"
@@ -538,7 +553,11 @@ function render(): void {
   }
 
   if (activeModel && activeColor) {
-    paintStage(activeModel, activeColor);
+    const kind: StageTransition = activeModel.id === lastPaintedModelId ? "color" : "model";
+    paintStage(activeModel, activeColor, kind);
+    lastPaintedModelId = activeModel.id;
+  } else {
+    lastPaintedModelId = null;
   }
 }
 
@@ -550,17 +569,35 @@ function render(): void {
   e reaparecia: isso cria um instante em que nada aparece, e mesmo rápido
   aquele "nada" lê como um flash/pisca, não como uma dissolução suave. Com
   duas camadas sobrepostas nunca existe esse vazio.
-*/
-const STAGE_FADE_MS = 220;
 
-function paintStage(model: Model, color: ModelColor): void {
+  Duas velocidades, de propósito:
+  - "color": rápida (220ms, linear, sem deslocamento) — troca de cor, que
+    precisa ficar quase imperceptível (só a cor registra). Já confirmado
+    como "perfeito" antes; não mexe.
+  - "model": lenta (900ms, mesma curva e deslocamento vertical do
+    [data-reveal] da home) — clicar num modelo novo merece uma entrada
+    suave e deliberada, não uma troca instantânea.
+*/
+type StageTransition = "model" | "color";
+
+const COLOR_FADE_MS = 220;
+const MODEL_FADE_MS = 900;
+
+function paintStage(model: Model, color: ModelColor, kind: StageTransition = "color"): void {
   const container = document.querySelector<HTMLElement>("#bike-stage-inner");
   if (!container) return;
+
+  const isModel = kind === "model";
+  const durationMs = isModel ? MODEL_FADE_MS : COLOR_FADE_MS;
+  const easing = isModel ? "var(--ease-glide)" : "linear";
 
   const layer = document.createElement("div");
   layer.className = "absolute inset-0 flex items-center justify-center";
   layer.style.opacity = "0";
-  layer.style.transition = `opacity ${STAGE_FADE_MS}ms linear`;
+  layer.style.transform = isModel ? "translateY(12px)" : "translateY(0)";
+  layer.style.transition = isModel
+    ? `opacity ${durationMs}ms ${easing}, transform ${durationMs}ms ${easing}`
+    : `opacity ${durationMs}ms ${easing}`;
   layer.innerHTML = bikeStageMarkup(model, color);
   container.appendChild(layer);
 
@@ -574,15 +611,16 @@ function paintStage(model: Model, color: ModelColor): void {
 
   requestAnimationFrame(() => {
     layer.style.opacity = "1";
+    if (isModel) layer.style.transform = "translateY(0)";
     previousLayers.forEach((el) => {
-      el.style.transition = `opacity ${STAGE_FADE_MS}ms linear`;
+      el.style.transition = `opacity ${durationMs}ms ${easing}`;
       el.style.opacity = "0";
     });
   });
 
   window.setTimeout(() => {
     previousLayers.forEach((el) => el.remove());
-  }, STAGE_FADE_MS + 50);
+  }, durationMs + 50);
 }
 
 function swapColor(model: Model, color: ModelColor): void {
@@ -614,45 +652,36 @@ function swapColor(model: Model, color: ModelColor): void {
   (ver main.css), então nenhum clique neles pode disparar um render() no meio
   da transição — não precisa se preocupar com esse caso.
 */
-const FOCUS_TRANSITION_MS = 420;
-
 function setFocusMode(on: boolean): void {
   state.focusMode = on;
 
+  const main = document.querySelector<HTMLElement>('[data-role="catalog-main"]');
   const nav = document.querySelector<HTMLElement>('[data-role="model-nav"]');
   const rail = document.querySelector<HTMLElement>('[data-role="color-rail"]');
   const panel = document.querySelector<HTMLElement>('[data-role="specs-panel"]');
   const stage = document.querySelector<HTMLElement>('[data-role="stage-section"]');
+  const logo = document.querySelector<HTMLElement>('[data-role="model-logo"]');
 
+  /*
+    A tentativa anterior de fechar o vão fantasma da coluna de cores recolhida
+    era tirá-la do fluxo (display:none) um instante DEPOIS que a transição de
+    encolher terminava — só que isso causava um segundo ajuste de layout bem
+    ali (a "piscada com aumentadinha" que foi reportada): o navegador refluía
+    tudo de uma vez, fora da transição suave. Trocado por uma solução de um
+    passo só: reduz o próprio gap do `main` (ver main.css) na MESMA transição
+    de 420ms que já anima o resto — sem segundo estágio, sem reajuste depois.
+  */
+  main?.classList.toggle("is-focus-open", on);
   nav?.classList.toggle("is-focus-collapsed", on);
+  rail?.classList.toggle("is-focus-collapsed", on);
   stage?.classList.toggle("is-focus-aligned", on);
+  // Logo acima da bike encolhe junto, na mesma duração — fica proporcional
+  // ao tamanho que a bike também está assumindo enquanto o painel abre.
+  logo?.classList.toggle("is-focus-open", on);
 
   if (panel) {
     panel.classList.toggle("is-focus-open", on);
     panel.setAttribute("aria-hidden", on ? "false" : "true");
-  }
-
-  /*
-    A coluna de cores recolhida (width:0) ainda "gasta" o gap do flex dos dois
-    lados — mesmo invisível, ela empurrava o painel pra mais longe da bike do
-    que precisava. `is-focus-hidden` tira ela do fluxo (display:none) de
-    verdade, fechando esse vão fantasma — só depois que ela já terminou de
-    encolher (senão o "sumiço" seria instantâneo, sem a animação de recolher).
-    Pra abrir de novo, a ordem inverte: primeiro volta pro fluxo (ainda
-    encolhida), força um reflow, só então libera o crescimento — senão o
-    navegador não tem um "antes" pra animar a partir dele.
-  */
-  if (!rail) return;
-
-  if (on) {
-    rail.classList.add("is-focus-collapsed");
-    window.setTimeout(() => {
-      if (state.focusMode) rail.classList.add("is-focus-hidden");
-    }, FOCUS_TRANSITION_MS);
-  } else {
-    rail.classList.remove("is-focus-hidden");
-    void rail.offsetHeight;
-    rail.classList.remove("is-focus-collapsed");
   }
 }
 
