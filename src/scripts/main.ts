@@ -57,9 +57,9 @@ if (app) {
           })}
           ${catalogCardMarkup({
             title: "Elétricos",
-            href: "/em-breve.html",
+            href: "/catalogo-eletricos.html",
             newTab: false,
-            linkLabel: "Em breve",
+            linkLabel: "Explorar modelos",
             delayMs: 380,
           })}
         </div>
