@@ -13,6 +13,7 @@ export default defineConfig({
       input: {
         main: resolve(__dirname, "index.html"),
         catalogoInterativo: resolve(__dirname, "catalogo-interativo.html"),
+        catalogoEletricos: resolve(__dirname, "catalogo-eletricos.html"),
       },
     },
   },
