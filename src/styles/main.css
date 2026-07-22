@@ -237,57 +237,43 @@
 }
 
 /*
-  Bike + logo encolhem e deslizam pra esquerda JUNTAS, controlado por UM valor
-  só: a LARGURA do bike-wrapper (100% → 44rem).
+  ANIMAÇÃO DA BIKE — refeita do zero.
 
-  Por que largura, e não transform:scale? scale redesenha uma textura já
-  rasterizada esticada → a foto fica serrilhada durante a animação e só
-  "estala" nítida no fim. Largura passa pelo layout: o object-contain refaz a
-  foto no tamanho certo a cada quadro, sempre nítida. E a posição final (faixa
-  esquerda, ~100 a 800) cai certa porque 44rem + margin-right:auto ancora o
-  conjunto na esquerda de forma previsível.
+  A bike (foto + logo) vive dentro de um QUADRO com a proporção exata da foto
+  (aspect-ratio 1800/1320, ver bikeWrapperMarkup). Esse quadro é a unidade que
+  anima. A foto preenche o quadro (object-contain), e como o quadro já tem a
+  proporção dela, preenche sem sobra.
 
-  `margin-right: auto` gruda o conjunto na ESQUERDA: um item flex com margem
-  automática absorve o espaço livre daquele lado, vencendo o align-items:center
-  do pai. Em repouso (largura 100%, sem espaço livre) não faz nada; só passa a
-  empurrar quando a largura encolhe.
+  Por que a proporção fixa é a chave (e por que as tentativas antigas falhavam):
+  no repouso o palco é curto e largo, então a bike é limitada pela ALTURA, não
+  pela largura — usa toda a altura e sobra espaço nas laterais. Animar só a
+  LARGURA não encolhia a foto enquanto a largura ainda fosse maior que ela
+  (o object-contain mantinha o tamanho travado na altura); só encolhia no fim.
+  Era esse o "desliza primeiro, encolhe depois", em etapas.
 
-  IMPORTANTE: a foto (#bike-stage-inner) NÃO tem mais teto de largura fixo.
-  Era esse teto que segurava a foto parada no começo enquanto o wrapper ainda
-  estava mais largo que ele ("diminui primeiro, depois arrasta"). Sem teto, a
-  foto acompanha 100% da largura do wrapper desde o primeiro quadro — encolhe
-  e desliza numa coisa só, contínua.
+  Agora quem anima é a ALTURA do quadro (a dimensão que de fato limita a bike).
+  Com aspect-ratio, mexer na altura puxa a largura junto na MESMA proporção: a
+  foto encolhe uniforme e contínua desde o primeiro quadro. E é tudo layout
+  (não transform:scale), então o object-contain redesenha a foto nítida a cada
+  tamanho — sem serrilhado, sem "estalar" nítida no fim.
+
+  Duas propriedades animam juntas, mesma duração e curva, então lê como UM
+  gesto só e é perfeitamente reversível (abrir = espelho de fechar):
+    - height: 100% → 62%  (encolhe; a largura acompanha pela proporção)
+    - transform: translateX  (desliza pra faixa da esquerda)
 
   Só no desktop: no mobile o painel cobre a tela inteira, a bike fica por baixo.
 */
-[data-role="bike-wrapper"] {
-  transition: width 600ms var(--ease-glide);
-  margin-right: auto;
+[data-role="bike-frame"] {
+  transition:
+    height 600ms var(--ease-glide),
+    transform 600ms var(--ease-glide);
 }
 
 @media (min-width: 1024px) {
-  [data-role="bike-wrapper"].is-focus-open {
-    width: 44rem;
-  }
-}
-
-/*
-  Logo do modelo (acima da bike): a largura dela é `w-full` (100% do wrapper),
-  então encolhe sozinha quando a largura do wrapper anima — não precisa de
-  animação própria de altura. Só um empurrãozinho de `top` pra ela descer mais
-  perto da bike dentro da ficha técnica.
-*/
-[data-role="model-logo"] {
-  transition: top 600ms var(--ease-glide);
-}
-
-[data-role="model-logo"].is-focus-open {
-  top: 1.25rem;
-}
-
-@media (min-width: 1024px) {
-  [data-role="model-logo"].is-focus-open {
-    top: 2rem;
+  [data-role="bike-frame"].is-focus-open {
+    height: 62%;
+    transform: translateX(-16vw);
   }
 }
 

@@ -310,10 +310,18 @@ function headerBackMarkup(): string {
   das bikes (ver comentário lá pra explicação completa da técnica).
 */
 function bikeWrapperMarkup(activeModel: Model | null, stageContent: string): string {
+  const content = activeModel
+    ? /* html */ `
+      <div data-role="bike-frame" class="relative h-full" style="aspect-ratio: 1800 / 1320;">
+        ${modelNameMarkup(activeModel)}
+        ${stageContent}
+      </div>
+    `
+    : stageContent;
+
   return /* html */ `
     <div data-role="bike-wrapper" class="relative flex min-h-0 w-full flex-1 items-center justify-center overflow-hidden pt-4">
-      ${activeModel ? modelNameMarkup(activeModel) : ""}
-      ${stageContent}
+      ${content}
     </div>
   `;
 }
@@ -330,7 +338,7 @@ function render(): void {
   const stageContent =
     activeModel && activeColor
       ? /* html */ `
-        <div id="bike-stage-inner" class="relative h-full w-full"></div>
+        <div id="bike-stage-inner" class="absolute inset-0"></div>
       `
       : /* html */ `
         <p class="max-w-xs text-balance text-base text-vullz-gray-500">
@@ -524,19 +532,16 @@ function setFocusMode(on: boolean): void {
   const nav = document.querySelector<HTMLElement>('[data-role="model-nav"]');
   const rail = document.querySelector<HTMLElement>('[data-role="color-rail"]');
   const panel = document.querySelector<HTMLElement>('[data-role="specs-panel"]');
-  const bikeWrapper = document.querySelector<HTMLElement>('[data-role="bike-wrapper"]');
-  const logo = document.querySelector<HTMLElement>('[data-role="model-logo"]');
+  const bikeFrame = document.querySelector<HTMLElement>('[data-role="bike-frame"]');
   const stageFooter = document.querySelector<HTMLElement>('[data-role="stage-footer"]');
 
   main?.classList.toggle("is-focus-open", on);
   nav?.classList.toggle("is-focus-collapsed", on);
   rail?.classList.toggle("is-focus-collapsed", on);
-  // Bike encolhe e desliza pra esquerda via largura (ver main.css) — dá um
-  // resultado sempre na mesma faixa, previsível. Logo encolhe junto (altura
-  // é fixa, não acompanha a largura sozinha). Nome/REF e o botão de ficha
-  // técnica somem enquanto o painel está aberto.
-  bikeWrapper?.classList.toggle("is-focus-open", on);
-  logo?.classList.toggle("is-focus-open", on);
+  // A bike (foto + logo, juntas dentro do quadro) encolhe e desliza pra
+  // esquerda animando a ALTURA do quadro (largura acompanha pela proporção) +
+  // translateX. Ver [data-role="bike-frame"] em main.css.
+  bikeFrame?.classList.toggle("is-focus-open", on);
   stageFooter?.classList.toggle("is-focus-open", on);
 
   // [TEMPORÁRIO — passo de depuração] A ficha técnica está DESLIGADA de

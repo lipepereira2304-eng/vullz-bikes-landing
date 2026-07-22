@@ -490,10 +490,28 @@ function headerBackMarkup(): string {
   cortando a própria imagem do logo.
 */
 function bikeWrapperMarkup(activeModel: Model | null, stageContent: string): string {
+  /*
+    Com modelo escolhido: a foto e o logo vivem dentro de um QUADRO com a
+    proporção exata da foto (aspect-ratio 1800/1320). É esse quadro que anima
+    (ver [data-role="bike-frame"] em main.css) — animando a ALTURA dele, a
+    largura acompanha na mesma proporção e a bike encolhe uniforme, sem etapas.
+    O logo é `absolute` dentro do quadro, então acompanha o encolhimento e o
+    deslize junto, como uma unidade só.
+
+    Sem modelo: só o texto-convite, sem quadro nenhum.
+  */
+  const content = activeModel
+    ? /* html */ `
+      <div data-role="bike-frame" class="relative h-full" style="aspect-ratio: 1800 / 1320;">
+        ${modelNameMarkup(activeModel)}
+        ${stageContent}
+      </div>
+    `
+    : stageContent;
+
   return /* html */ `
     <div data-role="bike-wrapper" class="relative flex min-h-0 w-full flex-1 items-center justify-center overflow-hidden pt-4">
-      ${activeModel ? modelNameMarkup(activeModel) : ""}
-      ${stageContent}
+      ${content}
     </div>
   `;
 }
@@ -514,7 +532,7 @@ function render(): void {
   const stageContent =
     activeModel && activeColor
       ? /* html */ `
-        <div id="bike-stage-inner" class="relative h-full w-full"></div>
+        <div id="bike-stage-inner" class="absolute inset-0"></div>
       `
       : /* html */ `
         <p class="max-w-xs text-balance text-base text-vullz-gray-500">
@@ -749,21 +767,17 @@ function setFocusMode(on: boolean): void {
   const nav = document.querySelector<HTMLElement>('[data-role="model-nav"]');
   const rail = document.querySelector<HTMLElement>('[data-role="color-rail"]');
   const panel = document.querySelector<HTMLElement>('[data-role="specs-panel"]');
-  const bikeWrapper = document.querySelector<HTMLElement>('[data-role="bike-wrapper"]');
-  const logo = document.querySelector<HTMLElement>('[data-role="model-logo"]');
+  const bikeFrame = document.querySelector<HTMLElement>('[data-role="bike-frame"]');
   const stageFooter = document.querySelector<HTMLElement>('[data-role="stage-footer"]');
 
   main?.classList.toggle("is-focus-open", on);
   nav?.classList.toggle("is-focus-collapsed", on);
   rail?.classList.toggle("is-focus-collapsed", on);
 
-  // Bike encolhe e desliza pra esquerda (ver [data-role="bike-wrapper"] em
-  // main.css: é a LARGURA dela que anima, não transform — dá um resultado
-  // sempre na mesma faixa, previsível, em vez de variar com a largura da
-  // tela). A logo encolhe junto, na mesma duração, com sua própria regra
-  // (a largura dela já acompanha o pai sozinha, mas a altura é fixa).
-  bikeWrapper?.classList.toggle("is-focus-open", on);
-  logo?.classList.toggle("is-focus-open", on);
+  // A bike (foto + logo, juntas dentro do quadro) encolhe e desliza pra
+  // esquerda animando a ALTURA do quadro (a largura acompanha pela proporção)
+  // + um translateX. Ver [data-role="bike-frame"] em main.css.
+  bikeFrame?.classList.toggle("is-focus-open", on);
 
   // Nome/REF da cor e o botão "Ficha técnica" só fazem sentido quando ela
   // ainda não foi aberta — somem enquanto o painel está na tela.
