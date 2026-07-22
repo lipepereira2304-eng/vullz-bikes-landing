@@ -237,49 +237,45 @@
 }
 
 /*
-  Bike + logo encolhem e deslizam pra esquerda JUNTAS, como uma unidade só —
-  agora com UMA transformação só: transform: scale() no bike-wrapper inteiro.
+  Bike + logo encolhem e deslizam pra esquerda JUNTAS, controlado por UM valor
+  só: a LARGURA do bike-wrapper (100% → 44rem).
 
-  Por que transform (e não mais a largura/max-width de antes)? Uma animação de
-  largura passa pelo LAYOUT do navegador a cada quadro, e aqui tinham TRÊS
-  larguras animando ao mesmo tempo (a do wrapper, o teto da foto, a altura da
-  logo), cada uma resolvida pelo flexbox num ritmo um pouquinho diferente — é
-  isso que dava a sensação de "encolhe primeiro, depois arrasta pro lado".
+  Por que largura, e não transform:scale? scale redesenha uma textura já
+  rasterizada esticada → a foto fica serrilhada durante a animação e só
+  "estala" nítida no fim. Largura passa pelo layout: o object-contain refaz a
+  foto no tamanho certo a cada quadro, sempre nítida. E a posição final (faixa
+  esquerda, ~100 a 800) cai certa porque 44rem + margin-right:auto ancora o
+  conjunto na esquerda de forma previsível.
 
-  transform:scale é uma coisa só, no compositor (não recalcula layout), e é
-  matematicamente REVERSÍVEL: abrir vira o espelho exato de fechar. Como o
-  fechar já estava perfeito, o abrir agora fica idêntico ao contrário dele —
-  era exatamente o pedido.
+  `margin-right: auto` gruda o conjunto na ESQUERDA: um item flex com margem
+  automática absorve o espaço livre daquele lado, vencendo o align-items:center
+  do pai. Em repouso (largura 100%, sem espaço livre) não faz nada; só passa a
+  empurrar quando a largura encolhe.
 
-  transform-origin: left center = o conjunto encolhe ANCORADO na borda
-  esquerda, então ao mesmo tempo que diminui já escorrega pra esquerda, numa
-  linha só. A logo, sendo filha do wrapper, encolhe junto no mesmo gesto (não
-  precisa mais de animação própria de altura).
+  IMPORTANTE: a foto (#bike-stage-inner) NÃO tem mais teto de largura fixo.
+  Era esse teto que segurava a foto parada no começo enquanto o wrapper ainda
+  estava mais largo que ele ("diminui primeiro, depois arrasta"). Sem teto, a
+  foto acompanha 100% da largura do wrapper desde o primeiro quadro — encolhe
+  e desliza numa coisa só, contínua.
 
-  Só no desktop: no mobile o painel cobre a tela inteira (ver acima), então a
-  bike nem precisa recuar — fica simplesmente por baixo do overlay.
+  Só no desktop: no mobile o painel cobre a tela inteira, a bike fica por baixo.
 */
 [data-role="bike-wrapper"] {
-  transform-origin: left center;
-  transition: transform 600ms var(--ease-glide);
+  transition: width 600ms var(--ease-glide);
+  margin-right: auto;
 }
 
 @media (min-width: 1024px) {
   [data-role="bike-wrapper"].is-focus-open {
-    transform: scale(0.62);
+    width: 44rem;
   }
 }
 
-#bike-stage-inner {
-  max-width: 1030px;
-  max-height: 100vh;
-}
-
 /*
-  Logo do modelo (acima da bike): encolhe junto com o wrapper pelo scale, sem
-  precisar de animação própria de altura (senão encolheria DUAS vezes). Só um
-  empurrãozinho de `top` pra ela descer mais perto da bike dentro da ficha
-  técnica — mesmo tempo, mesma curva, some junto no gesto único.
+  Logo do modelo (acima da bike): a largura dela é `w-full` (100% do wrapper),
+  então encolhe sozinha quando a largura do wrapper anima — não precisa de
+  animação própria de altura. Só um empurrãozinho de `top` pra ela descer mais
+  perto da bike dentro da ficha técnica.
 */
 [data-role="model-logo"] {
   transition: top 600ms var(--ease-glide);
