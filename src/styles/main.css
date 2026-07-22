@@ -272,6 +272,37 @@
 }
 
 /*
+  #bike-stage-inner tem um teto de 1030px (era inline antes; passou pra cá
+  de propósito — ver por quê logo abaixo). Em repouso isso é só o limite
+  normal de tamanho da foto, sem efeito nenhum na animação.
+
+  O BUG que fazia o encolhimento parecer "em etapas" (parava, depois quebrava
+  de repente): enquanto bike-wrapper (o pai) ainda estava mais largo que
+  1030px, este teto segurava a foto no MESMO tamanho — nada visível
+  encolhia, só espaço vazio ao redor. Só quando o pai cruzava a marca dos
+  1030px é que a foto finalmente começava a encolher de verdade, tarde
+  demais e rápido demais pro olho ler como uma coisa só.
+
+  A correção NÃO é simplesmente remover o teto (isso faria a foto pular pra
+  100% do pai no instante 0, um "salto" de crescimento antes de encolher).
+  Em vez disso, o próprio teto agora ANIMA, de 1030px até 40rem (640px) — um
+  valor sempre menor que o alvo final do bike-wrapper (44rem/704px). Como o
+  teto fica sempre abaixo da largura do pai do início ao fim, ele é quem
+  manda o tempo INTEIRO: uma única curva contínua, sem pausa nem quebra.
+*/
+#bike-stage-inner {
+  max-width: 1030px;
+  max-height: 100vh;
+  transition: max-width 600ms var(--ease-glide);
+}
+
+@media (min-width: 1024px) {
+  [data-role="bike-wrapper"].is-focus-open #bike-stage-inner {
+    max-width: 40rem;
+  }
+}
+
+/*
   Logo do modelo (acima da bike): a largura dela já encolhe sozinha junto com
   o bike-wrapper (é `w-full` — 100% do pai, ver modelNameMarkup), mas a
   ALTURA é fixa em classes Tailwind (h-11/sm:h-14/lg:h-[77px]), então não

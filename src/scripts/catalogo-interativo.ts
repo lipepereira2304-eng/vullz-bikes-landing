@@ -514,11 +514,7 @@ function render(): void {
   const stageContent =
     activeModel && activeColor
       ? /* html */ `
-        <div
-          id="bike-stage-inner"
-          class="relative h-full w-full"
-          style="max-width:1030px; max-height:100vh;"
-        ></div>
+        <div id="bike-stage-inner" class="relative h-full w-full"></div>
       `
       : /* html */ `
         <p class="max-w-xs text-balance text-base text-vullz-gray-500">
