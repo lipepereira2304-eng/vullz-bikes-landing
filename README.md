@@ -11,14 +11,29 @@ Landing page premium que serve de porta de entrada para o catálogo digital da V
 ## Estrutura
 
 ```
+index.html               → home (catálogos)
+catalogo-interativo.html → mostruário das bicicletas
+catalogo-eletricos.html  → mostruário dos elétricos
 public/            → assets estáticos servidos como estão (favicon, manifest, robots.txt)
-  catalogos/        → coloque aqui os PDFs finais: bicicletas.pdf e eletricos.pdf
+  catalogos/        → PDFs finais dos catálogos
 src/
-  assets/images/    → imagens otimizadas do projeto (hoje vazio)
-  components/       → módulos TS que retornam markup (hero, cards, ícones, background)
-  scripts/          → main.ts (monta a página) e animations.ts (reveal on scroll)
+  assets/bikes/     → fotos e logos das bicicletas, por convenção de nome (ver README de lá)
+  assets/eletricos/ → idem, para os elétricos
+  assets/images/    → logos da marca
+  catalog/          → motor compartilhado das duas páginas de catálogo interativo
+  components/       → módulos TS que retornam markup da home (cards, botões, background)
+  scripts/          → um arquivo por página + animations.ts (reveal on scroll)
   styles/           → main.css (tokens de marca + estilos base)
 ```
+
+Cada `.html` da raiz é um entry point registrado em `rollupOptions.input` no
+`vite.config.ts` — página nova exige as duas coisas.
+
+As duas páginas de catálogo interativo são a **mesma tela**: todo o
+comportamento (layout, sanfona da lateral, trilho de cores, crossfade da foto)
+vive em `src/catalog/`, e cada script em `src/scripts/catalogo-*.ts` é só
+**dados + configuração** (modelos, cores, pasta de assets, agrupamento). Um
+refinamento de UX feito em `src/catalog/` vale automaticamente para as duas.
 
 ## Substituindo os catálogos
 
