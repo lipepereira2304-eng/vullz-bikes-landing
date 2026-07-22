@@ -526,14 +526,16 @@ function setFocusMode(on: boolean): void {
   const nav = document.querySelector<HTMLElement>('[data-role="model-nav"]');
   const rail = document.querySelector<HTMLElement>('[data-role="color-rail"]');
   const panel = document.querySelector<HTMLElement>('[data-role="specs-panel"]');
-  const stage = document.querySelector<HTMLElement>('[data-role="stage-section"]');
   const logo = document.querySelector<HTMLElement>('[data-role="model-logo"]');
   const bikeWrapper = document.querySelector<HTMLElement>('[data-role="bike-wrapper"]');
 
+  // stage-section não recebe mais nenhuma classe aqui: o padding-right que
+  // existia nela reservava um espaço fantasma que nunca virava o painel de
+  // verdade (ver main.css) — removido, o painel agora cresce (64rem) pra
+  // ocupar essa mesma faixa sozinho.
   main?.classList.toggle("is-focus-open", on);
   nav?.classList.toggle("is-focus-collapsed", on);
   rail?.classList.toggle("is-focus-collapsed", on);
-  stage?.classList.toggle("is-focus-aligned", on);
   logo?.classList.toggle("is-focus-open", on);
   bikeWrapper?.classList.toggle("is-focus-open", on);
 

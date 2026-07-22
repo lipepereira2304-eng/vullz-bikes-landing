@@ -751,7 +751,6 @@ function setFocusMode(on: boolean): void {
   const nav = document.querySelector<HTMLElement>('[data-role="model-nav"]');
   const rail = document.querySelector<HTMLElement>('[data-role="color-rail"]');
   const panel = document.querySelector<HTMLElement>('[data-role="specs-panel"]');
-  const stage = document.querySelector<HTMLElement>('[data-role="stage-section"]');
   const logo = document.querySelector<HTMLElement>('[data-role="model-logo"]');
   const bikeWrapper = document.querySelector<HTMLElement>('[data-role="bike-wrapper"]');
 
@@ -763,13 +762,18 @@ function setFocusMode(on: boolean): void {
     tudo de uma vez, fora da transição suave. Trocado por uma solução de um
     passo só: reduz o próprio gap do `main` (ver main.css) na MESMA transição
     de 420ms que já anima o resto — sem segundo estágio, sem reajuste depois.
+
+    stage-section não recebe mais nenhuma classe aqui: o padding-right que
+    existia nela (pra "empurrar" a bike) reservava um espaço fantasma que
+    nunca chegava a virar o painel de verdade (ver main.css) — removido, o
+    painel agora cresce (64rem) pra ocupar essa mesma faixa sozinho.
   */
   main?.classList.toggle("is-focus-open", on);
   nav?.classList.toggle("is-focus-collapsed", on);
   rail?.classList.toggle("is-focus-collapsed", on);
-  stage?.classList.toggle("is-focus-aligned", on);
-  // Logo acima da bike encolhe junto, na mesma duração — fica proporcional
-  // ao tamanho que a bike também está assumindo enquanto o painel abre.
+  // Logo acima da bike encolhe e desce junto, na mesma duração — fica
+  // proporcional ao tamanho que a bike também está assumindo, e mais perto
+  // dela dentro da ficha técnica.
   logo?.classList.toggle("is-focus-open", on);
   // O respiro entre logo e bike (pt-4) sozinho não bastava dentro da ficha
   // técnica — a bike acaba renderizando menor ali (menos largura disponível

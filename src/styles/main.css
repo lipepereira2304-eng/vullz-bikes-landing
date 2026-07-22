@@ -227,31 +227,22 @@
     transform: translateX(16px);
   }
 
-  /* 32rem aqui precisa bater com o padding-right de stage-section abaixo —
-     é a mesma faixa de espaço vista dos dois lados (painel e bike). */
+  /*
+    Antes existia também um padding-right de 32rem em stage-section (ver
+    histórico) "empurrando" a bike pra abrir espaço aqui do lado — só que
+    isso dava um espaço FANTASMA: como stage-section é o único item flex-1
+    do <main>, aquele padding só encolhia a própria área de conteúdo da bike
+    por dentro, sem tirar nada do espaço que o flex já reservava pra cá. Na
+    prática sobrava uma faixa morta (o "quadro verde" de padding que aparece
+    ao inspecionar elemento) entre a bike e o painel de verdade. Removido: o
+    painel agora ocupa também essa faixa que antes ficava vazia — daí o
+    width ter dobrado de 32rem pra 64rem, sem precisar bater com mais nada
+    em stage-section.
+  */
   [data-role="specs-panel"].is-focus-open {
-    width: 32rem;
+    width: 64rem;
     max-height: 100%;
     transform: translateX(0);
-  }
-}
-
-/*
-  O quanto a bike desliza pra esquerda quando o painel abre: em vez de trocar
-  justify-content (não anima em CSS, é um valor discreto), empurra o "centro"
-  da seção pra esquerda com padding-right — padding, ao contrário de
-  justify-content, é uma propriedade que o navegador interpola de verdade.
-
-  32rem aqui precisa bater com o width de specs-panel acima: é a mesma
-  faixa de espaço vista dos dois lados (painel e bike).
-*/
-[data-role="stage-section"] {
-  transition: padding-right 420ms var(--ease-glide);
-}
-
-@media (min-width: 1024px) {
-  [data-role="stage-section"].is-focus-aligned {
-    padding-right: 32rem;
   }
 }
 
@@ -260,18 +251,27 @@
   bike leva pra se ajustar ao espaço menor — fica proporcional ao tamanho que
   a bike está assumindo, em vez de continuar do tamanho original enquanto
   tudo ao redor diminui.
+
+  `top` some ao valor já embutido no `top-0` do Tailwind (ver modelNameMarkup)
+  só dentro da ficha técnica: aproxima a logo da bike nesse estado. Diferente
+  de subir a logo (que arriscaria cortar a imagem — ver bikeWrapperMarkup),
+  descer é seguro: só entra mais fundo na própria caixa, nunca sai dela.
 */
 [data-role="model-logo"] {
-  transition: height 420ms var(--ease-glide);
+  transition:
+    height 420ms var(--ease-glide),
+    top 420ms var(--ease-glide);
 }
 
 [data-role="model-logo"].is-focus-open {
   height: 1.8rem;
+  top: 0.75rem;
 }
 
 @media (min-width: 1024px) {
   [data-role="model-logo"].is-focus-open {
     height: 2.8rem;
+    top: 1.25rem;
   }
 }
 
