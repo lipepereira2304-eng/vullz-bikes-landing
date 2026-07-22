@@ -30,11 +30,12 @@ catálogo mostra "Em breve..." no lugar da foto.
 Arquivos esperados em cada pasta: `branco.jpg`, `preto.jpg`, `vermelho.jpg`
 (ou `.jpeg`/`.png`/`.webp`).
 
-## Recomendações da foto
+## Padrão de canvas (o mesmo do catálogo das bikes)
 
-- Fundo branco puro (ou o mais próximo disso), a mesma pose/ângulo em todas
-  as cores de um mesmo modelo.
-- Tamanho generoso (pelo menos ~1600px no lado maior).
+Ver `src/assets/bikes/README.md` pro padrão completo. Resumindo: canvas
+**1800×1320px**, fundo transparente (não branco sólido), mesma
+posição/enquadramento entre as cores de um mesmo modelo, WebP comprimido
+(qualidade ~90).
 
 ## Logos (nome estilizado de cada modelo)
 

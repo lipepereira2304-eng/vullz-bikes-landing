@@ -89,13 +89,27 @@ Pasta: `src/assets/bikes/love-kids/`
 | `rosa.jpg`      | Rosa     |
 | `branco.jpg`    | Branco   |
 
-## Recomendações da foto
+## Padrão de canvas (obrigatório pra todo modelo/cor)
 
-- Fundo branco puro (ou o mais próximo disso), a mesma pose/ângulo em todas as
-  cores de um mesmo modelo — é o que faz a troca de cor parecer só uma troca
-  de cor, sem a bike "pular" de posição.
-- Tamanho generoso (pelo menos ~1600px no lado maior); a página redimensiona
-  pra caber, então maior é sempre mais seguro que menor.
+Pra toda foto ficar "perfeitamente alinhada" ao trocar de cor ou modelo, todo
+mundo segue o MESMO canvas, sempre:
+
+- **Canvas: 1800×1320px** (proporção 1.3636:1 — mesma da foto original
+  entregue pelo cliente, 3000×2200px).
+- **Mesma posição/enquadramento em toda foto de um mesmo modelo**: câmera,
+  distância e ângulo idênticos entre as cores, pra bike cair sempre no mesmo
+  lugar do canvas (mesma margem esquerda/direita/topo/base). O jeito mais
+  confiável de garantir isso é fixar a câmera (tripé) e marcar a posição da
+  bike no chão antes de fotografar todas as cores em sequência.
+- **Fundo transparente** (canal alpha), não branco sólido — mesmo que a
+  página seja branca, a transparência é o que faz o efeito de sombra
+  flutuante (`drop-shadow` no CSS) desenhar a sombra em volta da BIKE, e não
+  um retângulo em volta da foto inteira. Se a foto vier com fundo branco
+  sólido (photos de estúdio, por exemplo), o fundo pode ser removido depois
+  — a sombra suave sob as rodas, se já vier na foto, não precisa ser
+  removida junto (ela fica preservada, só o branco ao redor sai).
+- Formato de arquivo: WebP, comprimido (qualidade ~90) — fica bem menor que
+  PNG sem perda visível numa foto de produto.
 
 ## Logos (nome estilizado de cada modelo)
 
