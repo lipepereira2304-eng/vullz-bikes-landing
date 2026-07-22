@@ -769,9 +769,14 @@ function setFocusMode(on: boolean): void {
   // ainda não foi aberta — somem enquanto o painel está na tela.
   stageFooter?.classList.toggle("is-focus-open", on);
 
+  // [TEMPORÁRIO — passo de depuração] A ficha técnica está DESLIGADA de
+  // propósito: queremos ver só a animação da bike indo pro lado, sozinha, sem
+  // o painel aparecendo e disputando espaço. Pra reativar depois, é só voltar
+  // a linha comentada abaixo (toggle "is-focus-open" conforme `on`).
   if (panel) {
-    panel.classList.toggle("is-focus-open", on);
-    panel.setAttribute("aria-hidden", on ? "false" : "true");
+    // panel.classList.toggle("is-focus-open", on);
+    panel.classList.remove("is-focus-open");
+    panel.setAttribute("aria-hidden", "true");
   }
 }
 
