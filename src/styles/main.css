@@ -108,22 +108,35 @@
   coluna de cores recolhem, a bike (com a logo) encolhe e desliza pra
   esquerda, e um painel de especificações desliza por cima vindo da direita.
 
+  600ms de propósito (mais lento que os 420ms usados antes) — pedido
+  explícito pra toda animação de entrar/sair daqui pra frente ser mais devagar
+  e suave, não só esta.
+
   Redesenhado depois que a versão anterior (baseada em width/padding de flex
   recalculando a cada frame) parou de animar de forma confiável — width nunca
   esteve de fato na lista de transition-property do painel, então aquela
   troca sempre foi instantânea por baixo dos panos, só mascarada pelo
-  opacity+transform que rodavam junto. Esta versão só usa `opacity` e
-  `transform`: são as únicas duas propriedades que o navegador anima sem
-  precisar recalcular layout a cada frame, o que garante a transição suave
-  nos dois sentidos (abrir e fechar), sempre.
+  opacity+transform que rodavam junto. O painel agora só usa `opacity` e
+  `transform` (ver mais abaixo).
 */
 [data-role="model-nav"],
 [data-role="color-rail"] {
+  /*
+    max-width explícito aqui (100%, e não deixar em "none" implícito) é o que
+    faz a PRÓPRIA transição de max-width funcionar: o navegador só consegue
+    interpolar entre dois valores numéricos — de "none" (o padrão, sem isso)
+    pra "0" não existe meio-termo nenhum pra animar, e o corte vira
+    instantâneo mesmo com a propriedade listada na transição. Foi exatamente
+    isso que fazia a barra lateral (nav) sumir sem nenhum deslize suave. 100%
+    (não um rem fixo) porque o valor "de descanso" precisa ser válido nos dois
+    layouts — mobile em coluna (linha inteira) e desktop em linha (13rem).
+  */
+  max-width: 100%;
   transition:
-    max-width 420ms var(--ease-glide),
-    max-height 420ms var(--ease-glide),
-    opacity 420ms var(--ease-glide),
-    transform 420ms var(--ease-glide);
+    max-width 600ms var(--ease-glide),
+    max-height 600ms var(--ease-glide),
+    opacity 600ms var(--ease-glide),
+    transform 600ms var(--ease-glide);
 }
 
 /*
@@ -150,7 +163,7 @@
 }
 
 [data-role="catalog-main"] {
-  transition: column-gap 420ms var(--ease-glide);
+  transition: column-gap 600ms var(--ease-glide);
 }
 
 @media (min-width: 1024px) {
@@ -181,8 +194,8 @@
   transform: translateY(24px);
   pointer-events: none;
   transition:
-    opacity 420ms var(--ease-glide),
-    transform 420ms var(--ease-glide);
+    opacity 600ms var(--ease-glide),
+    transform 600ms var(--ease-glide);
 }
 
 [data-role="specs-panel"].is-focus-open {
@@ -224,25 +237,64 @@
 }
 
 /*
-  Bike + logo encolhem e deslizam pra esquerda JUNTAS, como uma unidade só: um
-  único transform:scale no contêiner que envolve as duas (a logo é
-  descendente dela — ver modelNameMarkup/bikeWrapperMarkup — então acompanha
-  o mesmo transform automaticamente, sem precisar de uma regra própria).
-  transform-origin na borda esquerda faz o conjunto encolher EM DIREÇÃO a
-  essa borda (lê como "deslizar pra lateral"), em vez de encolher em direção
-  ao próprio centro (que pareceria só diminuir no lugar).
+  Bike + logo encolhem e deslizam pra esquerda JUNTAS, como uma unidade só,
+  controlado por UM valor só: a largura do próprio bike-wrapper.
+
+  Por que largura, e não transform:scale (tentativa anterior)? stage-section
+  é flex-1 e pode ficar bem largo (agora que o painel não disputa espaço com
+  ele — é um overlay, ver acima). Um transform:scale com transform-origin na
+  borda esquerda ancora na borda daquela caixa LARGA, então o resultado final
+  variava com a largura da tela e não caía onde devia. Controlando a LARGURA
+  de verdade (animável, igual ao max-width do nav/cores acima) o resultado é
+  sempre o mesmo, previsível: a bike (e a logo, filha dela, que usa `w-full`
+  — encolhe junto automaticamente) sempre acaba numa faixa fixa a partir da
+  borda esquerda de stage-section.
+
+  `margin-right: auto` é o que gruda o conjunto na ESQUERDA: um item flex com
+  margem automática no eixo cruzado absorve todo o espaço livre daquele lado
+  — em vez do align-items:center do pai (stage-section) centralizar o
+  conjunto, a margem automática força ele pra esquerda. Sempre ligado (não só
+  no foco): sem espaço livre sobrando (width:100% no estado normal), não faz
+  diferença nenhuma; só passa a empurrar quando a largura encolhe.
 
   Só no desktop: no mobile o painel cobre a tela inteira (ver acima), então a
   bike nem precisa recuar — fica simplesmente por baixo do overlay.
 */
 [data-role="bike-wrapper"] {
-  transition: transform 420ms var(--ease-glide);
-  transform-origin: left center;
+  transition: width 600ms var(--ease-glide);
+  margin-right: auto;
 }
 
 @media (min-width: 1024px) {
   [data-role="bike-wrapper"].is-focus-open {
-    transform: scale(0.6);
+    width: 44rem;
+  }
+}
+
+/*
+  Logo do modelo (acima da bike): a largura dela já encolhe sozinha junto com
+  o bike-wrapper (é `w-full` — 100% do pai, ver modelNameMarkup), mas a
+  ALTURA é fixa em classes Tailwind (h-11/sm:h-14/lg:h-[77px]), então não
+  acompanha a largura automaticamente — precisa do próprio encolhimento aqui,
+  na mesma duração. `top` desce ela mais perto da bike só dentro da ficha
+  técnica (diferente de subir, que arriscaria cortar a imagem — ver
+  bikeWrapperMarkup).
+*/
+[data-role="model-logo"] {
+  transition:
+    height 600ms var(--ease-glide),
+    top 600ms var(--ease-glide);
+}
+
+[data-role="model-logo"].is-focus-open {
+  height: 1.8rem;
+  top: 1.25rem;
+}
+
+@media (min-width: 1024px) {
+  [data-role="model-logo"].is-focus-open {
+    height: 2.8rem;
+    top: 2rem;
   }
 }
 
@@ -252,7 +304,7 @@
   painel está na tela.
 */
 [data-role="stage-footer"] {
-  transition: opacity 420ms var(--ease-glide);
+  transition: opacity 600ms var(--ease-glide);
 }
 
 [data-role="stage-footer"].is-focus-open {

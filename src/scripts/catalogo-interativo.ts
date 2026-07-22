@@ -754,18 +754,20 @@ function setFocusMode(on: boolean): void {
   const rail = document.querySelector<HTMLElement>('[data-role="color-rail"]');
   const panel = document.querySelector<HTMLElement>('[data-role="specs-panel"]');
   const bikeWrapper = document.querySelector<HTMLElement>('[data-role="bike-wrapper"]');
+  const logo = document.querySelector<HTMLElement>('[data-role="model-logo"]');
   const stageFooter = document.querySelector<HTMLElement>('[data-role="stage-footer"]');
 
   main?.classList.toggle("is-focus-open", on);
   nav?.classList.toggle("is-focus-collapsed", on);
   rail?.classList.toggle("is-focus-collapsed", on);
 
-  // Bike + logo encolhem e deslizam pra esquerda JUNTAS, como uma unidade só
-  // (ver [data-role="bike-wrapper"] em main.css): um único transform:scale
-  // no contêiner que envolve as duas, em vez de width/padding recalculando
-  // layout a cada frame — é o que garante a transição rodar suave nos dois
-  // sentidos, abrir e fechar.
+  // Bike encolhe e desliza pra esquerda (ver [data-role="bike-wrapper"] em
+  // main.css: é a LARGURA dela que anima, não transform — dá um resultado
+  // sempre na mesma faixa, previsível, em vez de variar com a largura da
+  // tela). A logo encolhe junto, na mesma duração, com sua própria regra
+  // (a largura dela já acompanha o pai sozinha, mas a altura é fixa).
   bikeWrapper?.classList.toggle("is-focus-open", on);
+  logo?.classList.toggle("is-focus-open", on);
 
   // Nome/REF da cor e o botão "Ficha técnica" só fazem sentido quando ela
   // ainda não foi aberta — somem enquanto o painel está na tela.

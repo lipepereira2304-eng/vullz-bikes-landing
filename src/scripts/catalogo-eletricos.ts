@@ -529,15 +529,18 @@ function setFocusMode(on: boolean): void {
   const rail = document.querySelector<HTMLElement>('[data-role="color-rail"]');
   const panel = document.querySelector<HTMLElement>('[data-role="specs-panel"]');
   const bikeWrapper = document.querySelector<HTMLElement>('[data-role="bike-wrapper"]');
+  const logo = document.querySelector<HTMLElement>('[data-role="model-logo"]');
   const stageFooter = document.querySelector<HTMLElement>('[data-role="stage-footer"]');
 
   main?.classList.toggle("is-focus-open", on);
   nav?.classList.toggle("is-focus-collapsed", on);
   rail?.classList.toggle("is-focus-collapsed", on);
-  // Bike + logo encolhem e deslizam pra esquerda juntas via transform:scale
-  // no bike-wrapper (ver main.css) — nome/REF e o botão de ficha técnica
-  // somem enquanto o painel está aberto.
+  // Bike encolhe e desliza pra esquerda via largura (ver main.css) — dá um
+  // resultado sempre na mesma faixa, previsível. Logo encolhe junto (altura
+  // é fixa, não acompanha a largura sozinha). Nome/REF e o botão de ficha
+  // técnica somem enquanto o painel está aberto.
   bikeWrapper?.classList.toggle("is-focus-open", on);
+  logo?.classList.toggle("is-focus-open", on);
   stageFooter?.classList.toggle("is-focus-open", on);
 
   if (panel) {
