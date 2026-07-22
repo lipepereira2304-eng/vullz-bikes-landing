@@ -261,6 +261,8 @@
   bike nem precisa recuar — fica simplesmente por baixo do overlay.
 */
 [data-role="bike-wrapper"] {
+  position: relative;
+  z-index: 21;
   transition: width 600ms var(--ease-glide);
   margin-right: auto;
 }
