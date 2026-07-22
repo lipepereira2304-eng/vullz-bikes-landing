@@ -8,9 +8,9 @@ import vullzLogo from "../assets/images/vullz-logo-dark-text.webp";
 /*
   Catálogo interativo dos ELÉTRICOS — mesmo espírito do catálogo das bikes
   (src/scripts/catalogo-interativo.ts): fundo branco, foto grande "flutuando",
-  troca de cor com crossfade, ficha técnica em modo foco. Reaproveita a mesma
-  folha de estilos (main.css) e os mesmos seletores [data-role="..."], então
-  nenhuma CSS nova precisou ser escrita pra esta página.
+  troca de cor com crossfade. Reaproveita a mesma folha de estilos (main.css)
+  e os mesmos seletores [data-role="..."], então nenhuma CSS nova precisou ser
+  escrita pra esta página.
 
   A diferença fica só na estrutura de dados: aqui não existe agrupamento por
   aro — os modelos aparecem soltos, direto na lateral, sem gaveta de
@@ -134,12 +134,9 @@ const MODELS: Model[] = [
 const state: {
   modelId: string | null;
   colorId: string | null;
-  /** Modo foco: ficha técnica aberta, cores recolhidas. */
-  focusMode: boolean;
 } = {
   modelId: null,
   colorId: null,
-  focusMode: false,
 };
 
 /*
@@ -310,18 +307,10 @@ function headerBackMarkup(): string {
   das bikes (ver comentário lá pra explicação completa da técnica).
 */
 function bikeWrapperMarkup(activeModel: Model | null, stageContent: string): string {
-  const content = activeModel
-    ? /* html */ `
-      <div data-role="bike-frame" class="relative h-full" style="aspect-ratio: 1800 / 1320;">
-        ${modelNameMarkup(activeModel)}
-        ${stageContent}
-      </div>
-    `
-    : stageContent;
-
   return /* html */ `
     <div data-role="bike-wrapper" class="relative flex min-h-0 w-full flex-1 items-center justify-center overflow-hidden pt-4">
-      ${content}
+      ${activeModel ? modelNameMarkup(activeModel) : ""}
+      ${stageContent}
     </div>
   `;
 }
@@ -338,7 +327,7 @@ function render(): void {
   const stageContent =
     activeModel && activeColor
       ? /* html */ `
-        <div id="bike-stage-inner" class="absolute inset-0"></div>
+        <div id="bike-stage-inner" class="relative h-full w-full"></div>
       `
       : /* html */ `
         <p class="max-w-xs text-balance text-base text-vullz-gray-500">
@@ -357,21 +346,6 @@ function render(): void {
           ${activeModel.colors
             .map((c, i) => colorSwatchMarkup(c, c.id === activeColor.id, i * 35))
             .join("")}
-        </div>
-      `
-      : "";
-
-  const specsContent =
-    activeModel && activeColor
-      ? /* html */ `
-        <div class="specs-panel-inner">
-          <h2 class="text-lg font-extrabold uppercase tracking-wide text-vullz-black">Ficha técnica</h2>
-          <p class="mt-1 text-xs text-vullz-gray-500">
-            ${activeModel.name} — ${colorLabelMarkup(activeColor)}
-          </p>
-          <div class="mt-6 text-sm leading-relaxed text-vullz-gray-500">
-            Em breve, as especificações completas deste modelo vão aparecer aqui.
-          </div>
         </div>
       `
       : "";
@@ -405,18 +379,9 @@ function render(): void {
           ${
             activeModel && activeColor
               ? /* html */ `
-                <div data-role="stage-footer" class="flex flex-col items-center gap-4">
-                  <span id="color-label" class="max-w-full text-center text-xs text-vullz-gray-500">
-                    ${colorLabelMarkup(activeColor)}
-                  </span>
-                  <button
-                    type="button"
-                    data-action="open-specs"
-                    class="inline-flex items-center gap-1.5 rounded-full border border-vullz-gray-200 px-4 py-1.5 text-xs font-medium text-vullz-gray-700 transition-colors duration-150 hover:border-vullz-black hover:text-vullz-black"
-                  >
-                    Ficha técnica
-                  </button>
-                </div>
+                <span id="color-label" class="max-w-full text-center text-xs text-vullz-gray-500">
+                  ${colorLabelMarkup(activeColor)}
+                </span>
               `
               : ""
           }
@@ -429,16 +394,6 @@ function render(): void {
         >
           ${colorRailContent}
         </aside>
-
-        <div
-          id="specs-panel"
-          data-role="specs-panel"
-          aria-label="Ficha técnica"
-          aria-hidden="${state.focusMode ? "false" : "true"}"
-          class="${state.focusMode ? "is-focus-open" : ""}"
-        >
-          ${specsContent}
-        </div>
       </main>
     </div>
   `;
@@ -522,64 +477,12 @@ function swapColor(model: Model, color: ModelColor): void {
 }
 
 /*
-  Modo foco (ficha técnica) — idêntico ao catálogo das bikes, incluindo o
-  respiro extra entre logo e bike quando o painel abre (ver main.css).
-*/
-function setFocusMode(on: boolean): void {
-  state.focusMode = on;
-
-  const main = document.querySelector<HTMLElement>('[data-role="catalog-main"]');
-  const nav = document.querySelector<HTMLElement>('[data-role="model-nav"]');
-  const rail = document.querySelector<HTMLElement>('[data-role="color-rail"]');
-  const panel = document.querySelector<HTMLElement>('[data-role="specs-panel"]');
-  const bikeFrame = document.querySelector<HTMLElement>('[data-role="bike-frame"]');
-  const stageFooter = document.querySelector<HTMLElement>('[data-role="stage-footer"]');
-
-  main?.classList.toggle("is-focus-open", on);
-  nav?.classList.toggle("is-focus-collapsed", on);
-  rail?.classList.toggle("is-focus-collapsed", on);
-  // A bike (foto + logo, juntas dentro do quadro) encolhe e desliza pra
-  // esquerda animando a ALTURA do quadro (largura acompanha pela proporção) +
-  // translateX. Ver [data-role="bike-frame"] em main.css.
-  bikeFrame?.classList.toggle("is-focus-open", on);
-  stageFooter?.classList.toggle("is-focus-open", on);
-
-  // [TEMPORÁRIO — passo de depuração] A ficha técnica está DESLIGADA de
-  // propósito: queremos ver só a animação da bike indo pro lado, sozinha, sem
-  // o painel aparecendo e disputando espaço. Pra reativar depois, é só voltar
-  // a linha comentada abaixo (toggle "is-focus-open" conforme `on`).
-  if (panel) {
-    // panel.classList.toggle("is-focus-open", on);
-    panel.classList.remove("is-focus-open");
-    panel.setAttribute("aria-hidden", "true");
-  }
-}
-
-/*
   Delegação de evento num único listener — sobrevive a cada re-render. Sem
   branch de aro aqui (não existe nesta página).
 */
 function initInteractions(): void {
-  document.addEventListener("keydown", (event) => {
-    if (event.key !== "Escape") return;
-    if (state.focusMode) setFocusMode(false);
-  });
-
   document.addEventListener("click", (event) => {
     const target = event.target as HTMLElement;
-
-    const backLink = target.closest<HTMLElement>('[data-role="header-back"]');
-    if (backLink && state.focusMode) {
-      event.preventDefault();
-      setFocusMode(false);
-      return;
-    }
-
-    const specsButton = target.closest<HTMLElement>('[data-action="open-specs"]');
-    if (specsButton) {
-      setFocusMode(true);
-      return;
-    }
 
     const modelButton = target.closest<HTMLElement>("[data-model]");
     if (modelButton) {

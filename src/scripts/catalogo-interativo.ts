@@ -238,13 +238,10 @@ const state: {
   modelId: string | null;
   colorId: string | null;
   expandedAro: number | null;
-  /** Modo foco: ficha técnica aberta, aro/cores recolhidos. */
-  focusMode: boolean;
 } = {
   modelId: null,
   colorId: null,
   expandedAro: null,
-  focusMode: false,
 };
 
 /*
@@ -444,11 +441,8 @@ function headerBrandMarkup(): string {
 
 /*
   "Voltar" com contorno (mesmo tom cinza do texto) + ícone de casinha ao
-  lado, os dois à esquerda. A casinha vai direto pra home sempre — diferente
-  do "Voltar", que sai do modo foco antes de navegar quando a ficha técnica
-  está aberta (ver initInteractions). Os dois levarem ao mesmo lugar não é
-  redundância à toa: a casinha é um atalho reconhecível por ícone, útil
-  conforme a página crescer e o "Voltar" ganhar outros significados também.
+  lado, os dois à esquerda, os dois indo pra home. A casinha é um atalho
+  reconhecível por ícone.
 */
 function headerBackMarkup(): string {
   return /* html */ `
@@ -490,28 +484,10 @@ function headerBackMarkup(): string {
   cortando a própria imagem do logo.
 */
 function bikeWrapperMarkup(activeModel: Model | null, stageContent: string): string {
-  /*
-    Com modelo escolhido: a foto e o logo vivem dentro de um QUADRO com a
-    proporção exata da foto (aspect-ratio 1800/1320). É esse quadro que anima
-    (ver [data-role="bike-frame"] em main.css) — animando a ALTURA dele, a
-    largura acompanha na mesma proporção e a bike encolhe uniforme, sem etapas.
-    O logo é `absolute` dentro do quadro, então acompanha o encolhimento e o
-    deslize junto, como uma unidade só.
-
-    Sem modelo: só o texto-convite, sem quadro nenhum.
-  */
-  const content = activeModel
-    ? /* html */ `
-      <div data-role="bike-frame" class="relative h-full" style="aspect-ratio: 1800 / 1320;">
-        ${modelNameMarkup(activeModel)}
-        ${stageContent}
-      </div>
-    `
-    : stageContent;
-
   return /* html */ `
     <div data-role="bike-wrapper" class="relative flex min-h-0 w-full flex-1 items-center justify-center overflow-hidden pt-4">
-      ${content}
+      ${activeModel ? modelNameMarkup(activeModel) : ""}
+      ${stageContent}
     </div>
   `;
 }
@@ -532,7 +508,7 @@ function render(): void {
   const stageContent =
     activeModel && activeColor
       ? /* html */ `
-        <div id="bike-stage-inner" class="absolute inset-0"></div>
+        <div id="bike-stage-inner" class="relative h-full w-full"></div>
       `
       : /* html */ `
         <p class="max-w-xs text-balance text-base text-vullz-gray-500">
@@ -560,21 +536,6 @@ function render(): void {
           ${activeModel.colors
             .map((c, i) => colorSwatchMarkup(c, c.id === activeColor.id, i * 35))
             .join("")}
-        </div>
-      `
-      : "";
-
-  const specsContent =
-    activeModel && activeColor
-      ? /* html */ `
-        <div class="specs-panel-inner">
-          <h2 class="text-lg font-extrabold uppercase tracking-wide text-vullz-black">Ficha técnica</h2>
-          <p class="mt-1 text-xs text-vullz-gray-500">
-            ${activeModel.name} — ${colorLabelMarkup(activeColor)}
-          </p>
-          <div class="mt-6 text-sm leading-relaxed text-vullz-gray-500">
-            Em breve, as especificações completas deste modelo vão aparecer aqui.
-          </div>
         </div>
       `
       : "";
@@ -617,18 +578,9 @@ function render(): void {
           ${
             activeModel && activeColor
               ? /* html */ `
-                <div data-role="stage-footer" class="flex flex-col items-center gap-4">
-                  <span id="color-label" class="max-w-full text-center text-xs text-vullz-gray-500">
-                    ${colorLabelMarkup(activeColor)}
-                  </span>
-                  <button
-                    type="button"
-                    data-action="open-specs"
-                    class="inline-flex items-center gap-1.5 rounded-full border border-vullz-gray-200 px-4 py-1.5 text-xs font-medium text-vullz-gray-700 transition-colors duration-150 hover:border-vullz-black hover:text-vullz-black"
-                  >
-                    Ficha técnica
-                  </button>
-                </div>
+                <span id="color-label" class="max-w-full text-center text-xs text-vullz-gray-500">
+                  ${colorLabelMarkup(activeColor)}
+                </span>
               `
               : ""
           }
@@ -641,16 +593,6 @@ function render(): void {
         >
           ${colorRailContent}
         </aside>
-
-        <div
-          id="specs-panel"
-          data-role="specs-panel"
-          aria-label="Ficha técnica"
-          aria-hidden="${state.focusMode ? "false" : "true"}"
-          class="${state.focusMode ? "is-focus-open" : ""}"
-        >
-          ${specsContent}
-        </div>
       </main>
     </div>
   `;
@@ -749,79 +691,12 @@ function swapColor(model: Model, color: ModelColor): void {
 }
 
 /*
-  Modo foco (ficha técnica): NÃO passa por render(). Se passasse, o
-  app.innerHTML inteiro seria trocado por uma string nova e as classes que
-  acabamos de ligar/desligar não teriam "antes" pra transicionar a partir de
-  — só apareceriam já no estado final, sem animação nenhuma. Manipulando os
-  mesmos elementos que já estão na tela (nav/aside/painel), o navegador anima
-  a mudança de classe normalmente, sem nenhum truque de rAF.
-
-  Aro e cores ficam com pointer-events:none enquanto o painel está aberto
-  (ver main.css), então nenhum clique neles pode disparar um render() no meio
-  da transição — não precisa se preocupar com esse caso.
-*/
-function setFocusMode(on: boolean): void {
-  state.focusMode = on;
-
-  const main = document.querySelector<HTMLElement>('[data-role="catalog-main"]');
-  const nav = document.querySelector<HTMLElement>('[data-role="model-nav"]');
-  const rail = document.querySelector<HTMLElement>('[data-role="color-rail"]');
-  const panel = document.querySelector<HTMLElement>('[data-role="specs-panel"]');
-  const bikeFrame = document.querySelector<HTMLElement>('[data-role="bike-frame"]');
-  const stageFooter = document.querySelector<HTMLElement>('[data-role="stage-footer"]');
-
-  main?.classList.toggle("is-focus-open", on);
-  nav?.classList.toggle("is-focus-collapsed", on);
-  rail?.classList.toggle("is-focus-collapsed", on);
-
-  // A bike (foto + logo, juntas dentro do quadro) encolhe e desliza pra
-  // esquerda animando a ALTURA do quadro (a largura acompanha pela proporção)
-  // + um translateX. Ver [data-role="bike-frame"] em main.css.
-  bikeFrame?.classList.toggle("is-focus-open", on);
-
-  // Nome/REF da cor e o botão "Ficha técnica" só fazem sentido quando ela
-  // ainda não foi aberta — somem enquanto o painel está na tela.
-  stageFooter?.classList.toggle("is-focus-open", on);
-
-  // [TEMPORÁRIO — passo de depuração] A ficha técnica está DESLIGADA de
-  // propósito: queremos ver só a animação da bike indo pro lado, sozinha, sem
-  // o painel aparecendo e disputando espaço. Pra reativar depois, é só voltar
-  // a linha comentada abaixo (toggle "is-focus-open" conforme `on`).
-  if (panel) {
-    // panel.classList.toggle("is-focus-open", on);
-    panel.classList.remove("is-focus-open");
-    panel.setAttribute("aria-hidden", "true");
-  }
-}
-
-/*
   Delegação de evento num único listener: sobrevive a cada re-render (que troca
   o innerHTML inteiro), sem precisar re-anexar listener em botão nenhum.
 */
 function initInteractions(): void {
-  document.addEventListener("keydown", (event) => {
-    if (event.key !== "Escape") return;
-    if (state.focusMode) setFocusMode(false);
-  });
-
   document.addEventListener("click", (event) => {
     const target = event.target as HTMLElement;
-
-    // Enquanto o modo foco está aberto, o "Voltar" do cabeçalho sai da ficha
-    // técnica em vez de navegar pra home — mesmo botão, mesmo lugar, ação
-    // contextual conforme o que está na tela.
-    const backLink = target.closest<HTMLElement>('[data-role="header-back"]');
-    if (backLink && state.focusMode) {
-      event.preventDefault();
-      setFocusMode(false);
-      return;
-    }
-
-    const specsButton = target.closest<HTMLElement>('[data-action="open-specs"]');
-    if (specsButton) {
-      setFocusMode(true);
-      return;
-    }
 
     const aroButton = target.closest<HTMLElement>("[data-aro]");
     if (aroButton) {
