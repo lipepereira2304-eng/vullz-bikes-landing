@@ -603,16 +603,18 @@ function render(): void {
           ${
             activeModel && activeColor
               ? /* html */ `
-                <span id="color-label" class="max-w-full text-center text-xs text-vullz-gray-500">
-                  ${colorLabelMarkup(activeColor)}
-                </span>
-                <button
-                  type="button"
-                  data-action="open-specs"
-                  class="inline-flex items-center gap-1.5 rounded-full border border-vullz-gray-200 px-4 py-1.5 text-xs font-medium text-vullz-gray-700 transition-colors duration-150 hover:border-vullz-black hover:text-vullz-black"
-                >
-                  Ficha técnica
-                </button>
+                <div data-role="stage-footer" class="flex flex-col items-center gap-4">
+                  <span id="color-label" class="max-w-full text-center text-xs text-vullz-gray-500">
+                    ${colorLabelMarkup(activeColor)}
+                  </span>
+                  <button
+                    type="button"
+                    data-action="open-specs"
+                    class="inline-flex items-center gap-1.5 rounded-full border border-vullz-gray-200 px-4 py-1.5 text-xs font-medium text-vullz-gray-700 transition-colors duration-150 hover:border-vullz-black hover:text-vullz-black"
+                  >
+                    Ficha técnica
+                  </button>
+                </div>
               `
               : ""
           }
@@ -751,35 +753,23 @@ function setFocusMode(on: boolean): void {
   const nav = document.querySelector<HTMLElement>('[data-role="model-nav"]');
   const rail = document.querySelector<HTMLElement>('[data-role="color-rail"]');
   const panel = document.querySelector<HTMLElement>('[data-role="specs-panel"]');
-  const logo = document.querySelector<HTMLElement>('[data-role="model-logo"]');
   const bikeWrapper = document.querySelector<HTMLElement>('[data-role="bike-wrapper"]');
+  const stageFooter = document.querySelector<HTMLElement>('[data-role="stage-footer"]');
 
-  /*
-    A tentativa anterior de fechar o vão fantasma da coluna de cores recolhida
-    era tirá-la do fluxo (display:none) um instante DEPOIS que a transição de
-    encolher terminava — só que isso causava um segundo ajuste de layout bem
-    ali (a "piscada com aumentadinha" que foi reportada): o navegador refluía
-    tudo de uma vez, fora da transição suave. Trocado por uma solução de um
-    passo só: reduz o próprio gap do `main` (ver main.css) na MESMA transição
-    de 420ms que já anima o resto — sem segundo estágio, sem reajuste depois.
-
-    stage-section não recebe mais nenhuma classe aqui: o padding-right que
-    existia nela (pra "empurrar" a bike) reservava um espaço fantasma que
-    nunca chegava a virar o painel de verdade (ver main.css) — removido, o
-    painel agora cresce (64rem) pra ocupar essa mesma faixa sozinho.
-  */
   main?.classList.toggle("is-focus-open", on);
   nav?.classList.toggle("is-focus-collapsed", on);
   rail?.classList.toggle("is-focus-collapsed", on);
-  // Logo acima da bike encolhe e desce junto, na mesma duração — fica
-  // proporcional ao tamanho que a bike também está assumindo, e mais perto
-  // dela dentro da ficha técnica.
-  logo?.classList.toggle("is-focus-open", on);
-  // O respiro entre logo e bike (pt-4) sozinho não bastava dentro da ficha
-  // técnica — a bike acaba renderizando menor ali (menos largura disponível
-  // com o painel aberto), o que por si só já mudava a distância percebida.
-  // Este reforço garante a mesma folga em ambos os estados.
+
+  // Bike + logo encolhem e deslizam pra esquerda JUNTAS, como uma unidade só
+  // (ver [data-role="bike-wrapper"] em main.css): um único transform:scale
+  // no contêiner que envolve as duas, em vez de width/padding recalculando
+  // layout a cada frame — é o que garante a transição rodar suave nos dois
+  // sentidos, abrir e fechar.
   bikeWrapper?.classList.toggle("is-focus-open", on);
+
+  // Nome/REF da cor e o botão "Ficha técnica" só fazem sentido quando ela
+  // ainda não foi aberta — somem enquanto o painel está na tela.
+  stageFooter?.classList.toggle("is-focus-open", on);
 
   if (panel) {
     panel.classList.toggle("is-focus-open", on);

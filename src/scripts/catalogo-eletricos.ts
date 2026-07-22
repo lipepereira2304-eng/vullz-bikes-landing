@@ -401,16 +401,18 @@ function render(): void {
           ${
             activeModel && activeColor
               ? /* html */ `
-                <span id="color-label" class="max-w-full text-center text-xs text-vullz-gray-500">
-                  ${colorLabelMarkup(activeColor)}
-                </span>
-                <button
-                  type="button"
-                  data-action="open-specs"
-                  class="inline-flex items-center gap-1.5 rounded-full border border-vullz-gray-200 px-4 py-1.5 text-xs font-medium text-vullz-gray-700 transition-colors duration-150 hover:border-vullz-black hover:text-vullz-black"
-                >
-                  Ficha técnica
-                </button>
+                <div data-role="stage-footer" class="flex flex-col items-center gap-4">
+                  <span id="color-label" class="max-w-full text-center text-xs text-vullz-gray-500">
+                    ${colorLabelMarkup(activeColor)}
+                  </span>
+                  <button
+                    type="button"
+                    data-action="open-specs"
+                    class="inline-flex items-center gap-1.5 rounded-full border border-vullz-gray-200 px-4 py-1.5 text-xs font-medium text-vullz-gray-700 transition-colors duration-150 hover:border-vullz-black hover:text-vullz-black"
+                  >
+                    Ficha técnica
+                  </button>
+                </div>
               `
               : ""
           }
@@ -526,18 +528,17 @@ function setFocusMode(on: boolean): void {
   const nav = document.querySelector<HTMLElement>('[data-role="model-nav"]');
   const rail = document.querySelector<HTMLElement>('[data-role="color-rail"]');
   const panel = document.querySelector<HTMLElement>('[data-role="specs-panel"]');
-  const logo = document.querySelector<HTMLElement>('[data-role="model-logo"]');
   const bikeWrapper = document.querySelector<HTMLElement>('[data-role="bike-wrapper"]');
+  const stageFooter = document.querySelector<HTMLElement>('[data-role="stage-footer"]');
 
-  // stage-section não recebe mais nenhuma classe aqui: o padding-right que
-  // existia nela reservava um espaço fantasma que nunca virava o painel de
-  // verdade (ver main.css) — removido, o painel agora cresce (64rem) pra
-  // ocupar essa mesma faixa sozinho.
   main?.classList.toggle("is-focus-open", on);
   nav?.classList.toggle("is-focus-collapsed", on);
   rail?.classList.toggle("is-focus-collapsed", on);
-  logo?.classList.toggle("is-focus-open", on);
+  // Bike + logo encolhem e deslizam pra esquerda juntas via transform:scale
+  // no bike-wrapper (ver main.css) — nome/REF e o botão de ficha técnica
+  // somem enquanto o painel está aberto.
   bikeWrapper?.classList.toggle("is-focus-open", on);
+  stageFooter?.classList.toggle("is-focus-open", on);
 
   if (panel) {
     panel.classList.toggle("is-focus-open", on);

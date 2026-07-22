@@ -105,25 +105,20 @@
 
 /*
   Modo foco do catálogo interativo (ficha técnica): a barra de modelos e a
-  coluna de cores recolhem, e um painel de especificações abre no lugar.
+  coluna de cores recolhem, a bike (com a logo) encolhe e desliza pra
+  esquerda, e um painel de especificações desliza por cima vindo da direita.
 
-  Anima max-width E max-height ao mesmo tempo de propósito: no desktop
-  (`main` em linha) é a largura que precisa ir a zero pra liberar espaço pro
-  painel; no mobile (`main` em coluna) é a altura. Cada breakpoint só usa o
-  eixo que faz sentido pra ele — evita duplicar a lógica de colapso numa
-  media query por dispositivo.
-
-  `overflow: hidden` é o que permite max-width/max-height chegarem a 0 sem o
-  conteúdo vazar durante os 420ms de transição — mas só entra JUNTO com
-  `.is-focus-collapsed`, não o tempo todo: se ficasse sempre ligado, ele
-  também cortava qualquer coisa que crescesse um pouco além da caixa em uso
-  normal (foi exatamente isso que cortava as bolinhas de cor ativas, que
-  crescem com `scale-110` no hover/seleção — a bolinha cortava porque estava
-  tentando crescer para fora de uma caixa com overflow:hidden permanente).
+  Redesenhado depois que a versão anterior (baseada em width/padding de flex
+  recalculando a cada frame) parou de animar de forma confiável — width nunca
+  esteve de fato na lista de transition-property do painel, então aquela
+  troca sempre foi instantânea por baixo dos panos, só mascarada pelo
+  opacity+transform que rodavam junto. Esta versão só usa `opacity` e
+  `transform`: são as únicas duas propriedades que o navegador anima sem
+  precisar recalcular layout a cada frame, o que garante a transição suave
+  nos dois sentidos (abrir e fechar), sempre.
 */
 [data-role="model-nav"],
-[data-role="color-rail"],
-[data-role="specs-panel"] {
+[data-role="color-rail"] {
   transition:
     max-width 420ms var(--ease-glide),
     max-height 420ms var(--ease-glide),
@@ -131,6 +126,12 @@
     transform 420ms var(--ease-glide);
 }
 
+/*
+  `overflow: hidden` só entra JUNTO com `.is-focus-collapsed`, não o tempo
+  todo: se ficasse sempre ligado, também cortava qualquer coisa que crescesse
+  um pouco além da caixa em uso normal (foi isso que cortava as bolinhas de
+  cor ativas, que crescem com `scale-110` no hover/seleção).
+*/
 [data-role="model-nav"].is-focus-collapsed,
 [data-role="color-rail"].is-focus-collapsed {
   overflow: hidden;
@@ -148,16 +149,6 @@
   transform: translateX(16px);
 }
 
-/*
-  Mesmo em width:0, nav e aside recolhidos ainda reservam o `gap` do flex dos
-  dois lados — inclusive o vão entre a seção da bike e o painel de ficha
-  técnica, deixando os dois mais longe um do outro do que precisava. Reduzir
-  o gap do `main` NA MESMA transição (420ms, mesma curva) fecha esse vão em
-  um passo só, junto com o resto — nada de segundo estágio depois (uma
-  tentativa anterior tirava a coluna do fluxo com display:none *depois* que a
-  transição já tinha terminado, e isso causava um reajuste de layout visível
-  bem no fim: a "piscada com aumentadinha" reportada).
-*/
 [data-role="catalog-main"] {
   transition: column-gap 420ms var(--ease-glide);
 }
@@ -169,29 +160,32 @@
 }
 
 /*
-  `width` explícito aqui (não só max-width) de propósito: um flex item sem
-  width definido encolhe pro tamanho do conteúdo, então mesmo com
-  justify-content:center a faixa não tinha espaço de sobra nenhum pra
-  centralizar dentro — o painel só parecia "colado" onde o conteúdo acabava.
-  Com width real reservando a faixa toda, o card (.specs-panel-inner, mais
-  estreito) agora tem de fato espaço dos dois lados para ficar centralizado.
-  align-items:center centraliza verticalmente também, pelo mesmo motivo.
+  Painel de ficha técnica: agora é um OVERLAY (position:absolute) dentro do
+  <main> — não mais um item de flex que precisa "empurrar" ou dividir espaço
+  com os vizinhos. Isso elimina de vez qualquer vão fantasma e qualquer
+  necessidade de um valor bater com o padding/width de outro elemento: o
+  painel simplesmente desliza por cima de onde a bike estava.
+
+  No mobile ele cobre a tela toda (inset 0); no desktop fica ancorado só na
+  borda direita, com uma largura própria — mesma faixa que a bike libera ao
+  encolher (ver [data-role="bike-wrapper"] abaixo).
 */
 [data-role="specs-panel"] {
+  position: absolute;
+  inset: 0;
+  z-index: 20;
   display: flex;
   align-items: center;
   justify-content: center;
-  overflow: hidden;
-  width: 0;
-  max-height: 0;
   opacity: 0;
-  transform: translateY(16px);
+  transform: translateY(24px);
   pointer-events: none;
+  transition:
+    opacity 420ms var(--ease-glide),
+    transform 420ms var(--ease-glide);
 }
 
 [data-role="specs-panel"].is-focus-open {
-  width: 100%;
-  max-height: 60vh;
   opacity: 1;
   transform: translateY(0);
   pointer-events: auto;
@@ -200,18 +194,13 @@
 /*
   Card de verdade: borda + cantos arredondados. Largura preenche a faixa
   inteira reservada pro painel (sem sobrar vão de cada lado) — largura não é
-  mais o que centraliza aqui. Quem centraliza é a ALTURA: o card tem uma
-  altura proporcional (78% do espaço disponível, mesma faixa vertical que a
-  bike ocupa), e o align-items:center do contêiner pai (acima) o centraliza
-  nessa faixa de cima a baixo, sobrando respiro simétrico em cima e embaixo —
-  era isso que "centralizado" queria dizer. overflow-y cobre o pedido de
-  rolagem interna pra ficha técnica longa.
+  o que centraliza aqui. Quem centraliza é a ALTURA: o card tem uma altura
+  proporcional (78% do espaço disponível, mesma faixa vertical que a bike
+  ocupa), e o align-items:center do contêiner pai (acima) o centraliza nessa
+  faixa de cima a baixo. overflow-y cobre o pedido de rolagem interna pra
+  ficha técnica longa.
 */
 .specs-panel-inner {
-  /* 100% menos uma folga mínima (12px de cada lado): só o suficiente pra
-     sombra do card não ser cortada pelo overflow:hidden do contêiner de
-     fora — visualmente ainda é "preenchendo a faixa toda", não uma
-     centralização horizontal com respiro de verdade. */
   width: calc(100% - 24px);
   height: 78%;
   overflow-y: auto;
@@ -224,69 +213,51 @@
 
 @media (min-width: 1024px) {
   [data-role="specs-panel"] {
-    transform: translateX(16px);
+    left: auto;
+    width: 64rem;
+    transform: translateX(40px);
   }
 
-  /*
-    Antes existia também um padding-right de 32rem em stage-section (ver
-    histórico) "empurrando" a bike pra abrir espaço aqui do lado — só que
-    isso dava um espaço FANTASMA: como stage-section é o único item flex-1
-    do <main>, aquele padding só encolhia a própria área de conteúdo da bike
-    por dentro, sem tirar nada do espaço que o flex já reservava pra cá. Na
-    prática sobrava uma faixa morta (o "quadro verde" de padding que aparece
-    ao inspecionar elemento) entre a bike e o painel de verdade. Removido: o
-    painel agora ocupa também essa faixa que antes ficava vazia — daí o
-    width ter dobrado de 32rem pra 64rem, sem precisar bater com mais nada
-    em stage-section.
-  */
   [data-role="specs-panel"].is-focus-open {
-    width: 64rem;
-    max-height: 100%;
     transform: translateX(0);
   }
 }
 
 /*
-  Logo do modelo (acima da bike) encolhe junto, na mesma duração/curva que a
-  bike leva pra se ajustar ao espaço menor — fica proporcional ao tamanho que
-  a bike está assumindo, em vez de continuar do tamanho original enquanto
-  tudo ao redor diminui.
+  Bike + logo encolhem e deslizam pra esquerda JUNTAS, como uma unidade só: um
+  único transform:scale no contêiner que envolve as duas (a logo é
+  descendente dela — ver modelNameMarkup/bikeWrapperMarkup — então acompanha
+  o mesmo transform automaticamente, sem precisar de uma regra própria).
+  transform-origin na borda esquerda faz o conjunto encolher EM DIREÇÃO a
+  essa borda (lê como "deslizar pra lateral"), em vez de encolher em direção
+  ao próprio centro (que pareceria só diminuir no lugar).
 
-  `top` some ao valor já embutido no `top-0` do Tailwind (ver modelNameMarkup)
-  só dentro da ficha técnica: aproxima a logo da bike nesse estado. Diferente
-  de subir a logo (que arriscaria cortar a imagem — ver bikeWrapperMarkup),
-  descer é seguro: só entra mais fundo na própria caixa, nunca sai dela.
+  Só no desktop: no mobile o painel cobre a tela inteira (ver acima), então a
+  bike nem precisa recuar — fica simplesmente por baixo do overlay.
 */
-[data-role="model-logo"] {
-  transition:
-    height 420ms var(--ease-glide),
-    top 420ms var(--ease-glide);
-}
-
-[data-role="model-logo"].is-focus-open {
-  height: 1.8rem;
-  top: 0.75rem;
+[data-role="bike-wrapper"] {
+  transition: transform 420ms var(--ease-glide);
+  transform-origin: left center;
 }
 
 @media (min-width: 1024px) {
-  [data-role="model-logo"].is-focus-open {
-    height: 2.8rem;
-    top: 1.25rem;
+  [data-role="bike-wrapper"].is-focus-open {
+    transform: scale(0.6);
   }
 }
 
 /*
-  Reforça o respiro entre logo e bike quando a ficha técnica está aberta —
-  o pt-4 sozinho (ver bikeWrapperMarkup) não bastava porque a bike some com
-  menos largura disponível ali, o que muda a distância percebida por conta
-  própria. Some ao pt-4 de base (16px), não substitui.
+  Nome/REF da cor e o botão "Ficha técnica" só fazem sentido enquanto ela
+  ainda não foi aberta — somem (só opacidade, sem tirar do fluxo) enquanto o
+  painel está na tela.
 */
-[data-role="bike-wrapper"] {
-  transition: padding-top 420ms var(--ease-glide);
+[data-role="stage-footer"] {
+  transition: opacity 420ms var(--ease-glide);
 }
 
-[data-role="bike-wrapper"].is-focus-open {
-  padding-top: 2.5rem;
+[data-role="stage-footer"].is-focus-open {
+  opacity: 0;
+  pointer-events: none;
 }
 
 /*
