@@ -2,7 +2,8 @@ export interface SocialButtonsOptions {
   whatsappNumber: string;
   whatsappMessage?: string;
   instagramHandle: string;
-  delayMs: number;
+  /** Posição do primeiro botão na sequência de entrada; o segundo vem logo após. */
+  revealStep: number;
 }
 
 /*
@@ -13,13 +14,13 @@ export interface SocialButtonsOptions {
   a interface pisque amarelo toda vez que o cursor passa por cima de algo.
 */
 const BASE_BUTTON_CLASSES =
-  "group inline-flex flex-1 items-center justify-center gap-2.5 rounded-2xl border border-white/10 bg-white/[0.04] px-6 py-4 text-sm font-semibold text-white btn-motion hover:-translate-y-1 hover:border-white/25 hover:bg-white/[0.07] hover:shadow-[0_0_55px_-14px_rgba(255,255,255,0.22)] active:translate-y-0 active:scale-[0.985] active:duration-150 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vullz-yellow focus-visible:ring-offset-2 focus-visible:ring-offset-vullz-graphite sm:text-base";
+  "group inline-flex flex-1 items-center justify-center gap-2.5 rounded-2xl border border-white/10 bg-white/[0.04] px-6 py-4 text-sm font-semibold text-white btn-motion hover:-translate-y-[var(--shift-sm)] hover:border-white/25 hover:bg-white/[0.07] hover:shadow-[0_0_55px_-14px_rgba(255,255,255,0.22)] active:translate-y-0 active:scale-[0.985] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vullz-yellow focus-visible:ring-offset-2 focus-visible:ring-offset-vullz-graphite sm:text-base";
 
 export function socialButtonsMarkup({
   whatsappNumber,
   whatsappMessage = "Olá! Vi o catálogo da Vullz e queria saber mais.",
   instagramHandle,
-  delayMs,
+  revealStep,
 }: SocialButtonsOptions): string {
   const digits = whatsappNumber.replace(/\D/g, "");
   const whatsappHref = `https://wa.me/${digits}?text=${encodeURIComponent(whatsappMessage)}`;
@@ -33,7 +34,7 @@ export function socialButtonsMarkup({
         rel="noopener noreferrer"
         class="${BASE_BUTTON_CLASSES}"
         data-reveal
-        style="transition-delay:${delayMs}ms"
+        style="transition-delay:calc(var(--stagger) * ${revealStep})"
         aria-label="Falar no WhatsApp"
       >
         <svg
@@ -42,7 +43,7 @@ export function socialButtonsMarkup({
           viewBox="0 0 24 24"
           fill="currentColor"
           xmlns="http://www.w3.org/2000/svg"
-          class="text-[#25D366] transition-transform duration-[var(--dur-hover)] ease-lift group-hover:scale-110"
+          class="text-[#25D366] btn-motion group-hover:scale-110"
           aria-hidden="true"
         >
           <path
@@ -58,7 +59,7 @@ export function socialButtonsMarkup({
         rel="noopener noreferrer"
         class="${BASE_BUTTON_CLASSES}"
         data-reveal
-        style="transition-delay:${delayMs + 60}ms"
+        style="transition-delay:calc(var(--stagger) * ${revealStep + 1})"
         aria-label="Seguir no Instagram"
       >
         <svg
@@ -67,7 +68,7 @@ export function socialButtonsMarkup({
           viewBox="0 0 24 24"
           fill="none"
           xmlns="http://www.w3.org/2000/svg"
-          class="transition-transform duration-[var(--dur-hover)] ease-lift group-hover:scale-110"
+          class="btn-motion group-hover:scale-110"
           aria-hidden="true"
         >
           <rect x="3" y="3" width="18" height="18" rx="5" stroke="#E1306C" stroke-width="1.6" />

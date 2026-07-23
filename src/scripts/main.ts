@@ -33,7 +33,14 @@ if (app) {
       </header>
 
       <main class="relative z-10 flex flex-1 flex-col items-center justify-center gap-12 px-6 py-16 text-center sm:gap-16 sm:py-20">
-        <div class="flex flex-col items-center gap-5 delay-[120ms]" data-reveal>
+        <!--
+          A partir daqui cada bloco entra um passo (--stagger) depois do
+          anterior: logo (0), título (1), os três cards (2, 3, 4) e os dois
+          botões sociais (5, 6). O índice é a única coisa declarada no markup —
+          o intervalo mora no tema, então mudar o ritmo da página inteira é
+          mudar um número em main.css.
+        -->
+        <div class="flex flex-col items-center gap-5" style="transition-delay:calc(var(--stagger) * 1)" data-reveal>
           <h1 class="text-balance text-4xl font-extrabold tracking-tight text-white sm:text-6xl md:text-7xl">
             Catálogos Digitais
           </h1>
@@ -46,28 +53,28 @@ if (app) {
           ${catalogCardMarkup({
             title: "Bicicletas",
             href: CATALOGO_BICICLETAS,
-            delayMs: 220,
+            revealStep: 2,
           })}
           ${catalogCardMarkup({
             title: "Catálogo Interativo",
             href: "/catalogo-interativo.html",
             newTab: false,
             linkLabel: "Explorar modelos",
-            delayMs: 300,
+            revealStep: 3,
           })}
           ${catalogCardMarkup({
             title: "Elétricos",
             href: "/catalogo-eletricos.html",
             newTab: false,
             linkLabel: "Explorar modelos",
-            delayMs: 380,
+            revealStep: 4,
           })}
         </div>
 
         ${socialButtonsMarkup({
           whatsappNumber: "45998604743",
           instagramHandle: "vullzbikes",
-          delayMs: 460,
+          revealStep: 5,
         })}
       </main>
 

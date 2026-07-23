@@ -19,28 +19,88 @@
     -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter",
     "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 
-  /*
-    Easing único de todas as interações de hover. Antes usávamos um easeOutExpo
-    (0.16,1,0.3,1), que concentra ~60% do movimento nos primeiros 10% do tempo:
-    lê como "pulo e trava", não como lento. Esta curva (easeOutCubic) responde
-    na hora ao cursor, mas distribui o movimento — é o que dá a sensação de
-    deslizar devagar sem travar.
-  */
-  --ease-glide: cubic-bezier(0.33, 1, 0.68, 1);
+  /* ====================================================================
+     LINGUAGEM DE MOVIMENTO
+
+     Todo movimento do site sai daqui. A regra é: nenhum arquivo declara um
+     tempo ou uma curva próprios — eles escolhem um papel desta lista. Antes
+     havia sete durações e cinco curvas espalhadas por seis arquivos, cada uma
+     decidida isoladamente, e o mesmo gesto (passar o cursor) acontecia em três
+     velocidades diferentes dependendo do componente.
+     ==================================================================== */
 
   /*
-    Curva de tudo que se move no hover (subida, luz, cor). Simples ease-out:
-    resposta imediata ao cursor, sem a janela longa que uma curva
-    easeInOut precisaria pra não parecer cortada.
+    TRÊS CURVAS, TRÊS PAPÉIS.
 
-    Subida e luz usam esta mesma curva E a mesma duração de propósito: assim não
-    são dois efeitos parecidos tentando se acompanhar, são literalmente o mesmo
-    movimento. É o que faz a subida acontecer no compasso da luz.
+    --ease-out: responde a algo que o usuário está fazendo agora (cursor, dedo).
+    easeOutCubic: sai na velocidade máxima e desacelera — a reação começa no
+    mesmo instante do gesto. Antes o hover usava (0.4,0,0.2,1), que tem
+    aceleração na entrada: há um vão de alguns milissegundos entre o cursor
+    chegar e o elemento começar a andar, e é justamente esse vão que faz uma
+    interface parecer "com atraso" sem que se saiba dizer por quê.
+
+    --ease-glide: algo que aparece por conta própria (entrada, crossfade).
+    easeOutQuint, mais acentuada: como o movimento não está respondendo a um
+    gesto, ele pode chegar rápido e assentar devagar — é o que faz a entrada
+    parecer pousar em vez de parar.
+
+    --ease-inout: só para o que abre e fecha pelo mesmo caminho (sanfona).
+    Aqui a simetria importa: fechar é o mesmo movimento ao contrário, então a
+    curva precisa ter as duas pontas iguais.
   */
-  --ease-lift: cubic-bezier(0.4, 0, 0.2, 1);
+  --ease-out: cubic-bezier(0.33, 1, 0.68, 1);
+  --ease-glide: cubic-bezier(0.22, 1, 0.36, 1);
+  --ease-inout: cubic-bezier(0.65, 0, 0.35, 1);
 
-  /* Rápido de propósito: feedback deve parecer instantâneo, não uma animação. */
-  --dur-hover: 120ms;
+  /*
+    CINCO DURAÇÕES. Cada degrau é ~1.7x o anterior — longe o bastante para o
+    olho distinguir os papéis, perto o bastante para tudo parecer da mesma
+    família.
+
+    fast     — nada se desloca, só muda (cor, borda, opacidade) + todo press.
+    base     — hover com deslocamento, troca de cor da foto.
+    slow     — sanfona, entrada de item de lista, entrada da ficha técnica.
+    layout   — a tela inteira se reorganiza (produto encolhe e sai do centro).
+    entrance — entrada de seção, troca de modelo no palco.
+
+    O hover era 120ms. Rápido demais para um deslocamento de 6px: o elemento
+    aparecia na posição nova em vez de ir até ela — lê como um estalo, não como
+    uma subida. 220ms é a faixa em que o olho acompanha o percurso inteiro e
+    ainda assim registra como resposta imediata.
+
+    `layout` é mais longo que `slow` porque percorre muito mais distância: o
+    bloco do produto atravessa quase meia tela e muda de tamanho ao mesmo
+    tempo. Na duração de uma sanfona esse mesmo percurso vira um salto — a
+    distância cresceu, a duração precisa acompanhar para a VELOCIDADE aparente
+    continuar a mesma. É o que faz os dois movimentos parecerem da mesma mão.
+  */
+  --duration-fast: 150ms;
+  --duration-base: 220ms;
+  --duration-slow: 400ms;
+  --duration-layout: 520ms;
+  --duration-entrance: 700ms;
+
+  /*
+    Um único intervalo entre itens que entram em sequência. Havia quatro ritmos
+    diferentes no projeto (80ms na home, 90ms no catálogo, 70ms na lateral,
+    35ms nas cores) — quatro cadências que o olho compara e não reconhece como
+    a mesma interface.
+
+    O passo curto existe para listas densas de itens pequenos (as bolinhas de
+    cor, que podem ser sete): com 60ms elas levariam meio segundo para terminar
+    de aparecer, e um seletor de cor não pode ter tempo de carregamento.
+  */
+  --stagger: 60ms;
+  --stagger-tight: 30ms;
+
+  /*
+    Distâncias. Antes eram 12px, 14px, 8px, 4px e 2px, todas escolhidas na hora.
+    Duas bastam: sm é o quanto algo se desloca respondendo ao cursor (perto o
+    suficiente para não deslocar o layout ao redor), md é o quanto algo percorre
+    ao entrar em cena.
+  */
+  --shift-sm: 6px;
+  --shift-md: 12px;
 }
 
 @layer base {
@@ -78,6 +138,43 @@
   }
 }
 
+/*
+  Transição entre páginas (home ↔ catálogos). Navegação de documento para
+  documento, sem SPA nem roteador: o navegador tira um retrato da página que
+  sai, um da que entra, e cruza os dois. Só precisa que AMBAS as páginas
+  declarem isto — como todas carregam este mesmo arquivo, todas declaram.
+
+  Isto resolve o corte mais duro que restava no projeto: a home é grafite e os
+  catálogos são brancos, então sair de uma para a outra era um estouro de tela
+  inteira. Agora o fundo dissolve.
+
+  Fica fora de @layer de propósito: `@view-transition` é uma regra de nível de
+  documento, não uma declaração de estilo — não existe camada para ela.
+  Navegadores sem suporte simplesmente ignoram e navegam como antes.
+*/
+@view-transition {
+  navigation: auto;
+}
+
+::view-transition-old(root),
+::view-transition-new(root) {
+  animation-duration: var(--duration-base);
+  animation-timing-function: var(--ease-glide);
+}
+
+/*
+  Pseudo-elementos de view transition não são alcançados pelo `*` da regra de
+  reduced-motion acima (seletor universal não casa pseudo-elemento), então a
+  transição de página precisa ser desligada explicitamente. Desligar a
+  navegação inteira é mais seguro que zerar a duração: sem animação, o retrato
+  da página antiga pode ficar preso na tela.
+*/
+@media (prefers-reduced-motion: reduce) {
+  @view-transition {
+    navigation: none;
+  }
+}
+
 @utility text-balance {
   text-wrap: balance;
 }
@@ -89,13 +186,13 @@
   pra orquestrar "de onde" pra "onde": browser já sabe que é entrada.
 */
 @utility reveal-left-in {
-  animation: reveal-left 240ms var(--ease-glide) both;
+  animation: reveal-left var(--duration-slow) var(--ease-glide) both;
 }
 
 @keyframes reveal-left {
   from {
     opacity: 0;
-    transform: translateX(-14px);
+    transform: translateX(calc(var(--shift-md) * -1));
   }
   to {
     opacity: 1;
@@ -113,11 +210,101 @@
   Uma curva e uma duração para todas as propriedades: a subida e a luz precisam
   ser o mesmo movimento, não dois parecidos. Dar curvas diferentes a cada uma foi
   justamente o que fez elas parecerem descompassadas antes.
+
+  `translate`/`scale`/`rotate` — e NÃO `transform`. No Tailwind v4 as utilities
+  de movimento (`-translate-y-*`, `scale-*`, `rotate-*`) não geram mais
+  `transform: ...`: geram as propriedades individuais `translate:`, `scale:` e
+  `rotate:`. Enquanto esta lista dizia só `transform`, ela não cobria nenhuma
+  delas e TODO o hover do site chegava seco, sem transição — o card pulava os
+  6px em vez de subir. Um `transform` que ainda esteja escrito à mão em CSS
+  (é o caso do `[data-reveal]`) continua listado à parte, onde é usado.
 */
 @utility btn-motion {
-  transition-property: opacity, transform, background-color, border-color, box-shadow;
-  transition-duration: var(--dur-hover);
-  transition-timing-function: var(--ease-lift);
+  transition-property:
+    opacity, translate, scale, rotate, background-color, border-color, box-shadow;
+  transition-duration: var(--duration-base);
+  transition-timing-function: var(--ease-out);
+
+  /*
+    Press mais rápido que o hover em TODO elemento clicável do site. Não é
+    detalhe de gosto: soltar o dedo/botão precisa dar quitação imediata, senão
+    a interface parece estar pensando. Fica aqui (e não como `active:duration-*`
+    repetido em cada markup) para que nenhum componente novo esqueça.
+  */
+  &:active {
+    transition-duration: var(--duration-fast);
+  }
+}
+
+/*
+  Feedback que não desloca nada — só troca cor/borda (links do cabeçalho,
+  ícone da casinha). Duração `fast` porque não há percurso para o olho seguir:
+  a cor simplesmente chega.
+*/
+@utility tint-motion {
+  transition-property: color, border-color, translate, scale, opacity;
+  transition-duration: var(--duration-fast);
+  transition-timing-function: var(--ease-out);
+
+  &:active {
+    transition-duration: var(--duration-fast);
+  }
+}
+
+/*
+  Item da barra de modelos: desliza na horizontal no hover. Mesma curva e
+  mesma duração do `btn-motion` — é o mesmo gesto (cursor sobre algo
+  clicável), só expresso em outro eixo.
+*/
+@utility item-motion {
+  transition-property: translate, scale, color, border-color;
+  transition-duration: var(--duration-base);
+  transition-timing-function: var(--ease-out);
+
+  &:active {
+    transition-duration: var(--duration-fast);
+  }
+}
+
+/*
+  Bolinha de cor. Separada do `item-motion` só porque anima um conjunto
+  diferente de propriedades; tempo e curva são deliberadamente os mesmos.
+*/
+@utility swatch-motion {
+  transition-property: translate, scale, border-color;
+  transition-duration: var(--duration-base);
+  transition-timing-function: var(--ease-out);
+
+  &:active {
+    transition-duration: var(--duration-fast);
+  }
+}
+
+/*
+  Seta da sanfona. Recebe de propósito a duração e a curva do painel (`slow` +
+  `ease-inout`), e não as de hover: a seta não está reagindo ao cursor, ela é
+  parte do mesmo movimento de abrir. Duas curvas diferentes aqui fariam a seta
+  terminar de girar antes de a lista terminar de abrir.
+*/
+@utility chevron-motion {
+  /* `rotate`, não `transform`: a seta usa `rotate-90` do Tailwind v4 — mesma
+     armadilha explicada em `btn-motion`. */
+  transition: rotate var(--duration-slow) var(--ease-inout);
+}
+
+/*
+  Camadas do crossfade do palco (aplicadas por stage.ts). Vivem aqui, e não
+  como string de `transition` montada em JS, para que a troca de foto use os
+  mesmos tokens que o resto do site — era o último lugar com tempos próprios.
+*/
+@utility stage-fade-color {
+  transition: opacity var(--duration-base) linear;
+}
+
+@utility stage-fade-model {
+  transition:
+    opacity var(--duration-entrance) var(--ease-glide),
+    transform var(--duration-entrance) var(--ease-glide);
 }
 
 /*
@@ -178,10 +365,10 @@
 
   [data-reveal] {
     opacity: 0;
-    transform: translateY(12px);
+    transform: translateY(var(--shift-md));
     transition:
-      opacity 0.9s var(--ease-glide),
-      transform 0.9s var(--ease-glide);
+      opacity var(--duration-entrance) var(--ease-glide),
+      transform var(--duration-entrance) var(--ease-glide);
     will-change: opacity, transform;
   }
 
@@ -195,5 +382,141 @@
   [data-reveal].is-visible {
     opacity: 1;
     transform: translateY(0);
+  }
+
+  /*
+    Painel da sanfona (lista de modelos de um grupo). Abre E fecha animado,
+    que era a assimetria mais visível do projeto: entrar era suave, sair era
+    corte seco.
+
+    A altura vem de `grid-template-rows: 0fr → 1fr`, não de `height`. É a única
+    forma de animar até a altura natural do conteúdo sem medi-la em JS: `height:
+    auto` não é interpolável, e fixar um max-height chutado faz a animação
+    terminar antes (chute alto demais) ou cortar o conteúdo (chute baixo
+    demais). O filho com `overflow: hidden` é obrigatório — é ele que recorta o
+    conteúdo enquanto a linha do grid ainda não tem altura total.
+
+    Segue o mesmo padrão de `[data-reveal]`/`.is-visible`: o estado fechado é o
+    padrão do atributo, o aberto é uma variação dele.
+  */
+  [data-panel] {
+    display: grid;
+    grid-template-rows: 0fr;
+    transition: grid-template-rows var(--duration-slow) var(--ease-inout);
+  }
+
+  [data-panel][data-open="true"] {
+    grid-template-rows: 1fr;
+  }
+
+  /*
+    Enquanto a altura cresce, o recorte é obrigatório. Depois que ela assenta,
+    ele passa a atrapalhar: o anel de foco de teclado (outline com 3px de
+    offset) do primeiro e do último modelo ficaria cortado na borda do painel.
+    Por isso o recorte é liberado só ao fim da abertura, e retomado no primeiro
+    quadro do fechamento — quem marca os dois momentos é create-catalog-page.ts.
+
+    As DUAS pontas do recorte moram aqui, e o markup não declara mais
+    `overflow-hidden` na mão. Enquanto declarava, a utility do Tailwind (camada
+    utilities) vencia esta regra (camada components) e o recorte nunca era
+    liberado: `data-settled` chegava a "true" e o filho continuava `hidden`.
+    É a mesma armadilha de camada descrita em `btn-motion` — e some do mesmo
+    jeito: fazendo uma camada só responder pela propriedade inteira.
+  */
+  [data-panel] > * {
+    overflow: hidden;
+  }
+
+  [data-panel][data-settled="true"] > * {
+    overflow: visible;
+  }
+
+  /*
+    ------------------------------------------------------------------
+    Ficha técnica: reorganização de layout em dois atos
+    ------------------------------------------------------------------
+
+    Ato 1 — o bloco do produto (logo + foto + rótulo + botão) encolhe e sai do
+    centro. Ato 2 — a ficha entra pela direita. Nunca ao mesmo tempo: quem
+    encadeia é create-catalog-page.ts, esperando as animações do ato 1
+    REALMENTE terminarem antes de começar o ato 2. Por isso os dois atos são
+    dirigidos por atributos diferentes (`data-specs` no <main> e
+    `data-visible` no painel) — se um atributo só controlasse os dois, o CSS
+    dispararia tudo junto e não haveria como separar.
+
+    Tudo aqui anda em `translate`/`scale`, nunca em width/flex: mudar caixa
+    refaz o layout a cada quadro e é exatamente o que produz o movimento
+    "engasgado" que o projeto está evitando. Transform é composto na GPU e,
+    de quebra, escala logo e foto como uma coisa só — que é a leitura
+    pretendida: um bloco, não três elementos migrando juntos por acaso.
+  */
+  [data-role="stage-section"],
+  [data-role="color-rail"] {
+    transition-property: translate, scale, opacity;
+    transition-duration: var(--duration-layout);
+    transition-timing-function: var(--ease-inout);
+  }
+
+  /*
+    `ease-inout` (e não `ease-glide`) porque o bloco parte do repouso e chega
+    ao repouso. É a mesma curva da sanfona pelo mesmo motivo: não é algo
+    reagindo ao cursor nem entrando em cena, é um trecho de interface indo de
+    um estado estável a outro.
+  */
+  [data-specs="open"] [data-role="stage-section"] {
+    scale: 0.86;
+    translate: 0 calc(var(--shift-md) * -2);
+  }
+
+  /*
+    A trilha de cores sai junto com o ato 1, na mesma duração e na mesma curva.
+    Não é uma segunda animação competindo: é o mesmo gesto de abrir espaço —
+    o lugar dela é exatamente onde a ficha vai entrar. Escolher cor e ler ficha
+    são tarefas diferentes; enquanto a ficha está aberta a trilha também não
+    deve receber clique nem foco de teclado.
+  */
+  [data-specs="open"] [data-role="color-rail"] {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /*
+    No desktop o movimento é horizontal: o bloco desliza para a esquerda e
+    libera a metade direita. O -22% é relativo à largura do PRÓPRIO bloco, não
+    a um pixel fixo — assim o ponto de parada acompanha qualquer largura de
+    tela sem precisar medir nada em JS.
+
+    No mobile não há metade direita para liberar: lá o bloco só sobe um pouco
+    e encolhe, e a ficha entra ocupando a parte de baixo.
+  */
+  @media (width >= 64rem) {
+    [data-specs="open"] [data-role="stage-section"] {
+      scale: 0.78;
+      translate: -22% 0;
+    }
+  }
+
+  /*
+    A ficha é `absolute` de propósito: fora do fluxo, ela não empurra nem
+    reposiciona nada ao aparecer — o bloco do produto já parou no lugar dele
+    no ato 1, e nada deve se mexer de novo depois disso.
+  */
+  [data-role="specs-panel"] {
+    opacity: 0;
+    translate: var(--shift-md) 0;
+    transition-property: opacity, translate;
+    transition-duration: var(--duration-slow);
+    transition-timing-function: var(--ease-glide);
+  }
+
+  /*
+    `ease-glide` aqui, e não a curva do ato 1: isto é conteúdo entrando em
+    cena, a mesma linguagem de toda entrada do site. O deslocamento é um
+    `--shift-md` — o suficiente para o olho perceber uma direção, pouco o
+    bastante para não virar um efeito.
+  */
+  [data-role="specs-panel"][data-visible="true"] {
+    opacity: 1;
+    translate: 0 0;
   }
 }

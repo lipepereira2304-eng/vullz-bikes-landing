@@ -14,6 +14,40 @@
     <style>
       :root {
         color-scheme: dark;
+
+        /*
+          Os mesmos tokens de movimento de src/styles/main.css, repetidos aqui
+          porque esta página é servida crua de /public: ela não passa pelo build
+          e portanto não enxerga o tema do Tailwind. Repetir os VALORES é o
+          preço de manter esta página fora do pipeline; o que não podia
+          continuar é ela ter tempos e curvas PRÓPRIOS (0.8s e 0.45s com uma
+          curva que o resto do site já tinha abandonado), que era o caso.
+          Se os tokens mudarem lá, mudam aqui também.
+        */
+        --ease-out: cubic-bezier(0.33, 1, 0.68, 1);
+        --ease-glide: cubic-bezier(0.22, 1, 0.36, 1);
+        --duration-fast: 150ms;
+        --duration-base: 220ms;
+        --duration-entrance: 700ms;
+        --shift-sm: 6px;
+        --shift-md: 12px;
+      }
+
+      /* Mesma transição de página do resto do site (ver main.css). */
+      @view-transition {
+        navigation: auto;
+      }
+
+      ::view-transition-old(root),
+      ::view-transition-new(root) {
+        animation-duration: var(--duration-base);
+        animation-timing-function: var(--ease-glide);
+      }
+
+      @media (prefers-reduced-motion: reduce) {
+        @view-transition {
+          navigation: none;
+        }
       }
 
       * {
@@ -63,8 +97,8 @@
         align-items: center;
         gap: 1.75rem;
         opacity: 0;
-        transform: translateY(14px);
-        animation: fade-in-up 0.8s cubic-bezier(0.16, 1, 0.3, 1) 0.05s forwards;
+        transform: translateY(var(--shift-md));
+        animation: fade-in-up var(--duration-entrance) var(--ease-glide) forwards;
       }
 
       .mark {
@@ -107,22 +141,22 @@
         font-size: 0.9rem;
         font-weight: 600;
         background: rgba(255, 255, 255, 0.04);
-        transition:
-          background-color 0.45s cubic-bezier(0.16, 1, 0.3, 1),
-          border-color 0.45s cubic-bezier(0.16, 1, 0.3, 1),
-          transform 0.45s cubic-bezier(0.16, 1, 0.3, 1),
-          box-shadow 0.45s cubic-bezier(0.16, 1, 0.3, 1);
+        /* Equivalente local do `btn-motion` do site. */
+        transition-property: background-color, border-color, transform, box-shadow;
+        transition-duration: var(--duration-base);
+        transition-timing-function: var(--ease-out);
       }
 
       .back:hover {
         background: rgba(255, 255, 255, 0.08);
         border-color: rgba(255, 255, 255, 0.24);
-        transform: translateY(-2px);
+        transform: translateY(calc(var(--shift-sm) * -1));
         box-shadow: 0 12px 30px -18px rgba(0, 0, 0, 0.6);
       }
 
       .back:active {
-        transform: translateY(0) scale(0.98);
+        transform: translateY(0) scale(0.985);
+        transition-duration: var(--duration-fast);
       }
 
       .back:focus-visible {
