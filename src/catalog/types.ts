@@ -35,15 +35,17 @@ export interface SpecDetail {
   quebra essa simetria. Se um modelo tiver mais de seis características
   marcantes, a escolha é editorial (quais seis destacar), não técnica.
 */
-/*
-  Ícone de um destaque. É uma lista fechada de propósito: o desenho vem de
-  SPEC_ICONS em markup.ts, então um nome fora da lista viraria um cartão sem
-  ícone em silêncio. Com union type, o TypeScript acusa no build.
-*/
-export type SpecIcon = "frame" | "derailleur" | "brake" | "shifter" | "rim" | "wheel";
-
 export interface SpecHighlight {
-  icon: SpecIcon;
+  /*
+    Nome do ARQUIVO do ícone (sem extensão), procurado em src/assets/icons/ —
+    mesma convenção das fotos e dos logos: larga o arquivo na pasta com o nome
+    certo e ele aparece, sem tocar em código.
+
+    Enquanto o arquivo não existe, o cartão reserva o espaço e o deixa vazio.
+    Reservar desde já (em vez de encolher o cartão) é o que garante que, no dia
+    em que os ícones chegarem, nada no layout se desloque.
+  */
+  icon: string;
   label: string;
 }
 
@@ -84,6 +86,9 @@ export interface CatalogConfig<M extends ProductModel = ProductModel> {
   models: M[];
   photos: AssetMap;
   logos: AssetMap;
+  /* Ícones dos destaques da ficha técnica. Opcional: sem ele os cartões
+     aparecem com o espaço do ícone reservado e vazio. */
+  icons?: AssetMap;
   /** Convite mostrado no palco enquanto nenhum modelo foi escolhido. */
   emptyMessage: string;
   grouping?: CatalogGrouping<M>;

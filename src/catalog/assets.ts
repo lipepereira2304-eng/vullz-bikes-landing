@@ -39,6 +39,24 @@ export function findLogo(logos: AssetMap, modelId: string): string | undefined {
   return undefined;
 }
 
+const ICON_EXTENSION = /\.(svg|png|webp)$/i;
+
+/*
+  Ícone de um destaque da ficha técnica, por nome de arquivo em
+  src/assets/icons/ — mesma ideia das fotos: o dado guarda só o NOME, e quem
+  resolve para uma URL é o glob do script de página.
+
+  Devolver `undefined` quando o arquivo ainda não existe é o comportamento
+  esperado, não um erro: o cartão reserva o espaço e mostra vazio até o arquivo
+  aparecer.
+*/
+export function findSpecIcon(icons: AssetMap, iconId: string): string | undefined {
+  for (const path in icons) {
+    if (fileNameOf(path).replace(ICON_EXTENSION, "") === iconId) return icons[path];
+  }
+  return undefined;
+}
+
 /*
   Sem isto, o navegador só baixa a foto de um modelo/cor na primeira vez que ela
   aparece na tela — daí aquele delayzinho perceptível na primeira troca (depois

@@ -1,6 +1,6 @@
 import vullzLogo from "../assets/images/vullz-logo-dark-text.webp";
-import { findLogo, findPhoto } from "./assets";
-import type { AssetMap, ProductColor, ProductModel, ProductSpecs, SpecIcon } from "./types";
+import { findLogo, findPhoto, findSpecIcon } from "./assets";
+import type { AssetMap, ProductColor, ProductModel, ProductSpecs } from "./types";
 
 /*
   Todo o markup compartilhado pelos dois catálogos interativos. Funções puras:
@@ -99,7 +99,11 @@ export function specsButtonMarkup(): string {
   Modelo sem `specs` cadastrada continua abrindo a ficha, só que com um aviso
   no lugar do conteúdo: some o texto, não a interação.
 */
-export function specsPanelMarkup(model: ProductModel, activeColor: ProductColor): string {
+export function specsPanelMarkup(
+  model: ProductModel,
+  activeColor: ProductColor,
+  icons: AssetMap
+): string {
   const ref = activeColor.ref ? ` — REF. ${activeColor.ref}` : "";
 
   return /* html */ `
@@ -128,7 +132,7 @@ export function specsPanelMarkup(model: ProductModel, activeColor: ProductColor)
           </p>
         </header>
 
-        ${model.specs ? specsContentMarkup(model.specs) : specsEmptyMarkup()}
+        ${model.specs ? specsContentMarkup(model.specs, icons) : specsEmptyMarkup()}
       </div>
     </aside>
   `;
@@ -143,6 +147,40 @@ function specsEmptyMarkup(): string {
 }
 
 /*
+  ESPAÇO RESERVADO PARA O ÍCONE DO CARTÃO.
+
+  O quadrado existe sempre, tenha ou não arquivo — é isso que faz "reservado".
+  Se ele encolhesse quando o ícone falta, o dia em que os arquivos chegassem
+  seria o dia em que todo o texto dos seis cartões mudaria de posição.
+
+  Como preencher: largar o arquivo em src/assets/icons/ com o nome que está no
+  campo `icon` do destaque (ex.: quadro.svg para `icon: "quadro"`). Não é
+  preciso tocar em código — mesma convenção das fotos e dos logos. Ver
+  src/assets/icons/README.md.
+
+  Enquanto falta, fica um contorno tracejado discreto: em produção ele denuncia
+  que ali cabia algo, o que é preferível a um buraco branco que parece
+  intencional.
+*/
+function specIconSlotMarkup(icons: AssetMap, iconId: string): string {
+  const src = findSpecIcon(icons, iconId);
+
+  if (src) {
+    return /* html */ `
+      <img src="${src}" alt="" aria-hidden="true" class="h-7 w-7 shrink-0 object-contain" />
+    `;
+  }
+
+  return /* html */ `
+    <span
+      data-role="spec-icon-slot"
+      aria-hidden="true"
+      class="h-7 w-7 shrink-0 rounded-md border border-dashed border-vullz-gray-200"
+    ></span>
+  `;
+}
+
+/*
   Os dois níveis reusam `[data-panel]` — a mesma sanfona da barra lateral, que
   anima `grid-template-rows: 0fr → 1fr` e já resolve "animar até a altura
   natural do conteúdo" sem medir nada em JS. Reaproveitar em vez de escrever um
@@ -151,81 +189,8 @@ function specsEmptyMarkup(): string {
   Os destaques nascem ABERTOS (`data-open="true"`) e a tabela nasce fechada; o
   botão inverte os dois.
 */
-/*
-  Os seis ícones dos cartões, desenhados aqui em vez de virem de arquivo: são
-  traços simples, e um <svg> inline não custa requisição nem pode faltar.
-
-  Mesma gramática dos ícones que já existiam no projeto (o "Voltar", a casinha,
-  a seta da sanfona): viewBox 24, traço 1.5, pontas arredondadas, `currentColor`
-  — assim eles herdam a cor do cartão e reagem ao hover sem regra extra.
-
-  Foram desenhados para não se confundirem entre si em 24px. Quatro deles são
-  redondos por natureza (coroa, disco, aro, roda), então cada um se distingue
-  por um detalhe próprio: a coroa tem dentes, o disco tem furos e cubo, o aro
-  são dois anéis (a "parede dupla") e a roda tem raios.
-*/
-const SPEC_ICONS: Record<SpecIcon, string> = {
-  // Quadro: as duas triangulações que formam a silhueta de um quadro de bike.
-  frame: /* html */ `
-    <path d="M3.5 18L8.5 7.5H14.5L10 18H3.5Z" />
-    <path d="M14.5 7.5L19.5 18H10" />
-  `,
-  // Câmbio: coroa dentada.
-  derailleur: /* html */ `
-    <circle cx="12" cy="12" r="4.6" />
-    <circle cx="12" cy="12" r="1.5" />
-    <path d="M12 3.6v2.2M12 18.2v2.2M3.6 12h2.2M18.2 12h2.2M6.1 6.1l1.5 1.5M16.4 16.4l1.5 1.5M17.9 6.1l-1.5 1.5M7.6 16.4l-1.5 1.5" />
-  `,
-  // Freio: disco com furos de ventilação e cubo.
-  brake: /* html */ `
-    <circle cx="12" cy="12" r="8" />
-    <circle cx="12" cy="12" r="2.6" />
-    <path d="M12 4v2.6M12 17.4V20M4 12h2.6M17.4 12H20" />
-  `,
-  // Alavanca: guidão com o corpo da alavanca e o gatilho.
-  shifter: /* html */ `
-    <path d="M3 13h7" />
-    <circle cx="12.5" cy="13" r="2.4" />
-    <path d="M15 13h6" />
-    <path d="M12.5 10.6V6" />
-  `,
-  // Aro parede dupla: dois anéis concêntricos — literalmente as duas paredes.
-  rim: /* html */ `
-    <circle cx="12" cy="12" r="8.5" />
-    <circle cx="12" cy="12" r="5.8" />
-  `,
-  // Roda: aro com raios e cubo.
-  wheel: /* html */ `
-    <circle cx="12" cy="12" r="8.5" />
-    <circle cx="12" cy="12" r="1.4" />
-    <path d="M12 3.5v7.1M12 13.4v7.1M3.5 12h7.1M13.4 12h7.1" />
-  `,
-};
-
-function specIconMarkup(icon: SpecIcon): string {
+function specsContentMarkup(specs: ProductSpecs, icons: AssetMap): string {
   return /* html */ `
-    <svg
-      viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg"
-      aria-hidden="true"
-      stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"
-      class="h-7 w-7 shrink-0 text-vullz-gray-500 lg:h-9 lg:w-9"
-    >
-      ${SPEC_ICONS[icon]}
-    </svg>
-  `;
-}
-
-function specsContentMarkup(specs: ProductSpecs): string {
-  return /* html */ `
-    <!--
-      A "pilha": o espaço de altura FIXA onde os dois níveis se revezam. É ela
-      que faz o quadro ter o mesmo tamanho com os cartões e com a tabela — sem
-      ela, o quadro tinha a altura do conteúdo da vez e mudava de tamanho no
-      meio da interação. A sanfona continua animando exatamente como antes; o
-      que mudou é que a sobra agora é absorvida aqui dentro, em vez de encolher
-      o quadro inteiro.
-    -->
-    <div data-role="specs-stack">
     <div data-panel data-open="true" data-role="specs-highlights">
       <div>
         <!--
@@ -233,12 +198,6 @@ function specsContentMarkup(specs: ProductSpecs): string {
           auto-fit) porque a leitura pretendida é "duas fileiras de três": com
           auto-fit a quantidade por linha mudaria com a largura do painel e a
           simetria se perderia.
-
-          A altura de cada cartão no desktop é calculada a partir de
-          --specs-stack-h (a altura fixa do quadro, ver main.css): duas fileiras
-          mais o vão do meio preenchem exatamente essa altura. Assim os
-          destaques ocupam todo o espaço reservado em vez de deixarem sobra
-          embaixo, e continua havendo um único número para ajustar.
         -->
         <ul class="grid grid-cols-2 gap-2 sm:grid-cols-3">
           ${specs.highlights
@@ -247,12 +206,10 @@ function specsContentMarkup(specs: ProductSpecs): string {
                 <li
                   data-role="spec-card"
                   style="animation-delay:calc(var(--stagger-tight) * ${i})"
-                  class="flex min-h-[104px] flex-col justify-between gap-2 rounded-2xl border border-vullz-gray-200 bg-vullz-gray-50 p-3 lg:min-h-0 lg:h-[calc((var(--specs-stack-h)-0.5rem)/2)] lg:p-4"
+                  class="flex min-h-[72px] items-center gap-2.5 rounded-2xl border border-vullz-gray-200 bg-vullz-gray-50 px-3 py-3 text-xs font-semibold leading-snug text-vullz-black"
                 >
-                  ${specIconMarkup(item.icon)}
-                  <span class="font-display text-[13px] font-bold uppercase leading-[1.1] tracking-wide text-vullz-black lg:text-[17px]">
-                    ${item.label}
-                  </span>
+                  ${specIconSlotMarkup(icons, item.icon)}
+                  <span>${item.label}</span>
                 </li>
               `
             )
@@ -281,7 +238,6 @@ function specsContentMarkup(specs: ProductSpecs): string {
             .join("")}
         </dl>
       </div>
-    </div>
     </div>
 
     <button

@@ -1,30 +1,5 @@
 @import "tailwindcss";
 
-/*
-  Saira Condensed 700 — a fonte de destaque dos cartões da ficha técnica.
-
-  Hospedada no projeto (src/assets/fonts/), não puxada do Google em tempo de
-  execução: sem isso, cada aparelho cairia numa condensada diferente do sistema
-  (Avenir Next Condensed no iPhone, Roboto Condensed no Android, Arial Narrow
-  no Windows) e a marca teria três desenhos de letra. Também evita uma
-  requisição a um domínio de terceiros — o catálogo é aberto por QR Code, com
-  frequência em rede móvel ruim.
-
-  Só o peso 700 e só o subset latino (12 KB): é tudo que os cartões usam, em
-  caixa alta e com acentuação do português. Licença SIL Open Font.
-
-  `swap`: o texto aparece na fonte de sistema e troca quando a fonte carrega —
-  preferível a esconder o texto. Na prática nem é percebido, porque a ficha só
-  abre depois de um clique, e a essa altura o arquivo já baixou.
-*/
-@font-face {
-  font-family: "Saira Condensed";
-  src: url("../assets/fonts/saira-condensed-700.woff2") format("woff2");
-  font-weight: 700;
-  font-style: normal;
-  font-display: swap;
-}
-
 @theme {
   /* Identidade Vullz */
   --color-vullz-black: #111111;
@@ -43,27 +18,6 @@
   --font-sans:
     -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter",
     "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-
-  /*
-    Fonte de DESTAQUE — condensada, para texto curto em caixa alta (os cartões
-    da ficha técnica). Não substitui a --font-sans: o corpo do site continua
-    neutro, e o peso de identidade fica concentrado onde o texto é curto e
-    funciona como rótulo, não como leitura corrida.
-
-    Os dois primeiros nomes são fontes que o projeto AINDA NÃO carrega. Estão
-    primeiro de propósito: no dia em que uma delas for hospedada no projeto
-    (um @font-face e o arquivo em src/assets/fonts/), os cartões passam a usá-la
-    sem que nada mais precise mudar. Enquanto isso, a cascata cai nas
-    condensadas que já existem no sistema — Avenir Next Condensed no
-    macOS/iOS, Roboto Condensed no Android, Arial Narrow no Windows.
-
-    Isso significa que HOJE o desenho da letra muda de aparelho para aparelho.
-    Para a identidade ser a mesma em todo lugar, a fonte precisa ser hospedada.
-  */
-  --font-display:
-    "Saira Condensed", "Barlow Condensed", "SF Compressed Text",
-    "Avenir Next Condensed", "Roboto Condensed", "Arial Narrow",
-    var(--font-sans);
 
   /* ====================================================================
      LINGUAGEM DE MOVIMENTO
@@ -663,36 +617,6 @@
     to {
       opacity: 1;
       transform: none;
-    }
-  }
-
-  /*
-    Altura fixa do miolo da ficha — o que garante que o quadro tenha o MESMO
-    tamanho com os cartões e com a tabela aberta.
-
-    Um número só governa as duas coisas: a altura da pilha e, por consequência,
-    a altura de cada cartão (que é calculada a partir dele no markup, de modo
-    que duas fileiras mais o vão preencham exatamente esta altura). Para dar
-    mais ou menos respiro aos cartões, mexer aqui — os cartões acompanham.
-
-    Só no desktop: no celular os seis cartões viram três fileiras de dois e a
-    tabela fica bem mais alta que a tela, então lá o quadro é uma folha que
-    rola, e travar a altura só criaria um recorte no meio do conteúdo.
-  */
-  @media (width >= 64rem) {
-    [data-role="specs-stack"] {
-      /*
-        Quem dita este valor é a TABELA, não os cartões: ela é o conteúdo mais
-        alto dos dois, e o que não couber aqui é cortado pelo recorte da
-        sanfona (silenciosamente — some do fim da lista sem aviso). Medido, a
-        tabela da Oregon pede 339px; 22rem = 352px deixa uma folga pequena.
-        Ao acrescentar linhas na tabela, conferir se ainda cabe.
-
-        Os cartões então se acomodam a esta altura, não o contrário.
-      */
-      --specs-stack-h: 22rem;
-
-      height: var(--specs-stack-h);
     }
   }
 

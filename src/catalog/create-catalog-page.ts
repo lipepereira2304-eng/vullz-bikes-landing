@@ -51,7 +51,7 @@ function groupConsecutive<M extends ProductModel>(
 }
 
 export function createCatalogPage<M extends ProductModel>(config: CatalogConfig<M>): void {
-  const { models, photos, logos, emptyMessage, grouping } = config;
+  const { models, photos, logos, emptyMessage, grouping, icons = {} } = config;
 
   /*
     Nada selecionado até o cliente clicar num modelo na lateral: a tela abre
@@ -220,7 +220,7 @@ export function createCatalogPage<M extends ProductModel>(config: CatalogConfig<
           ${colorRailContent}
         </aside>
 
-        ${activeModel && activeColor ? specsPanelMarkup(activeModel, activeColor) : ""}
+        ${activeModel && activeColor ? specsPanelMarkup(activeModel, activeColor, icons) : ""}
       </main>
     </div>
   `;

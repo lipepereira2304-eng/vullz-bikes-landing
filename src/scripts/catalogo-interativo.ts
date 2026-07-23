@@ -34,6 +34,17 @@ const logos = import.meta.glob<string>("../assets/bikes/*/logo.{svg,png,webp}", 
   import: "default",
 });
 
+/*
+  ÍCONES dos destaques da ficha técnica: qualquer arquivo em src/assets/icons/
+  é encontrado pelo NOME (sem extensão), que é o que o campo `icon` de cada
+  destaque guarda. Mesma convenção das fotos — largar o arquivo na pasta basta,
+  sem tocar neste arquivo. Ver src/assets/icons/README.md.
+*/
+const icons = import.meta.glob<string>("../assets/icons/*.{svg,png,webp}", {
+  eager: true,
+  import: "default",
+});
+
 /** Tamanho do aro, usado só pra agrupar a barra lateral (ex.: "Aro 29"). */
 interface BikeModel extends ProductModel {
   aro: number;
@@ -142,12 +153,12 @@ const OREGON_COLORS: ProductColor[] = [
 */
 const OREGON_SPECS: ProductSpecs = {
   highlights: [
-    { icon: "frame", label: "Quadro em alumínio" },
-    { icon: "derailleur", label: "Câmbio traseiro Shimano TZ31" },
-    { icon: "brake", label: "Freio a disco 160 mm" },
-    { icon: "shifter", label: "Alavanca 3x7 V-Fire Index" },
-    { icon: "rim", label: "Aros aéros parede dupla" },
-    { icon: "wheel", label: "Aro 29" },
+    { icon: "quadro", label: "Quadro em alumínio" },
+    { icon: "cambio", label: "Câmbio traseiro Shimano TZ31" },
+    { icon: "freio", label: "Freio a disco 160 mm" },
+    { icon: "alavanca", label: "Alavanca 3x7 V-Fire Index" },
+    { icon: "aro-parede-dupla", label: "Aros aéros parede dupla" },
+    { icon: "aro", label: "Aro 29" },
   ],
   details: [
     { label: "Peso", value: "14,2 kg" },
@@ -206,6 +217,7 @@ createCatalogPage<BikeModel>({
   models: MODELS,
   photos,
   logos,
+  icons,
   emptyMessage: "Escolha um modelo ao lado para ver a bike.",
   grouping: {
     keyOf: (model) => model.aro,
