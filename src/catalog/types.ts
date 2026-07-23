@@ -35,8 +35,20 @@ export interface SpecDetail {
   quebra essa simetria. Se um modelo tiver mais de seis características
   marcantes, a escolha é editorial (quais seis destacar), não técnica.
 */
+/*
+  Ícone de um destaque. É uma lista fechada de propósito: o desenho vem de
+  SPEC_ICONS em markup.ts, então um nome fora da lista viraria um cartão sem
+  ícone em silêncio. Com union type, o TypeScript acusa no build.
+*/
+export type SpecIcon = "frame" | "derailleur" | "brake" | "shifter" | "rim" | "wheel";
+
+export interface SpecHighlight {
+  icon: SpecIcon;
+  label: string;
+}
+
 export interface ProductSpecs {
-  highlights: string[];
+  highlights: SpecHighlight[];
   details: SpecDetail[];
 }
 

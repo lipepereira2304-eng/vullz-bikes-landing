@@ -142,12 +142,12 @@ const OREGON_COLORS: ProductColor[] = [
 */
 const OREGON_SPECS: ProductSpecs = {
   highlights: [
-    "Quadro em alumínio",
-    "Câmbio traseiro Shimano TZ31",
-    "Freio a disco 160 mm",
-    "Alavanca 3x7 V-Fire Index",
-    "Aros aéros parede dupla",
-    "Aro 29",
+    { icon: "frame", label: "Quadro em alumínio" },
+    { icon: "derailleur", label: "Câmbio traseiro Shimano TZ31" },
+    { icon: "brake", label: "Freio a disco 160 mm" },
+    { icon: "shifter", label: "Alavanca 3x7 V-Fire Index" },
+    { icon: "rim", label: "Aros aéros parede dupla" },
+    { icon: "wheel", label: "Aro 29" },
   ],
   details: [
     { label: "Peso", value: "14,2 kg" },
