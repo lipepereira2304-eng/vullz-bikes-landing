@@ -53,6 +53,29 @@
   --ease-inout: cubic-bezier(0.65, 0, 0.35, 1);
 
   /*
+    --ease-layout: percursos LONGOS, onde um trecho de interface atravessa a
+    tela. Sai do repouso com decisão e desacelera por muito tempo.
+
+    Por que não reaproveitar `--ease-inout`: medindo o percurso quadro a quadro
+    com ela, o bloco andava 11% nos primeiros 30% do tempo, 78% no miolo e os
+    últimos 2% se arrastavam. Numa sanfona de 76px isso é imperceptível; num
+    bloco que atravessa ~180px vira "parado, tranco, assenta" — o movimento
+    parece quebrado em duas partes mesmo estando perfeitamente sincronizado.
+    A queixa não era de sincronia, era de curva.
+
+    Escolhida medindo, não no olho. Percentual do percurso concluído aos 15%,
+    30%, 50% e 70% do tempo:
+
+      ease-inout (a do bug)      2%  11%  50%  89%   ← patamar, depois tranco
+      cubic-bezier(.32,.72,0,1) 46%  85%  95%  99%   ← estala e escorre
+      esta                      11%  49%  81%  95%   ← parte macio, pousa longo
+
+    A forma certa para isto é sair do repouso já visível (sem patamar), fazer
+    metade do caminho em ~30% do tempo e gastar os últimos 30% pousando.
+  */
+  --ease-layout: cubic-bezier(0.32, 0, 0.16, 1);
+
+  /*
     CINCO DURAÇÕES. Cada degrau é ~1.7x o anterior — longe o bastante para o
     olho distinguir os papéis, perto o bastante para tudo parecer da mesma
     família.
@@ -450,49 +473,96 @@
     de quebra, escala logo e foto como uma coisa só — que é a leitura
     pretendida: um bloco, não três elementos migrando juntos por acaso.
   */
+  /*
+    ---------------------------------------------------------------
+    OS DOIS BOTÕES DE AJUSTE DA POSIÇÃO ABERTA
+    ---------------------------------------------------------------
+    Mexer na posição do produto com a ficha aberta é mexer AQUI, e só aqui.
+
+    --specs-scale : o tamanho do bloco aberto (1 = tamanho original).
+    --specs-x     : o quanto ele anda para a esquerda, em % da largura DELE.
+
+    E eles são independentes um do outro por causa do `transform-origin: left`:
+    com a origem no centro (o padrão), encolher também puxa a borda esquerda
+    para dentro, então mudar a escala movia a peça e ajustar os dois virava
+    perseguição — era a dificuldade de achar a posição exata. Com a origem na
+    esquerda, a escala muda só o TAMANHO e o translate muda só ONDE a borda
+    esquerda para. Um botão de cada vez.
+
+    Com os valores atuais, numa tela de 1280px o bloco fica entre x=100 e
+    x=798. Como as duas medidas são relativas ao bloco, a proporção se mantém
+    em telas maiores.
+  */
+  [data-role="stage-section"] {
+    --specs-scale: 0.86;
+    --specs-x: -26%;
+
+    transform-origin: left center;
+  }
+
   [data-role="stage-section"],
-  [data-role="color-rail"] {
+  [data-role="color-rail"],
+  [data-role="model-nav"] {
     transition-property: translate, scale, opacity;
     transition-duration: var(--duration-layout);
-    transition-timing-function: var(--ease-inout);
+    transition-timing-function: var(--ease-layout);
   }
 
   /*
-    `ease-inout` (e não `ease-glide`) porque o bloco parte do repouso e chega
-    ao repouso. É a mesma curva da sanfona pelo mesmo motivo: não é algo
-    reagindo ao cursor nem entrando em cena, é um trecho de interface indo de
-    um estado estável a outro.
+    `--ease-layout`, e não `--ease-inout`: ver a explicação no token. Em resumo,
+    a curva de sanfona tem um patamar no início que, num percurso desta
+    extensão, faz o movimento parecer quebrado em duas partes.
   */
   [data-specs="open"] [data-role="stage-section"] {
-    scale: 0.86;
+    scale: var(--specs-scale);
     translate: 0 calc(var(--shift-md) * -2);
   }
 
   /*
-    A trilha de cores sai junto com o ato 1, na mesma duração e na mesma curva.
-    Não é uma segunda animação competindo: é o mesmo gesto de abrir espaço —
-    o lugar dela é exatamente onde a ficha vai entrar. Escolher cor e ler ficha
-    são tarefas diferentes; enquanto a ficha está aberta a trilha também não
-    deve receber clique nem foco de teclado.
+    A barra de modelos e a trilha de cores saem junto com o ato 1, na mesma
+    duração e na mesma curva. Não são animações competindo: são o mesmo gesto
+    de abrir espaço. Enquanto a ficha está aberta nenhuma das duas deve receber
+    clique nem foco de teclado — quem lê a ficha não está escolhendo modelo nem
+    cor, e um alvo invisível que ainda recebe Tab é uma armadilha.
+
+    A barra sai deslizando para a esquerda (para fora), não só esmaecendo: ela
+    é a única coisa à esquerda do produto, e some na direção de onde veio.
   */
-  [data-specs="open"] [data-role="color-rail"] {
+  [data-specs="open"] [data-role="color-rail"],
+  [data-specs="open"] [data-role="model-nav"] {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  [data-specs="open"] [data-role="model-nav"] {
+    translate: -100% 0;
+  }
+
+  /*
+    O rótulo da cor e o botão saem no ato 1 junto com o resto: o rótulo porque
+    reaparece como subtítulo dentro da ficha, e o botão porque já cumpriu o
+    papel dele. Os dois viajam com o bloco (são filhos dele), então aqui é só
+    a opacidade — a posição quem resolve é o transform do pai.
+  */
+  #color-label,
+  [data-role="specs-toggle"] {
+    transition: opacity var(--duration-layout) var(--ease-layout);
+  }
+
+  [data-specs="open"] #color-label,
+  [data-specs="open"] [data-role="specs-toggle"] {
     opacity: 0;
     pointer-events: none;
   }
 
   /*
     No desktop o movimento é horizontal: o bloco desliza para a esquerda e
-    libera a metade direita. O -22% é relativo à largura do PRÓPRIO bloco, não
-    a um pixel fixo — assim o ponto de parada acompanha qualquer largura de
-    tela sem precisar medir nada em JS.
-
-    No mobile não há metade direita para liberar: lá o bloco só sobe um pouco
-    e encolhe, e a ficha entra ocupando a parte de baixo.
+    libera o lado direito para a ficha. No mobile não há lado direito para
+    liberar — lá o bloco só sobe um pouco e encolhe, e a ficha entra por baixo.
   */
   @media (width >= 64rem) {
     [data-specs="open"] [data-role="stage-section"] {
-      scale: 0.78;
-      translate: -22% 0;
+      translate: var(--specs-x) 0;
     }
   }
 

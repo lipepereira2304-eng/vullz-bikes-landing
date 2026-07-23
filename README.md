@@ -74,6 +74,24 @@ tudo junto.
 Um contador de geração (`specsRun`) descarta sequências interrompidas — clicar
 duas vezes rápido não deixa a ficha reaparecer sozinha depois de fechada.
 
+**Ajustar onde o produto para** é mexer em duas variáveis, em um lugar só
+(`[data-role="stage-section"]` em `main.css`):
+
+| | |
+| --- | --- |
+| `--specs-scale` | tamanho do bloco aberto (1 = original) |
+| `--specs-x` | quanto ele anda para a esquerda, em % da largura dele |
+
+As duas são independentes graças ao `transform-origin: left center`. Com a
+origem no centro (o padrão), encolher também puxa a borda esquerda para
+dentro — então mudar a escala movia a peça, e acertar os dois virava
+perseguição. Com a origem na esquerda, a escala muda só o tamanho e o
+translate só onde a borda esquerda para.
+
+O movimento usa `--ease-layout`, uma curva escolhida medindo o percurso quadro
+a quadro: `--ease-inout` tem um patamar no início que, nesta distância, faz o
+bloco parecer que encolhe primeiro e só depois desliza.
+
 ### Duas armadilhas de camada (já corrigidas — não reintroduzir)
 
 1. **`translate`/`scale`/`rotate` não são `transform`.** No Tailwind v4 as

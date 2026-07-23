@@ -61,8 +61,12 @@ export function headerBackMarkup(): string {
   meio da tela, órfão do produto a que se refere. Ele pertence à peça, então
   viaja com ela.
 
-  É um toggle: o mesmo botão fecha, e o rótulo/`aria-expanded` acompanham o
-  estado (quem atualiza é create-catalog-page.ts).
+  Ele só ABRE. Fechar é trabalho do "Voltar" do cabeçalho, que enquanto a ficha
+  está aberta volta um passo na tela em vez de ir para a home — um botão de
+  fechar aqui embaixo seria um segundo caminho para a mesma saída, competindo
+  com um controle que já existe e já está no lugar certo. Some junto com o
+  ato 1, pelo mesmo motivo que o rótulo da cor some: já não faz sentido depois
+  que a ficha está na tela.
 */
 export function specsButtonMarkup(): string {
   return /* html */ `
@@ -73,7 +77,7 @@ export function specsButtonMarkup(): string {
       aria-controls="specs-panel"
       class="btn-motion mt-1 inline-flex items-center gap-2 rounded-full border border-vullz-gray-500 px-5 py-2 text-xs font-bold uppercase tracking-widest text-vullz-gray-500 hover:-translate-y-[var(--shift-sm)] hover:border-vullz-black hover:text-vullz-black active:translate-y-0 active:scale-[0.985] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vullz-black focus-visible:ring-offset-2"
     >
-      <span data-role="specs-toggle-label">Ficha Técnica</span>
+      Ficha Técnica
     </button>
   `;
 }
@@ -91,7 +95,7 @@ export function specsButtonMarkup(): string {
   natural é um campo opcional em ProductModel (types.ts) e esta função passar a
   receber o modelo como argumento.
 */
-export function specsPanelMarkup(): string {
+export function specsPanelMarkup(activeColor: ProductColor): string {
   return /* html */ `
     <aside
       id="specs-panel"
@@ -99,29 +103,38 @@ export function specsPanelMarkup(): string {
       data-visible="false"
       inert
       aria-label="Ficha técnica"
-      class="absolute inset-x-0 bottom-0 z-20 flex max-h-[45%] flex-col gap-4 overflow-y-auto rounded-t-3xl border-t border-vullz-gray-200 bg-white px-6 pb-6 pt-5 lg:inset-y-0 lg:left-1/2 lg:right-0 lg:max-h-none lg:justify-center lg:rounded-none lg:border-l lg:border-t-0 lg:px-10 lg:py-8"
+      class="absolute inset-x-4 bottom-4 z-20 flex flex-col justify-end lg:inset-y-0 lg:left-auto lg:right-8 lg:w-[38%] lg:justify-center"
     >
-      <div class="flex items-start justify-between gap-4">
+      <!--
+        Duas camadas de propósito: o <aside> só POSICIONA (ocupa a faixa
+        reservada e centraliza), e este <div> é o quadro visível. Enquanto o
+        fundo e a borda estavam no próprio <aside>, o quadro esticava por toda
+        a altura da faixa e sobrava um vazio enorme em volta de um texto curto.
+        Separando, o quadro abraça o conteúdo e a faixa cuida de onde ele fica.
+      -->
+      <div class="flex max-h-full flex-col gap-4 overflow-y-auto rounded-3xl border border-vullz-gray-200 bg-white px-6 py-5 shadow-[0_24px_60px_-32px_rgba(17,17,17,0.35)] lg:px-10 lg:py-8">
+      <header class="flex flex-col gap-1">
         <h2 class="text-lg font-extrabold uppercase tracking-wide text-vullz-black">
           Ficha Técnica
         </h2>
-        <button
-          type="button"
-          data-role="specs-close"
-          aria-label="Fechar ficha técnica"
-          class="tint-motion -mr-1 -mt-1 inline-flex h-8 w-8 shrink-0 items-center justify-center rounded-full text-vullz-gray-500 hover:text-vullz-black active:scale-95 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vullz-black focus-visible:ring-offset-2"
-        >
-          <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
-            <path d="M4 4L12 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-            <path d="M12 4L4 12" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-          </svg>
-        </button>
-      </div>
+        <!--
+          O rótulo da cor "sobe" para cá: ele desaparece de baixo da foto no
+          ato 1 e reaparece aqui como subtítulo no ato 2. Não é o MESMO nó
+          viajando pela tela — são dois nós, um saindo e outro entrando no
+          tempo certo. Mover o nó real exigiria arrancá-lo do fluxo e animar
+          coordenadas medidas em JS, que quebra a cada mudança de layout; a
+          leitura para quem assiste é idêntica e isto não tem como quebrar.
+        -->
+        <p data-role="specs-color" class="text-xs text-vullz-gray-500">
+          ${colorLabelMarkup(activeColor)}
+        </p>
+      </header>
 
       <div data-role="specs-body" class="text-sm leading-relaxed text-vullz-gray-500">
         <p>
           As especificações técnicas deste modelo estarão disponíveis em breve.
         </p>
+      </div>
       </div>
     </aside>
   `;

@@ -220,7 +220,7 @@ export function createCatalogPage<M extends ProductModel>(config: CatalogConfig<
           ${colorRailContent}
         </aside>
 
-        ${activeModel ? specsPanelMarkup() : ""}
+        ${activeModel && activeColor ? specsPanelMarkup(activeColor) : ""}
       </main>
     </div>
   `;
@@ -382,11 +382,9 @@ export function createCatalogPage<M extends ProductModel>(config: CatalogConfig<
     const panel = document.querySelector<HTMLElement>("[data-role='specs-panel']");
     const block = document.querySelector<HTMLElement>("[data-role='stage-section']");
     const toggle = document.querySelector<HTMLElement>("[data-role='specs-toggle']");
-    const label = document.querySelector<HTMLElement>("[data-role='specs-toggle-label']");
     if (!main || !panel || !block || !toggle) return;
 
     toggle.setAttribute("aria-expanded", String(open));
-    if (label) label.textContent = open ? "Fechar" : "Ficha Técnica";
 
     if (open) {
       main.dataset.specs = "open";
@@ -420,13 +418,21 @@ export function createCatalogPage<M extends ProductModel>(config: CatalogConfig<
     document.addEventListener("click", (event) => {
       const target = event.target as HTMLElement;
 
-      if (target.closest("[data-role='specs-toggle']")) {
-        void setSpecsOpen(!specsOpen);
+      /*
+        Com a ficha aberta, o "Voltar" do cabeçalho fecha a ficha em vez de ir
+        para a home: ele volta UM passo, e o passo mais recente foi abrir a
+        ficha. Sair direto da página aqui seria pular um nível de navegação que
+        o usuário não pediu — e é o que o link faria sozinho, por isso o
+        preventDefault.
+      */
+      if (specsOpen && target.closest("[data-role='header-back']")) {
+        event.preventDefault();
+        void setSpecsOpen(false);
         return;
       }
 
-      if (target.closest("[data-role='specs-close']")) {
-        void setSpecsOpen(false);
+      if (target.closest("[data-role='specs-toggle']")) {
+        void setSpecsOpen(true);
         return;
       }
 
