@@ -167,7 +167,7 @@ function specIconSlotMarkup(icons: AssetMap, iconId: string): string {
 
   if (src) {
     return /* html */ `
-      <img src="${src}" alt="" aria-hidden="true" class="h-7 w-7 shrink-0 object-contain" />
+      <img src="${src}" alt="" aria-hidden="true" class="h-9 w-9 shrink-0 object-contain" />
     `;
   }
 
@@ -175,7 +175,7 @@ function specIconSlotMarkup(icons: AssetMap, iconId: string): string {
     <span
       data-role="spec-icon-slot"
       aria-hidden="true"
-      class="h-7 w-7 shrink-0 rounded-md border border-dashed border-vullz-gray-200"
+      class="h-9 w-9 shrink-0 rounded-md border border-dashed border-vullz-gray-200"
     ></span>
   `;
 }
@@ -206,7 +206,7 @@ function specsContentMarkup(specs: ProductSpecs, icons: AssetMap): string {
                 <li
                   data-role="spec-card"
                   style="animation-delay:calc(var(--stagger-tight) * ${i})"
-                  class="flex min-h-[72px] items-center gap-2.5 rounded-2xl border border-vullz-gray-200 bg-vullz-gray-50 px-3 py-3 text-xs font-semibold leading-snug text-vullz-black"
+                  class="flex min-h-[72px] items-center gap-2.5 rounded-2xl border border-vullz-gray-200 bg-vullz-gray-50 px-3 py-3 text-xs font-semibold uppercase leading-snug tracking-wide text-vullz-black"
                 >
                   ${specIconSlotMarkup(icons, item.icon)}
                   <span>${item.label}</span>
