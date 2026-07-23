@@ -589,4 +589,43 @@
     opacity: 1;
     translate: 0 0;
   }
+
+  /*
+    Os seis cartões de destaque entram em sequência DEPOIS que o quadro já
+    apareceu. O gatilho é o próprio `data-visible` do painel, e não o
+    carregamento da página: uma @keyframes solta tocaria uma vez, no load, com
+    o painel ainda invisível — quando a ficha finalmente abrisse, a animação já
+    teria acabado e ninguém veria nada.
+
+    Passo `--stagger-tight` (e não `--stagger`) porque são seis itens pequenos
+    lado a lado: com 60ms a última fileira chegaria quase 400ms depois da
+    primeira, e um bloco de informação não pode ter tempo de carregamento.
+  */
+  [data-role="specs-panel"] [data-role="spec-card"] {
+    opacity: 0;
+  }
+
+  [data-role="specs-panel"][data-visible="true"] [data-role="spec-card"] {
+    animation: spec-card-in var(--duration-slow) var(--ease-glide) both;
+  }
+
+  @keyframes spec-card-in {
+    from {
+      opacity: 0;
+      transform: translateY(var(--shift-md));
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  /*
+    A seta do "Mais informações" gira meia volta ao abrir a tabela. Usa
+    `chevron-motion`, que transiciona `rotate` — a propriedade que o Tailwind v4
+    realmente escreve (ver o comentário de `btn-motion`).
+  */
+  [data-role="specs-details-toggle"][aria-expanded="true"] [data-role="specs-details-chevron"] {
+    rotate: 180deg;
+  }
 }

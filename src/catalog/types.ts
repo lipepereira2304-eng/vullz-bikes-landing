@@ -19,10 +19,37 @@ export interface ProductColor {
   ref?: string;
 }
 
+/** Uma linha da tabela detalhada da ficha técnica. */
+export interface SpecDetail {
+  label: string;
+  value: string;
+}
+
+/*
+  Ficha técnica de um modelo. Dividida em dois níveis porque a tela também é:
+  `highlights` são os seis cartões que aparecem assim que a ficha abre — o que
+  caracteriza a bike de relance — e `details` é a tabela completa, escondida
+  atrás do "Mais informações".
+
+  Seis não é um número solto: o grid é 3x2, e uma lista de tamanho diferente
+  quebra essa simetria. Se um modelo tiver mais de seis características
+  marcantes, a escolha é editorial (quais seis destacar), não técnica.
+*/
+export interface ProductSpecs {
+  highlights: string[];
+  details: SpecDetail[];
+}
+
 export interface ProductModel {
   id: string;
   name: string;
   colors: ProductColor[];
+  /*
+    Opcional porque as fichas chegam modelo a modelo. Sem ela, a ficha abre
+    com um aviso de "em breve" em vez de cartões vazios — some o conteúdo, não
+    a interação.
+  */
+  specs?: ProductSpecs;
 }
 
 /** Mapa "caminho do arquivo" → "URL final", como devolvido por import.meta.glob eager. */

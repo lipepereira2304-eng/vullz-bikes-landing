@@ -1,6 +1,6 @@
 import "../styles/main.css";
 import { createCatalogPage } from "../catalog/create-catalog-page";
-import type { ProductColor, ProductModel } from "../catalog/types";
+import type { ProductColor, ProductModel, ProductSpecs } from "../catalog/types";
 
 /*
   Catálogo interativo das BICICLETAS. Este arquivo é só dados: os modelos, as
@@ -130,6 +130,43 @@ const OREGON_COLORS: ProductColor[] = [
   solid("oregon", "laranja", "268/01", "Laranja Neon"),
 ];
 
+/*
+  Ficha técnica da Oregon, tirada do catálogo em PDF.
+
+  `highlights` são os seis cartões do topo — o que caracteriza a bike de
+  relance. `details` é a tabela do "Mais informações".
+
+  ATENÇÃO: os `details` abaixo são PROVISÓRIOS, escritos só para dar noção
+  visual do volume e do formato da tabela. Nenhum número aqui foi conferido
+  com o catálogo — substituir pelos valores reais antes de publicar.
+*/
+const OREGON_SPECS: ProductSpecs = {
+  highlights: [
+    "Quadro em alumínio",
+    "Câmbio traseiro Shimano TZ31",
+    "Freio a disco 160 mm",
+    "Alavanca 3x7 V-Fire Index",
+    "Aros aéros parede dupla",
+    "Aro 29",
+  ],
+  details: [
+    { label: "Peso", value: "14,2 kg" },
+    { label: "Tamanho do quadro", value: '17"' },
+    { label: "Material do quadro", value: "Alumínio 6061" },
+    { label: "Altura do selim", value: "82 – 96 cm" },
+    { label: "Comprimento total", value: "175 cm" },
+    { label: "Entre-eixos", value: "108 cm" },
+    { label: "Pneu", value: "29 x 2.10" },
+    { label: "Marchas", value: "21 (3x7)" },
+    { label: "Câmbio dianteiro", value: "Shimano TZ31" },
+    { label: "Freio dianteiro", value: "Disco mecânico 160 mm" },
+    { label: "Freio traseiro", value: "Disco mecânico 160 mm" },
+    { label: "Guidão", value: "Aço, 640 mm" },
+    { label: "Peso máximo suportado", value: "100 kg" },
+    { label: "Garantia", value: "1 ano contra defeitos de fabricação" },
+  ],
+};
+
 const SLIM_COLORS: ProductColor[] = [
   framed("slim", "preto-azul-rosa", "Preto (Azul + Rosa)", "269/06", "preto", "azul", "rosa"),
 ];
@@ -155,7 +192,7 @@ const PRO_KIDS_COLORS: ProductColor[] = [solid("pro-kids", "azul", "274/04"), so
 const LOVE_KIDS_COLORS: ProductColor[] = [solid("love-kids", "rosa", "275/03"), solid("love-kids", "branco", "275/05")];
 
 const MODELS: BikeModel[] = [
-  { id: "oregon", name: "Oregon", aro: 29, colors: OREGON_COLORS },
+  { id: "oregon", name: "Oregon", aro: 29, colors: OREGON_COLORS, specs: OREGON_SPECS },
   { id: "slim", name: "Slim", aro: 29, colors: SLIM_COLORS },
   { id: "street", name: "Street", aro: 26, colors: STREET_COLORS },
   { id: "doble", name: "Doble", aro: 26, colors: DOBLE_COLORS },

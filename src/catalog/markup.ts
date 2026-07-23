@@ -1,6 +1,6 @@
 import vullzLogo from "../assets/images/vullz-logo-dark-text.webp";
 import { findLogo, findPhoto } from "./assets";
-import type { AssetMap, ProductColor, ProductModel } from "./types";
+import type { AssetMap, ProductColor, ProductModel, ProductSpecs } from "./types";
 
 /*
   Todo o markup compartilhado pelos dois catálogos interativos. Funções puras:
@@ -86,16 +86,22 @@ export function specsButtonMarkup(): string {
   ---------------------------------------------------------------------------
   CONTEÚDO PROVISÓRIO DA FICHA
   ---------------------------------------------------------------------------
-  O texto real ainda não existe. Está isolado nesta função — e só aqui — para
-  que substituí-lo seja uma edição só, sem passar perto da coreografia de
-  abertura. Trocar o miolo do <div data-role="specs-body"> basta; nada em
-  main.css nem em create-catalog-page.ts depende do que tem dentro.
+  O cabeçalho é fixo: "Ficha Técnica" + "MODELO — REF. XXX/XX". A referência
+  vem da COR ativa, não do modelo, porque cada cor tem o código dela — trocar
+  de cor com a ficha aberta atualiza esse subtítulo.
 
-  Quando as fichas reais chegarem e forem diferentes por modelo, o caminho
-  natural é um campo opcional em ProductModel (types.ts) e esta função passar a
-  receber o modelo como argumento.
+  Abaixo dele, dois níveis que se revezam:
+    1. seis cartões de destaque (grid 3x2), visíveis ao abrir;
+    2. a tabela completa, atrás do "Mais informações".
+  Um recolhe enquanto o outro abre — ver `toggleSpecsDetails` em
+  create-catalog-page.ts.
+
+  Modelo sem `specs` cadastrada continua abrindo a ficha, só que com um aviso
+  no lugar do conteúdo: some o texto, não a interação.
 */
-export function specsPanelMarkup(activeColor: ProductColor): string {
+export function specsPanelMarkup(model: ProductModel, activeColor: ProductColor): string {
+  const ref = activeColor.ref ? ` — REF. ${activeColor.ref}` : "";
+
   return /* html */ `
     <aside
       id="specs-panel"
@@ -103,7 +109,7 @@ export function specsPanelMarkup(activeColor: ProductColor): string {
       data-visible="false"
       inert
       aria-label="Ficha técnica"
-      class="absolute inset-x-4 bottom-4 z-20 flex flex-col justify-end lg:inset-y-0 lg:left-auto lg:right-8 lg:w-[38%] lg:justify-center"
+      class="absolute inset-x-4 bottom-4 z-20 flex max-h-[calc(100%-2rem)] flex-col justify-end lg:inset-y-0 lg:left-auto lg:right-6 lg:w-[42%] lg:max-h-none lg:justify-center"
     >
       <!--
         Duas camadas de propósito: o <aside> só POSICIONA (ocupa a faixa
@@ -112,31 +118,105 @@ export function specsPanelMarkup(activeColor: ProductColor): string {
         a altura da faixa e sobrava um vazio enorme em volta de um texto curto.
         Separando, o quadro abraça o conteúdo e a faixa cuida de onde ele fica.
       -->
-      <div class="flex max-h-full flex-col gap-4 overflow-y-auto rounded-3xl border border-vullz-gray-200 bg-white px-6 py-5 shadow-[0_24px_60px_-32px_rgba(17,17,17,0.35)] lg:px-10 lg:py-8">
-      <header class="flex flex-col gap-1">
-        <h2 class="text-lg font-extrabold uppercase tracking-wide text-vullz-black">
-          Ficha Técnica
-        </h2>
-        <!--
-          O rótulo da cor "sobe" para cá: ele desaparece de baixo da foto no
-          ato 1 e reaparece aqui como subtítulo no ato 2. Não é o MESMO nó
-          viajando pela tela — são dois nós, um saindo e outro entrando no
-          tempo certo. Mover o nó real exigiria arrancá-lo do fluxo e animar
-          coordenadas medidas em JS, que quebra a cada mudança de layout; a
-          leitura para quem assiste é idêntica e isto não tem como quebrar.
-        -->
-        <p data-role="specs-color" class="text-xs text-vullz-gray-500">
-          ${colorLabelMarkup(activeColor)}
-        </p>
-      </header>
+      <div class="flex max-h-full flex-col gap-5 overflow-y-auto rounded-3xl border border-vullz-gray-200 bg-white px-6 py-5 shadow-[0_24px_60px_-32px_rgba(17,17,17,0.35)] lg:px-8 lg:py-7">
+        <header class="flex flex-col gap-1">
+          <h2 class="text-lg font-extrabold uppercase tracking-wide text-vullz-black">
+            Ficha Técnica
+          </h2>
+          <p data-role="specs-subtitle" class="text-xs font-medium uppercase tracking-widest text-vullz-gray-500">
+            ${model.name}${ref}
+          </p>
+        </header>
 
-      <div data-role="specs-body" class="text-sm leading-relaxed text-vullz-gray-500">
-        <p>
-          As especificações técnicas deste modelo estarão disponíveis em breve.
-        </p>
-      </div>
+        ${model.specs ? specsContentMarkup(model.specs) : specsEmptyMarkup()}
       </div>
     </aside>
+  `;
+}
+
+function specsEmptyMarkup(): string {
+  return /* html */ `
+    <p class="text-sm leading-relaxed text-vullz-gray-500">
+      As especificações técnicas deste modelo estarão disponíveis em breve.
+    </p>
+  `;
+}
+
+/*
+  Os dois níveis reusam `[data-panel]` — a mesma sanfona da barra lateral, que
+  anima `grid-template-rows: 0fr → 1fr` e já resolve "animar até a altura
+  natural do conteúdo" sem medir nada em JS. Reaproveitar em vez de escrever um
+  segundo mecanismo de recolher mantém uma implementação só para o mesmo gesto.
+
+  Os destaques nascem ABERTOS (`data-open="true"`) e a tabela nasce fechada; o
+  botão inverte os dois.
+*/
+function specsContentMarkup(specs: ProductSpecs): string {
+  return /* html */ `
+    <div data-panel data-open="true" data-role="specs-highlights">
+      <div>
+        <!--
+          3x2 no desktop, 2x3 no celular. O grid é fixo em 3 colunas (e não
+          auto-fit) porque a leitura pretendida é "duas fileiras de três": com
+          auto-fit a quantidade por linha mudaria com a largura do painel e a
+          simetria se perderia.
+        -->
+        <ul class="grid grid-cols-2 gap-2 sm:grid-cols-3">
+          ${specs.highlights
+            .map(
+              (item, i) => /* html */ `
+                <li
+                  data-role="spec-card"
+                  style="animation-delay:calc(var(--stagger-tight) * ${i})"
+                  class="flex min-h-[72px] items-center rounded-2xl border border-vullz-gray-200 bg-vullz-gray-50 px-3 py-3 text-xs font-semibold leading-snug text-vullz-black"
+                >
+                  ${item}
+                </li>
+              `
+            )
+            .join("")}
+        </ul>
+      </div>
+    </div>
+
+    <div id="specs-details" data-panel data-open="false" data-role="specs-details">
+      <div>
+        <!--
+          <dl> e não <table>: isto é uma lista de pares rótulo/valor, não uma
+          matriz de linhas e colunas. Um leitor de tela anuncia "Peso, 14,2 kg"
+          em vez de tentar narrar coordenadas de tabela.
+        -->
+        <dl class="grid grid-cols-1 gap-x-6 text-sm sm:grid-cols-2">
+          ${specs.details
+            .map(
+              (row) => /* html */ `
+                <div class="flex items-baseline justify-between gap-3 border-b border-vullz-gray-200 py-2">
+                  <dt class="shrink-0 text-vullz-gray-500">${row.label}</dt>
+                  <dd class="text-right font-medium text-vullz-black">${row.value}</dd>
+                </div>
+              `
+            )
+            .join("")}
+        </dl>
+      </div>
+    </div>
+
+    <button
+      type="button"
+      data-role="specs-details-toggle"
+      aria-expanded="false"
+      aria-controls="specs-details"
+      class="btn-motion inline-flex items-center justify-center gap-2 self-center rounded-full border border-vullz-gray-500 px-5 py-2 text-xs font-bold uppercase tracking-widest text-vullz-gray-500 hover:border-vullz-black hover:text-vullz-black active:scale-[0.985] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vullz-black focus-visible:ring-offset-2"
+    >
+      <span data-role="specs-details-label">Mais informações</span>
+      <svg
+        data-role="specs-details-chevron"
+        width="12" height="12" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg"
+        class="chevron-motion shrink-0"
+      >
+        <path d="M1 3L5 7L9 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+      </svg>
+    </button>
   `;
 }
 

@@ -220,7 +220,7 @@ export function createCatalogPage<M extends ProductModel>(config: CatalogConfig<
           ${colorRailContent}
         </aside>
 
-        ${activeModel && activeColor ? specsPanelMarkup(activeColor) : ""}
+        ${activeModel && activeColor ? specsPanelMarkup(activeModel, activeColor) : ""}
       </main>
     </div>
   `;
@@ -247,6 +247,8 @@ export function createCatalogPage<M extends ProductModel>(config: CatalogConfig<
     */
     specsOpen = false;
     specsRun++;
+    detailsOpen = false;
+    detailsRun++;
 
     if (isFirstRender) {
       initRevealOnScroll();
@@ -275,6 +277,15 @@ export function createCatalogPage<M extends ProductModel>(config: CatalogConfig<
     });
     const label = document.querySelector("#color-label");
     if (label) label.innerHTML = colorLabelMarkup(color);
+
+    /*
+      O subtítulo da ficha carrega a REF, e a REF é da COR — então trocar de
+      cor tem que reescrevê-lo aqui. `swapColor` não passa por render(), então
+      nada mais atualiza esse texto: sem isto a ficha continuaria mostrando o
+      código da cor anterior, silenciosamente errado.
+    */
+    const subtitle = document.querySelector("[data-role='specs-subtitle']");
+    if (subtitle) subtitle.textContent = `${model.name}${color.ref ? ` — REF. ${color.ref}` : ""}`;
 
     paint(model, color, "color");
   }
@@ -387,6 +398,15 @@ export function createCatalogPage<M extends ProductModel>(config: CatalogConfig<
     toggle.setAttribute("aria-expanded", String(open));
 
     if (open) {
+      /*
+        A ficha sempre abre no primeiro nível. O painel não é reconstruído
+        entre uma abertura e outra, então sem isto ela reabriria no estado em
+        que foi fechada — com a tabela aberta e os destaques recolhidos, que
+        não é a leitura pretendida de "abri a ficha".
+
+        Sem animação, de propósito: acontece com o painel ainda invisível.
+      */
+      resetSpecsDetails();
       main.dataset.specs = "open";
       await animationsSettled(block);
       if (run !== specsRun) return;
@@ -411,6 +431,74 @@ export function createCatalogPage<M extends ProductModel>(config: CatalogConfig<
   }
 
   /*
+    Segundo nível da ficha: os destaques recolhem e a tabela completa aparece.
+
+    Encadeado, não simultâneo — pelo mesmo motivo da abertura da ficha. Os dois
+    blocos vivem um embaixo do outro no MESMO quadro: animar a altura dos dois
+    ao mesmo tempo faz o conteúdo de baixo subir enquanto o de cima ainda está
+    descendo, e o quadro inteiro treme. Recolhendo primeiro, a altura só muda
+    uma vez em cada sentido.
+
+    A ordem se inverte ao voltar, e é sempre "sai quem está, depois entra quem
+    vem": abrindo, destaques saem → tabela entra; fechando, tabela sai →
+    destaques entram.
+  */
+  let detailsOpen = false;
+  let detailsRun = 0;
+
+  /** Devolve a ficha ao primeiro nível (destaques à mostra), sem animar. */
+  function resetSpecsDetails(): void {
+    detailsOpen = false;
+    detailsRun++;
+
+    const highlights = document.querySelector<HTMLElement>("[data-role='specs-highlights']");
+    const details = document.querySelector<HTMLElement>("[data-role='specs-details']");
+    const toggle = document.querySelector<HTMLElement>("[data-role='specs-details-toggle']");
+    const label = document.querySelector<HTMLElement>("[data-role='specs-details-label']");
+
+    if (highlights) {
+      highlights.dataset.open = "true";
+      highlights.dataset.settled = "true";
+    }
+    if (details) {
+      details.dataset.open = "false";
+      delete details.dataset.settled;
+    }
+    toggle?.setAttribute("aria-expanded", "false");
+    if (label) label.textContent = "Mais informações";
+  }
+
+  async function toggleSpecsDetails(): Promise<void> {
+    const highlights = document.querySelector<HTMLElement>("[data-role='specs-highlights']");
+    const details = document.querySelector<HTMLElement>("[data-role='specs-details']");
+    const toggle = document.querySelector<HTMLElement>("[data-role='specs-details-toggle']");
+    const label = document.querySelector<HTMLElement>("[data-role='specs-details-label']");
+    if (!highlights || !details || !toggle) return;
+
+    detailsOpen = !detailsOpen;
+    const run = ++detailsRun;
+
+    toggle.setAttribute("aria-expanded", String(detailsOpen));
+    if (label) label.textContent = detailsOpen ? "Menos informações" : "Mais informações";
+
+    const sai = detailsOpen ? highlights : details;
+    const entra = detailsOpen ? details : highlights;
+
+    delete sai.dataset.settled;
+    sai.dataset.open = "false";
+    await animationsSettled(sai);
+    if (run !== detailsRun) return;
+
+    entra.dataset.open = "true";
+    await animationsSettled(entra);
+    if (run !== detailsRun) return;
+
+    // Solta o recorte só com a altura estabilizada — senão o anel de foco de
+    // teclado do primeiro e do último item fica cortado na borda do bloco.
+    entra.dataset.settled = "true";
+  }
+
+  /*
     Delegação de evento num único listener: sobrevive a cada re-render (que
     troca o innerHTML inteiro), sem precisar re-anexar listener em botão nenhum.
   */
@@ -428,6 +516,11 @@ export function createCatalogPage<M extends ProductModel>(config: CatalogConfig<
       if (specsOpen && target.closest("[data-role='header-back']")) {
         event.preventDefault();
         void setSpecsOpen(false);
+        return;
+      }
+
+      if (target.closest("[data-role='specs-details-toggle']")) {
+        void toggleSpecsDetails();
         return;
       }
 
