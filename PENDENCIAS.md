@@ -9,32 +9,48 @@ _Última atualização: 2026-07-23._
 
 ## 🔴 Precisam de decisão/ação sua
 
-### 1. Dados da tabela ("Mais informações") são inventados
-A tabela `details` da ficha (hoje compartilhada por Oregon e Slim) foi escrita
-só para dar noção visual — **nenhum número foi conferido com o catálogo**: peso,
-medidas, entre-eixos, garantia etc. Os **seis destaques (cards) são reais**; a
-tabela não. Substituir pelos valores reais antes de publicar de verdade.
-Arquivo: `src/scripts/catalogo-interativo.ts`, const `ARO29_SPECS.details`.
+### 1. Inconsistências na planilha (dados aplicados fielmente, NÃO corrigidos)
+A tabela agora usa os dados reais da planilha "Ficha Técnica Bikes", aplicados
+tal como vieram — só limpei espaços em excesso. **Não corrigi capitalização,
+acentos nem formatação**, porque isso seria adivinhar. Pontos a revisar na
+fonte (`src/scripts/catalogo-interativo.ts`, const `DETAILS`):
+- **"90K"** na Majestic (peso máximo) — provável erro de "90Kg".
+- **"ALUMINIO"** sem acento (vários) vs. "ALUMÍNIO" no guidão — inconsistente.
+- **"18.5kg"** (Doble) usa ponto e minúsculas; os outros usam "14,5 Kg" (vírgula,
+  espaço, Kg). Padrões de unidade misturados no geral (Kg/kg, cm/m, aspas).
+- **CAIXA ALTA** em muitos valores ("A DISCO MECÂNICO", "V-FIRE 21V") ao lado de
+  "V-brake", "Grip-shift" minúsculos — a tabela fica visualmente heterogênea.
+- **"NÃO"** aparece nos modelos sem marcha (Pulse/Majestic/Kids) — está correto,
+  mas confirmar se prefere assim ou uma linha omitida.
+**Decidir:** você corrige na planilha e reenvia, ou me autoriza a padronizar
+(com cuidado manual nas siglas TZ31/PACO/SHIMANO/LEVORIN).
 
-### 2. Ficha da Slim é cópia da Oregon
-A pedido seu, a Slim usa **exatamente a mesma ficha** da Oregon por enquanto
-(mesma const `ARO29_SPECS`). Os destaques da Oregon podem não valer para a Slim
-(câmbio, freio etc. podem diferir). Quando a Slim ganhar dados próprios, separar
-em duas constantes.
+### 2. Ordem das linhas da tabela
+Mantive a ordem exata da planilha. Nela "Freio traseiro" (7º) fica longe de
+"Freio dianteiro" (13º), e "Peso máximo" cai no meio. Se preferir reagrupar por
+tema (pesos juntos, freios juntos, transmissão junta), é só dizer a ordem.
 
-### 3. Labels dos cards: manter detalhados ou encurtar?
-Ao definir a nova ordem você escreveu os nomes curtos ("câmbio traseiro", "freio
-a disco", "alavanca 3x7", "aros aéros"). Mantive os **detalhados** ("Câmbio
-traseiro Shimano TZ31", "Freio a disco 160 mm", "Alavanca 3x7 V-Fire Index",
-"Aros aéros parede dupla") para não perder a informação técnica que veio do
-catálogo. **Decidir:** manter detalhado (alguns quebram em 3 linhas no card) ou
-encurtar (cards mais limpos, menos informação). Trivial trocar.
+### 3. Ficha da Slim usa os mesmos destaques (cards) da Oregon
+A **tabela** da Slim agora é própria (dados da planilha, com "15.5''"). Mas os
+**seis cards de destaque** ainda são os mesmos da Oregon (const compartilhada
+`ARO29_HIGHLIGHTS`), a seu pedido. Confirmar se a Slim tem os mesmos destaques.
 
-### 4. Faltam as fichas dos outros modelos
-Só Oregon e Slim (aro 29) têm ficha. Faltam: **Street, Doble, Pulse, Majestic,
-Pro Kids, Love Kids** (catálogo de bicicletas) e **todo o catálogo de
-elétricos**. Cada um é só preencher `highlights` + `details` no arquivo de dados
-da página — sem tocar em código.
+### 4. Cards de destaque dos modelos não-aro-29
+Street, Doble, Pulse, Majestic, Pro Kids e Love Kids **têm a tabela** ("Mais
+informações"), mas **não têm os seis cards** de destaque. Hoje a ficha deles
+abre mostrando a tabela direto, sem o botão "Mais informações" (não há o que
+recolher). Quando você definir os destaques desses modelos, o botão e os cards
+voltam sozinhos. **Falta também definir os labels dos cards por aro** (o card
+"Aro 29" não serve para um aro 26).
+
+### 5. Labels dos cards (aro 29): manter detalhados ou encurtar?
+Ao definir a ordem você escreveu nomes curtos ("câmbio traseiro", "freio a
+disco"...). Mantive os **detalhados** ("Câmbio traseiro Shimano TZ31" etc.) para
+não perder a informação técnica. **Decidir:** detalhado (alguns quebram em 3
+linhas) ou curto (cards mais limpos). Trivial trocar.
+
+### 6. Faltam as fichas do catálogo de ELÉTRICOS
+Todo o `catalogo-eletricos.ts` ainda está sem ficha técnica.
 
 ---
 
@@ -80,3 +96,6 @@ testar Saira Condensed; foi revertido.
   imagens preservada.
 - Nova ordem dos destaques (aro → quadro → câmbio → freio → alavanca → aros)
   aplicada a Oregon e Slim.
+- Tabela "Mais informações" com dados reais da planilha aplicada aos **8
+  modelos** de bicicleta. Modelos sem cards abrem a tabela direto (sem botão);
+  os aro 29 mantêm cards + botão. Verificado modelo a modelo.

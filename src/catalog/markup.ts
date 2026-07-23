@@ -1,6 +1,6 @@
 import vullzLogo from "../assets/images/vullz-logo-dark-text.webp";
 import { findLogo, findPhoto, findSpecIcon } from "./assets";
-import type { AssetMap, ProductColor, ProductModel, ProductSpecs } from "./types";
+import type { AssetMap, ProductColor, ProductModel, ProductSpecs, SpecDetail } from "./types";
 
 /*
   Todo o markup compartilhado pelos dois catálogos interativos. Funções puras:
@@ -181,15 +181,48 @@ function specIconSlotMarkup(icons: AssetMap, iconId: string): string {
 }
 
 /*
-  Os dois níveis reusam `[data-panel]` — a mesma sanfona da barra lateral, que
-  anima `grid-template-rows: 0fr → 1fr` e já resolve "animar até a altura
-  natural do conteúdo" sem medir nada em JS. Reaproveitar em vez de escrever um
-  segundo mecanismo de recolher mantém uma implementação só para o mesmo gesto.
+  A tabela de especificações — pares rótulo/valor. `<dl>` e não `<table>`
+  porque isto é uma lista de pares, não uma matriz de linhas e colunas: um
+  leitor de tela anuncia "Peso, 14,5 Kg" em vez de tentar narrar coordenadas.
+*/
+function specsTableMarkup(details: SpecDetail[]): string {
+  return /* html */ `
+    <dl class="grid grid-cols-1 gap-x-6 text-sm sm:grid-cols-2">
+      ${details
+        .map(
+          (row) => /* html */ `
+            <div class="flex items-baseline justify-between gap-3 border-b border-vullz-gray-200 py-2">
+              <dt class="shrink-0 text-vullz-gray-500">${row.label}</dt>
+              <dd class="pl-3 text-right font-medium text-vullz-black">${row.value}</dd>
+            </div>
+          `
+        )
+        .join("")}
+    </dl>
+  `;
+}
 
-  Os destaques nascem ABERTOS (`data-open="true"`) e a tabela nasce fechada; o
-  botão inverte os dois.
+/*
+  A ficha tem dois níveis, mas nem todo modelo tem os dois (ver ProductSpecs):
+
+  - com destaques + tabela → cards no primeiro nível, "Mais informações" abre a
+    tabela. Os dois reusam `[data-panel]`, a mesma sanfona da barra lateral, que
+    anima `grid-template-rows: 0fr → 1fr` e já resolve "animar até a altura
+    natural do conteúdo" sem medir nada em JS. Os destaques nascem ABERTOS e a
+    tabela fechada; o botão inverte os dois.
+
+  - só tabela → mostra a tabela direto, sem sanfona e sem botão. Nada a
+    recolher, então nada a alternar. Quando o modelo ganhar destaques, cai
+    automaticamente no primeiro caso.
 */
 function specsContentMarkup(specs: ProductSpecs, icons: AssetMap): string {
+  const highlights = specs.highlights ?? [];
+  const details = specs.details ?? [];
+
+  if (highlights.length === 0) {
+    return details.length > 0 ? /* html */ `<div>${specsTableMarkup(details)}</div>` : "";
+  }
+
   return /* html */ `
     <div data-panel data-open="true" data-role="specs-highlights">
       <div>
@@ -200,7 +233,7 @@ function specsContentMarkup(specs: ProductSpecs, icons: AssetMap): string {
           simetria se perderia.
         -->
         <ul class="grid grid-cols-2 gap-2 sm:grid-cols-3">
-          ${specs.highlights
+          ${highlights
             .map(
               (item, i) => /* html */ `
                 <li
@@ -218,44 +251,32 @@ function specsContentMarkup(specs: ProductSpecs, icons: AssetMap): string {
       </div>
     </div>
 
-    <div id="specs-details" data-panel data-open="false" data-role="specs-details">
-      <div>
-        <!--
-          <dl> e não <table>: isto é uma lista de pares rótulo/valor, não uma
-          matriz de linhas e colunas. Um leitor de tela anuncia "Peso, 14,2 kg"
-          em vez de tentar narrar coordenadas de tabela.
-        -->
-        <dl class="grid grid-cols-1 gap-x-6 text-sm sm:grid-cols-2">
-          ${specs.details
-            .map(
-              (row) => /* html */ `
-                <div class="flex items-baseline justify-between gap-3 border-b border-vullz-gray-200 py-2">
-                  <dt class="shrink-0 text-vullz-gray-500">${row.label}</dt>
-                  <dd class="text-right font-medium text-vullz-black">${row.value}</dd>
-                </div>
-              `
-            )
-            .join("")}
-        </dl>
-      </div>
-    </div>
+    ${
+      details.length > 0
+        ? /* html */ `
+          <div id="specs-details" data-panel data-open="false" data-role="specs-details">
+            <div>${specsTableMarkup(details)}</div>
+          </div>
 
-    <button
-      type="button"
-      data-role="specs-details-toggle"
-      aria-expanded="false"
-      aria-controls="specs-details"
-      class="btn-motion inline-flex items-center justify-center gap-2 self-center rounded-full border border-vullz-gray-500 px-5 py-2 text-xs font-bold uppercase tracking-widest text-vullz-gray-500 hover:border-vullz-black hover:text-vullz-black active:scale-[0.985] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vullz-black focus-visible:ring-offset-2"
-    >
-      <span data-role="specs-details-label">Mais informações</span>
-      <svg
-        data-role="specs-details-chevron"
-        width="12" height="12" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg"
-        class="chevron-motion shrink-0"
-      >
-        <path d="M1 3L5 7L9 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-      </svg>
-    </button>
+          <button
+            type="button"
+            data-role="specs-details-toggle"
+            aria-expanded="false"
+            aria-controls="specs-details"
+            class="btn-motion inline-flex items-center justify-center gap-2 self-center rounded-full border border-vullz-gray-500 px-5 py-2 text-xs font-bold uppercase tracking-widest text-vullz-gray-500 hover:border-vullz-black hover:text-vullz-black active:scale-[0.985] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vullz-black focus-visible:ring-offset-2"
+          >
+            <span data-role="specs-details-label">Mais informações</span>
+            <svg
+              data-role="specs-details-chevron"
+              width="12" height="12" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg"
+              class="chevron-motion shrink-0"
+            >
+              <path d="M1 3L5 7L9 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </button>
+        `
+        : ""
+    }
   `;
 }
 

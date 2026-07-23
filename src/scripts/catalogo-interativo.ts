@@ -1,6 +1,6 @@
 import "../styles/main.css";
 import { createCatalogPage } from "../catalog/create-catalog-page";
-import type { ProductColor, ProductModel, ProductSpecs } from "../catalog/types";
+import type { ProductColor, ProductModel } from "../catalog/types";
 
 /*
   Catálogo interativo das BICICLETAS. Este arquivo é só dados: os modelos, as
@@ -142,48 +142,70 @@ const OREGON_COLORS: ProductColor[] = [
 ];
 
 /*
-  Ficha técnica dos modelos ARO 29 (Oregon e Slim), a partir do catálogo em PDF.
+  ---------------------------------------------------------------------------
+  FICHAS TÉCNICAS — dados reais do cliente (planilha "Ficha Técnica Bikes").
+  ---------------------------------------------------------------------------
 
-  `highlights` são os seis cartões do topo — o que caracteriza a bike de
-  relance. A ORDEM aqui é a ordem em que aparecem no grid (esquerda→direita,
-  cima→baixo): aro, quadro, câmbio, freio, alavanca, aros. `details` é a tabela
-  do "Mais informações".
+  `details` (a tabela do "Mais informações") veio para os OITO modelos. Os
+  `highlights` (os seis cartões) só existem para os aro 29 até agora; os demais
+  abrem a ficha mostrando a tabela direto (ver ProductSpecs / specsContentMarkup).
 
-  Compartilhada entre Oregon e Slim por decisão do cliente ("aplicar a mesma
-  coisa na Slim por enquanto"). Quando a Slim ganhar dados próprios, separar em
-  duas constantes.
+  Os rótulos são fixos e na mesma ordem da planilha; cada modelo entra como um
+  array de 14 valores nessa ordem — é o que torna a edição futura um replace de
+  strings, sem risco de desalinhar rótulo e valor.
 
-  ATENÇÃO: os `details` abaixo são PROVISÓRIOS, escritos só para dar noção
-  visual do volume e do formato da tabela. Nenhum número aqui foi conferido
-  com o catálogo — substituir pelos valores reais antes de publicar. (Idem para
-  aplicar isto à Slim: os destaques podem não valer para ela sem conferência.)
+  Os VALORES estão como na planilha, só com espaços em excesso removidos: nada
+  de capitalização nem acento foi "corrigido" (ex.: "ALUMINIO" sem acento, "90K"
+  na Majestic, "18.5kg" com ponto). Corrigir seria adivinhar — o cliente revisa
+  na fonte. "NÃO" = o modelo não tem aquele componente (bikes sem marcha).
 */
-const ARO29_SPECS: ProductSpecs = {
-  highlights: [
-    { icon: "aro", label: "Aro 29" },
-    { icon: "quadro", label: "Quadro em alumínio" },
-    { icon: "cambio", label: "Câmbio traseiro Shimano TZ31" },
-    { icon: "freio", label: "Freio a disco 160 mm" },
-    { icon: "alavanca", label: "Alavanca 3x7 V-Fire Index" },
-    { icon: "aro-parede-dupla", label: "Aros aéros parede dupla" },
-  ],
-  details: [
-    { label: "Peso", value: "14,2 kg" },
-    { label: "Tamanho do quadro", value: '17"' },
-    { label: "Material do quadro", value: "Alumínio 6061" },
-    { label: "Altura do selim", value: "82 – 96 cm" },
-    { label: "Comprimento total", value: "175 cm" },
-    { label: "Entre-eixos", value: "108 cm" },
-    { label: "Pneu", value: "29 x 2.10" },
-    { label: "Marchas", value: "21 (3x7)" },
-    { label: "Câmbio dianteiro", value: "Shimano TZ31" },
-    { label: "Freio dianteiro", value: "Disco mecânico 160 mm" },
-    { label: "Freio traseiro", value: "Disco mecânico 160 mm" },
-    { label: "Guidão", value: "Aço, 640 mm" },
-    { label: "Peso máximo suportado", value: "100 kg" },
-    { label: "Garantia", value: "1 ano contra defeitos de fabricação" },
-  ],
+const SPEC_LABELS = [
+  "Peso",
+  "Material do quadro",
+  "Alavanca de câmbio",
+  "Trocador traseiro",
+  "Trocador dianteiro",
+  "Pneu",
+  "Freio traseiro",
+  "Peso máximo suportado",
+  "Tamanho do quadro",
+  "Movimento central",
+  "Entre-eixos",
+  "Marchas",
+  "Freio dianteiro",
+  "Guidão",
+] as const;
+
+/** Casa os 14 valores (na ordem de SPEC_LABELS) com seus rótulos. */
+function specDetails(values: readonly string[]): { label: string; value: string }[] {
+  return SPEC_LABELS.map((label, i) => ({ label, value: values[i] }));
+}
+
+// prettier-ignore
+const DETAILS: Record<string, { label: string; value: string }[]> = {
+  oregon:      specDetails(["14,5 Kg", "ALUMINIO", "V-FIRE 21V", "SHIMANO TOURNEY 7V TZ31", "PACO Dual 28.6mm 31.8mm", "PACO / LEVORIN", "A DISCO MECÂNICO", "110Kg", "17''", "BLINDADO 122.5", "1,15m", "21 Velocidades", "A DISCO MECÂNICO", "ALUMÍNIO 31,8mm 720mm"]),
+  slim:        specDetails(["14,5 Kg", "ALUMINIO", "V-FIRE 21V", "SHIMANO TOURNEY 7V TZ31", "PACO Dual 28.6mm 31.8mm", "PACO / LEVORIN", "A DISCO MECÂNICO", "110Kg", "15.5''", "BLINDADO 122.5", "1,15m", "21 Velocidades", "A DISCO MECÂNICO", "ALUMÍNIO 31,8mm 720mm"]),
+  street:      specDetails(["14,5 Kg", "ALUMINIO", "V-FIRE 21V", "SHIMANO TOURNEY 7V TZ31", "PACO Dual 28.6mm 31.8mm", "PACO / LEVORIN", "A DISCO MECÂNICO", "110Kg", "13.5''", "BLINDADO 122.5", "1,15m", "21 Velocidades", "A DISCO MECÂNICO", "ALUMÍNIO 31,8mm 720mm"]),
+  doble:       specDetails(["18.5kg", "AÇO CARBONO", "Grip-shift - trocador na luva", "PACO 18v", "PACO Dual 28.6mm 31.8mm", "PACO / LEVORIN", "V-brake", "100Kg", "17''", "34,7mm - Rosca 3 Partes", "1.06m", "18 Velocidades", "V-brake", "AÇO CARBONO"]),
+  pulse:       specDetails(["11Kg", "AÇO CARBONO", "NÃO", "NÃO", "NÃO", "PACO / LEVORIN", "V-brake", "90Kg", "11''", "MONOBLOCO", "90cm", "NÃO", "V-brake", "AÇO CARBONO"]),
+  majestic:    specDetails(["11Kg", "AÇO CARBONO", "NÃO", "NÃO", "NÃO", "PACO / LEVORIN", "V-brake", "90K", "11''", "MONOBLOCO", "90cm", "NÃO", "V-brake", "AÇO CARBONO"]),
+  "pro-kids":  specDetails(["9Kg", "AÇO CARBONO", "NÃO", "NÃO", "NÃO", "PACO / LEVORIN", "V-brake", "80Kg", "8''", "MONOBLOCO", "75cm", "NÃO", "V-brake", "AÇO CARBONO"]),
+  "love-kids": specDetails(["9Kg", "AÇO CARBONO", "NÃO", "NÃO", "NÃO", "PACO / LEVORIN", "V-brake", "80Kg", "8''", "MONOBLOCO", "75cm", "NÃO", "V-brake", "AÇO CARBONO"]),
 };
+
+/*
+  Os seis cartões de destaque dos aro 29 (Oregon e Slim). Ordem = ordem no grid
+  (esquerda→direita, cima→baixo). Compartilhados por escolha do cliente ("mesma
+  coisa na Slim por enquanto"); separar quando divergirem.
+*/
+const ARO29_HIGHLIGHTS = [
+  { icon: "aro", label: "Aro 29" },
+  { icon: "quadro", label: "Quadro em alumínio" },
+  { icon: "cambio", label: "Câmbio traseiro Shimano TZ31" },
+  { icon: "freio", label: "Freio a disco 160 mm" },
+  { icon: "alavanca", label: "Alavanca 3x7 V-Fire Index" },
+  { icon: "aro-parede-dupla", label: "Aros aéros parede dupla" },
+];
 
 const SLIM_COLORS: ProductColor[] = [
   framed("slim", "preto-azul-rosa", "Preto (Azul + Rosa)", "269/06", "preto", "azul", "rosa"),
@@ -210,14 +232,14 @@ const PRO_KIDS_COLORS: ProductColor[] = [solid("pro-kids", "azul", "274/04"), so
 const LOVE_KIDS_COLORS: ProductColor[] = [solid("love-kids", "rosa", "275/03"), solid("love-kids", "branco", "275/05")];
 
 const MODELS: BikeModel[] = [
-  { id: "oregon", name: "Oregon", aro: 29, colors: OREGON_COLORS, specs: ARO29_SPECS },
-  { id: "slim", name: "Slim", aro: 29, colors: SLIM_COLORS, specs: ARO29_SPECS },
-  { id: "street", name: "Street", aro: 26, colors: STREET_COLORS },
-  { id: "doble", name: "Doble", aro: 26, colors: DOBLE_COLORS },
-  { id: "pulse", name: "Pulse", aro: 20, colors: PULSE_COLORS },
-  { id: "majestic", name: "Majestic", aro: 20, colors: MAJESTIC_COLORS },
-  { id: "pro-kids", name: "Pro Kids", aro: 16, colors: PRO_KIDS_COLORS },
-  { id: "love-kids", name: "Love Kids", aro: 16, colors: LOVE_KIDS_COLORS },
+  { id: "oregon", name: "Oregon", aro: 29, colors: OREGON_COLORS, specs: { highlights: ARO29_HIGHLIGHTS, details: DETAILS.oregon } },
+  { id: "slim", name: "Slim", aro: 29, colors: SLIM_COLORS, specs: { highlights: ARO29_HIGHLIGHTS, details: DETAILS.slim } },
+  { id: "street", name: "Street", aro: 26, colors: STREET_COLORS, specs: { details: DETAILS.street } },
+  { id: "doble", name: "Doble", aro: 26, colors: DOBLE_COLORS, specs: { details: DETAILS.doble } },
+  { id: "pulse", name: "Pulse", aro: 20, colors: PULSE_COLORS, specs: { details: DETAILS.pulse } },
+  { id: "majestic", name: "Majestic", aro: 20, colors: MAJESTIC_COLORS, specs: { details: DETAILS.majestic } },
+  { id: "pro-kids", name: "Pro Kids", aro: 16, colors: PRO_KIDS_COLORS, specs: { details: DETAILS["pro-kids"] } },
+  { id: "love-kids", name: "Love Kids", aro: 16, colors: LOVE_KIDS_COLORS, specs: { details: DETAILS["love-kids"] } },
 ];
 
 createCatalogPage<BikeModel>({

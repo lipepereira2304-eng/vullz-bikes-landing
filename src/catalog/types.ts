@@ -31,6 +31,13 @@ export interface SpecDetail {
   caracteriza a bike de relance — e `details` é a tabela completa, escondida
   atrás do "Mais informações".
 
+  Os dois são OPCIONAIS e independentes, porque chegam em tempos diferentes: a
+  tabela `details` veio para todos os modelos de uma vez (planilha do cliente),
+  mas os `highlights` só existem para os aro 29 até agora. Um modelo só com
+  `details` mostra a tabela direto, sem o botão "Mais informações" (não há
+  primeiro nível para recolher); quando ganhar `highlights`, o botão volta
+  sozinho. Ver specsContentMarkup.
+
   Seis não é um número solto: o grid é 3x2, e uma lista de tamanho diferente
   quebra essa simetria. Se um modelo tiver mais de seis características
   marcantes, a escolha é editorial (quais seis destacar), não técnica.
@@ -50,8 +57,8 @@ export interface SpecHighlight {
 }
 
 export interface ProductSpecs {
-  highlights: SpecHighlight[];
-  details: SpecDetail[];
+  highlights?: SpecHighlight[];
+  details?: SpecDetail[];
 }
 
 export interface ProductModel {
