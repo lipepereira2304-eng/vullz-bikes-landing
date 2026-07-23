@@ -142,23 +142,30 @@ const OREGON_COLORS: ProductColor[] = [
 ];
 
 /*
-  Ficha técnica da Oregon, tirada do catálogo em PDF.
+  Ficha técnica dos modelos ARO 29 (Oregon e Slim), a partir do catálogo em PDF.
 
   `highlights` são os seis cartões do topo — o que caracteriza a bike de
-  relance. `details` é a tabela do "Mais informações".
+  relance. A ORDEM aqui é a ordem em que aparecem no grid (esquerda→direita,
+  cima→baixo): aro, quadro, câmbio, freio, alavanca, aros. `details` é a tabela
+  do "Mais informações".
+
+  Compartilhada entre Oregon e Slim por decisão do cliente ("aplicar a mesma
+  coisa na Slim por enquanto"). Quando a Slim ganhar dados próprios, separar em
+  duas constantes.
 
   ATENÇÃO: os `details` abaixo são PROVISÓRIOS, escritos só para dar noção
   visual do volume e do formato da tabela. Nenhum número aqui foi conferido
-  com o catálogo — substituir pelos valores reais antes de publicar.
+  com o catálogo — substituir pelos valores reais antes de publicar. (Idem para
+  aplicar isto à Slim: os destaques podem não valer para ela sem conferência.)
 */
-const OREGON_SPECS: ProductSpecs = {
+const ARO29_SPECS: ProductSpecs = {
   highlights: [
+    { icon: "aro", label: "Aro 29" },
     { icon: "quadro", label: "Quadro em alumínio" },
     { icon: "cambio", label: "Câmbio traseiro Shimano TZ31" },
     { icon: "freio", label: "Freio a disco 160 mm" },
     { icon: "alavanca", label: "Alavanca 3x7 V-Fire Index" },
     { icon: "aro-parede-dupla", label: "Aros aéros parede dupla" },
-    { icon: "aro", label: "Aro 29" },
   ],
   details: [
     { label: "Peso", value: "14,2 kg" },
@@ -203,8 +210,8 @@ const PRO_KIDS_COLORS: ProductColor[] = [solid("pro-kids", "azul", "274/04"), so
 const LOVE_KIDS_COLORS: ProductColor[] = [solid("love-kids", "rosa", "275/03"), solid("love-kids", "branco", "275/05")];
 
 const MODELS: BikeModel[] = [
-  { id: "oregon", name: "Oregon", aro: 29, colors: OREGON_COLORS, specs: OREGON_SPECS },
-  { id: "slim", name: "Slim", aro: 29, colors: SLIM_COLORS },
+  { id: "oregon", name: "Oregon", aro: 29, colors: OREGON_COLORS, specs: ARO29_SPECS },
+  { id: "slim", name: "Slim", aro: 29, colors: SLIM_COLORS, specs: ARO29_SPECS },
   { id: "street", name: "Street", aro: 26, colors: STREET_COLORS },
   { id: "doble", name: "Doble", aro: 26, colors: DOBLE_COLORS },
   { id: "pulse", name: "Pulse", aro: 20, colors: PULSE_COLORS },
