@@ -29,13 +29,12 @@ A **tabela** da Slim agora é própria (dados da planilha, com "15.5''"). Mas os
 **seis cards de destaque** ainda são os mesmos da Oregon (const compartilhada
 `ARO29_HIGHLIGHTS`), a seu pedido. Confirmar se a Slim tem os mesmos destaques.
 
-### 4. Ícones dos novos cards (9 arquivos faltando)
-Os cards de destaque dos 6 modelos já estão definidos, mas 9 ícones ainda não
-existem — hoje mostram o espaço tracejado reservado. Largar na pasta
-`src/assets/icons/` com o nome exato (ver o README de lá):
-`freio-v-brake`, `18-velocidades`, `dupla-suspensao`, `pedivela-monobloco`,
-`aros-36-raios`, `descanso-lateral`, `cestinha-frontal`, `rodinhas-de-apoio`,
-`capa-de-protecao`.
+### 4. (resolvido) Ícones dos novos cards
+Todos os 6 ícones de cada um dos 8 modelos estão na pasta — nada reservado.
+Os 9 novos vieram pretos/branco e foram recoloridos para o cinza padrão
+(#737373). NOTA: o desenho de "Capa de proteção" é uma engrenagem (o arquivo
+era "coroa", que você indicou usar como capa) — se quiser um desenho mais
+representativo de capa depois, é só substituir o `capa-de-protecao.png`.
 
 ### 5. Doble tem 5 cards (não 6) → uma célula vazia no grid
 Você listou 4 características + aro para a Doble = 5 cards. O grid é 3×2, então

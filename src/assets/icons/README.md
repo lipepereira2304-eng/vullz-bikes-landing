@@ -28,33 +28,28 @@ arquivo novo quando o desenho for realmente outro.
 | `aro-parede-dupla.png` | Aros aéros / Aros em alumínio |
 | `aro.png` | Aro 29 |
 | `aro-16.png` `aro-20.png` `aro-26.png` | Aro de cada bike |
+| `18-velocidades.png` | 18 velocidades — Doble |
+| `dupla-suspensao.png` | Dupla suspensão — Doble |
+| `freio-v-brake.png` | Freio v-brake — Doble, Pulse, Majestic, Kids |
+| `pedivela.png` | Pedivela monobloco — Pulse, Majestic |
+| `aro-36-raios.png` | Aros 36 raios — Pulse |
+| `descanso-lateral.png` | Descanso lateral — Pulse, Majestic |
+| `cestinha.png` | Cestinha frontal — Majestic, Love Kids |
+| `rodinha.png` | Rodinhas de apoio — Pro Kids, Love Kids |
+| `capa-de-protecao.png` | Capa de proteção — Pro Kids, Love Kids |
 
-### ⏳ Faltam (hoje mostram o espaço tracejado)
-
-Cartões que você pediu para reservar. Largar o arquivo com este nome exato:
-
-| Arquivo esperado | Cartão | Modelos |
-| --- | --- | --- |
-| `freio-v-brake.png` | Freio v-brake | Doble, Pulse, Majestic, Pro Kids, Love Kids |
-| `18-velocidades.png` | 18 velocidades | Doble |
-| `dupla-suspensao.png` | Dupla suspensão | Doble |
-| `pedivela-monobloco.png` | Pedivela monobloco | Pulse, Majestic |
-| `aros-36-raios.png` | Aros 36 raios | Pulse |
-| `descanso-lateral.png` | Descanso lateral | Pulse, Majestic |
-| `cestinha-frontal.png` | Cestinha frontal | Majestic, Love Kids |
-| `rodinhas-de-apoio.png` | Rodinhas de apoio | Pro Kids, Love Kids |
-| `capa-de-protecao.png` | Capa de proteção | Pro Kids, Love Kids |
+Todos os 8 modelos de bicicleta têm os 6 ícones. Nada reservado no momento.
 
 ## Como os arquivos devem ser
 
-- **Quadrados** (proporção 1:1). São exibidos em 28×28 px, com `object-contain`
-  — um arquivo fora do quadrado não distorce, mas sobra espaço de um lado.
+- **Quadrados** (proporção 1:1). São exibidos em 28×28 px, com `object-contain`.
 - **SVG é o ideal**: escala sem perder nitidez e pesa pouco. Se vier de PNG,
   exportar em pelo menos 84×84 px (3×) para não borrar em tela retina.
 - **Fundo transparente.**
-- **Traço escuro ou preto.** O fundo do cartão é cinza bem claro (`#fafafa`),
-  então ícone claro some. Se os seus vierem em branco, avise — dá para inverter
-  por CSS em vez de reexportar tudo.
+- **Cor:** o padrão é o cinza `#737373` (o mesmo dos demais ícones). Se o
+  arquivo vier preto (ou de outra cor), é recolorido para esse cinza no momento
+  de entrar — a forma é preservada, só a cor muda. Ícones sobre fundo branco
+  opaco também são convertidos para traço sobre transparente.
 
 ## Se um arquivo faltar
 

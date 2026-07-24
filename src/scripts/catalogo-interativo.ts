@@ -241,25 +241,25 @@ const DOBLE_HIGHLIGHTS = [
 const PULSE_HIGHLIGHTS = [
   { icon: "aro-20", label: "Aro 20" },
   { icon: "quadro", label: "Quadro em aço de carbono" },
-  { icon: "pedivela-monobloco", label: "Pedivela monobloco" },
+  { icon: "pedivela", label: "Pedivela monobloco" },
   { icon: "freio-v-brake", label: "Freio v-brake" },
-  { icon: "aros-36-raios", label: "Aros 36 raios" },
+  { icon: "aro-36-raios", label: "Aros 36 raios" },
   { icon: "descanso-lateral", label: "Descanso lateral" },
 ];
 
 const MAJESTIC_HIGHLIGHTS = [
   { icon: "aro-20", label: "Aro 20" },
   { icon: "quadro", label: "Quadro em aço de carbono" },
-  { icon: "pedivela-monobloco", label: "Pedivela monobloco" },
+  { icon: "pedivela", label: "Pedivela monobloco" },
   { icon: "freio-v-brake", label: "Freio v-brake" },
-  { icon: "cestinha-frontal", label: "Cestinha frontal" },
+  { icon: "cestinha", label: "Cestinha frontal" },
   { icon: "descanso-lateral", label: "Descanso lateral" },
 ];
 
 const PRO_KIDS_HIGHLIGHTS = [
   { icon: "aro-16", label: "Aro 16" },
   { icon: "quadro", label: "Quadro em aço de carbono" },
-  { icon: "rodinhas-de-apoio", label: "Rodinhas de apoio" },
+  { icon: "rodinha", label: "Rodinhas de apoio" },
   { icon: "freio-v-brake", label: "Freio v-brake" },
   { icon: "capa-de-protecao", label: "Capa de proteção" },
   { icon: "aro-parede-dupla", label: "Aros em alumínio" },
@@ -268,10 +268,10 @@ const PRO_KIDS_HIGHLIGHTS = [
 const LOVE_KIDS_HIGHLIGHTS = [
   { icon: "aro-16", label: "Aro 16" },
   { icon: "quadro", label: "Quadro em aço de carbono" },
-  { icon: "rodinhas-de-apoio", label: "Rodinhas de apoio" },
+  { icon: "rodinha", label: "Rodinhas de apoio" },
   { icon: "freio-v-brake", label: "Freio v-brake" },
   { icon: "capa-de-protecao", label: "Capa de proteção" },
-  { icon: "cestinha-frontal", label: "Cestinha frontal" },
+  { icon: "cestinha", label: "Cestinha frontal" },
 ];
 
 const SLIM_COLORS: ProductColor[] = [
