@@ -181,9 +181,29 @@ function specIconSlotMarkup(icons: AssetMap, iconId: string): string {
 }
 
 /*
+  Padroniza a apresentação do VALOR de uma linha da ficha (nunca do rótulo):
+
+  - "NÃO" (o modelo não tem aquele componente) vira um traço — mais limpo que a
+    palavra repetida em várias linhas.
+  - garante o espaço entre número e unidade de peso ("9Kg" → "9 Kg"); o
+    maiúsculo do "KG" vem do CSS, então aqui só o espaço.
+
+  O MAIÚSCULO geral não é feito aqui, é `text-transform: uppercase` no <dd>:
+  assim o texto real continua em caixa natural no DOM (melhor para leitor de
+  tela) e a caixa é só de exibição. Manter as duas coisas juntas — a regra de
+  caixa no CSS, a de conteúdo aqui — é de propósito: são naturezas diferentes.
+*/
+function formatSpecValue(value: string): string {
+  if (value.trim() === "NÃO") return "–";
+  return value.replace(/(\d)\s*(kg)\b/gi, "$1 $2");
+}
+
+/*
   A tabela de especificações — pares rótulo/valor. `<dl>` e não `<table>`
   porque isto é uma lista de pares, não uma matriz de linhas e colunas: um
-  leitor de tela anuncia "Peso, 14,5 Kg" em vez de tentar narrar coordenadas.
+  leitor de tela anuncia "Peso, 14,5 kg" em vez de tentar narrar coordenadas.
+
+  Só o valor (`<dd>`) é maiúsculo; o rótulo (`<dt>`) fica em caixa natural.
 */
 function specsTableMarkup(details: SpecDetail[]): string {
   return /* html */ `
@@ -193,7 +213,7 @@ function specsTableMarkup(details: SpecDetail[]): string {
           (row) => /* html */ `
             <div class="flex items-baseline justify-between gap-3 border-b border-vullz-gray-200 py-2">
               <dt class="shrink-0 text-vullz-gray-500">${row.label}</dt>
-              <dd class="pl-3 text-right font-medium text-vullz-black">${row.value}</dd>
+              <dd class="pl-3 text-right font-medium uppercase text-vullz-black">${formatSpecValue(row.value)}</dd>
             </div>
           `
         )

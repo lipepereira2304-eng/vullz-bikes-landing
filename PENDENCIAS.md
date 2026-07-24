@@ -9,21 +9,16 @@ _Última atualização: 2026-07-23._
 
 ## 🔴 Precisam de decisão/ação sua
 
-### 1. Inconsistências na planilha (dados aplicados fielmente, NÃO corrigidos)
-A tabela agora usa os dados reais da planilha "Ficha Técnica Bikes", aplicados
-tal como vieram — só limpei espaços em excesso. **Não corrigi capitalização,
-acentos nem formatação**, porque isso seria adivinhar. Pontos a revisar na
-fonte (`src/scripts/catalogo-interativo.ts`, const `DETAILS`):
-- **"90K"** na Majestic (peso máximo) — provável erro de "90Kg".
-- **"ALUMINIO"** sem acento (vários) vs. "ALUMÍNIO" no guidão — inconsistente.
-- **"18.5kg"** (Doble) usa ponto e minúsculas; os outros usam "14,5 Kg" (vírgula,
-  espaço, Kg). Padrões de unidade misturados no geral (Kg/kg, cm/m, aspas).
-- **CAIXA ALTA** em muitos valores ("A DISCO MECÂNICO", "V-FIRE 21V") ao lado de
-  "V-brake", "Grip-shift" minúsculos — a tabela fica visualmente heterogênea.
-- **"NÃO"** aparece nos modelos sem marcha (Pulse/Majestic/Kids) — está correto,
-  mas confirmar se prefere assim ou uma linha omitida.
-**Decidir:** você corrige na planilha e reenvia, ou me autoriza a padronizar
-(com cuidado manual nas siglas TZ31/PACO/SHIMANO/LEVORIN).
+### 1. Resíduos da planilha (a REVISAR na fonte, não bloqueiam)
+A padronização de exibição já resolveu a heterogeneidade visual: tudo em
+MAIÚSCULO, "9 KG" com espaço, "NÃO" → traço (feito em formatSpecValue/CSS, não
+nos dados). Mas dois resíduos de conteúdo continuam nos dados e só o cliente
+resolve (`src/scripts/catalogo-interativo.ts`, const `DETAILS`):
+- **"ALUMINIO"** sem acento vira "ALUMINIO" na tela (o uppercase não inventa
+  acento). Se quiser "ALUMÍNIO", corrigir a string na fonte.
+- **"18.5kg"** (Doble) usa ponto decimal; os outros usam vírgula ("14,5"). O
+  uppercase não uniformiza isso. Decidir o separador padrão.
+- (resolvido) "90K" da Majestic → "90Kg" na fonte; exibe "90 KG".
 
 ### 2. Ordem das linhas da tabela
 Mantive a ordem exata da planilha. Nela "Freio traseiro" (7º) fica longe de
@@ -102,5 +97,8 @@ testar Saira Condensed; foi revertido.
 - Nova ordem dos destaques (aro → quadro → câmbio → freio → alavanca → aros)
   aplicada a Oregon e Slim.
 - Tabela "Mais informações" com dados reais da planilha aplicada aos **8
-  modelos** de bicicleta. Modelos sem cards abrem a tabela direto (sem botão);
-  os aro 29 mantêm cards + botão. Verificado modelo a modelo.
+  modelos** de bicicleta. Verificado modelo a modelo.
+- Cards de destaque definidos para os **8 modelos** (Street reusa os da Oregon
+  com Aro 26; Doble fica com 5 cards de propósito). 9 ícones ainda a chegar.
+- Padronização de exibição da tabela: valores em MAIÚSCULO (rótulo em caixa
+  natural), peso sempre "NN KG" com espaço, "NÃO" → traço.

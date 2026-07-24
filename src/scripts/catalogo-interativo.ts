@@ -154,10 +154,16 @@ const OREGON_COLORS: ProductColor[] = [
   array de 14 valores nessa ordem — é o que torna a edição futura um replace de
   strings, sem risco de desalinhar rótulo e valor.
 
-  Os VALORES estão como na planilha, só com espaços em excesso removidos: nada
-  de capitalização nem acento foi "corrigido" (ex.: "ALUMINIO" sem acento, "90K"
-  na Majestic, "18.5kg" com ponto). Corrigir seria adivinhar — o cliente revisa
-  na fonte. "NÃO" = o modelo não tem aquele componente (bikes sem marcha).
+  Os VALORES ficam aqui em caixa NATURAL, como na planilha (só espaços em
+  excesso removidos) — legíveis para editar. A padronização de exibição
+  (TUDO MAIÚSCULO, "9 KG" com espaço, "NÃO" → traço) é aplicada na hora de
+  renderizar, em formatSpecValue/CSS (markup.ts), não aqui. Assim qualquer
+  valor futuro herda o padrão sem o editor precisar lembrar.
+
+  Acentos/typos NÃO foram "corrigidos" (ex.: "ALUMINIO" sem acento, "18.5kg"
+  com ponto onde os outros usam vírgula) — isso é conteúdo do cliente, revisar
+  na fonte. Exceção: "90K" da Majestic virou "90Kg" (o "g" faltando era claro).
+  "NÃO" = o modelo não tem aquele componente (bikes sem marcha).
 */
 const SPEC_LABELS = [
   "Peso",
@@ -188,7 +194,7 @@ const DETAILS: Record<string, { label: string; value: string }[]> = {
   street:      specDetails(["14,5 Kg", "ALUMINIO", "V-FIRE 21V", "SHIMANO TOURNEY 7V TZ31", "PACO Dual 28.6mm 31.8mm", "PACO / LEVORIN", "A DISCO MECÂNICO", "110Kg", "13.5''", "BLINDADO 122.5", "1,15m", "21 Velocidades", "A DISCO MECÂNICO", "ALUMÍNIO 31,8mm 720mm"]),
   doble:       specDetails(["18.5kg", "AÇO CARBONO", "Grip-shift - trocador na luva", "PACO 18v", "PACO Dual 28.6mm 31.8mm", "PACO / LEVORIN", "V-brake", "100Kg", "17''", "34,7mm - Rosca 3 Partes", "1.06m", "18 Velocidades", "V-brake", "AÇO CARBONO"]),
   pulse:       specDetails(["11Kg", "AÇO CARBONO", "NÃO", "NÃO", "NÃO", "PACO / LEVORIN", "V-brake", "90Kg", "11''", "MONOBLOCO", "90cm", "NÃO", "V-brake", "AÇO CARBONO"]),
-  majestic:    specDetails(["11Kg", "AÇO CARBONO", "NÃO", "NÃO", "NÃO", "PACO / LEVORIN", "V-brake", "90K", "11''", "MONOBLOCO", "90cm", "NÃO", "V-brake", "AÇO CARBONO"]),
+  majestic:    specDetails(["11Kg", "AÇO CARBONO", "NÃO", "NÃO", "NÃO", "PACO / LEVORIN", "V-brake", "90Kg", "11''", "MONOBLOCO", "90cm", "NÃO", "V-brake", "AÇO CARBONO"]),
   "pro-kids":  specDetails(["9Kg", "AÇO CARBONO", "NÃO", "NÃO", "NÃO", "PACO / LEVORIN", "V-brake", "80Kg", "8''", "MONOBLOCO", "75cm", "NÃO", "V-brake", "AÇO CARBONO"]),
   "love-kids": specDetails(["9Kg", "AÇO CARBONO", "NÃO", "NÃO", "NÃO", "PACO / LEVORIN", "V-brake", "80Kg", "8''", "MONOBLOCO", "75cm", "NÃO", "V-brake", "AÇO CARBONO"]),
 };
