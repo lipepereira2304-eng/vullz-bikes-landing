@@ -35,13 +35,18 @@ A **tabela** da Slim agora é própria (dados da planilha, com "15.5''"). Mas os
 **seis cards de destaque** ainda são os mesmos da Oregon (const compartilhada
 `ARO29_HIGHLIGHTS`), a seu pedido. Confirmar se a Slim tem os mesmos destaques.
 
-### 4. Cards de destaque dos modelos não-aro-29
-Street, Doble, Pulse, Majestic, Pro Kids e Love Kids **têm a tabela** ("Mais
-informações"), mas **não têm os seis cards** de destaque. Hoje a ficha deles
-abre mostrando a tabela direto, sem o botão "Mais informações" (não há o que
-recolher). Quando você definir os destaques desses modelos, o botão e os cards
-voltam sozinhos. **Falta também definir os labels dos cards por aro** (o card
-"Aro 29" não serve para um aro 26).
+### 4. Ícones dos novos cards (9 arquivos faltando)
+Os cards de destaque dos 6 modelos já estão definidos, mas 9 ícones ainda não
+existem — hoje mostram o espaço tracejado reservado. Largar na pasta
+`src/assets/icons/` com o nome exato (ver o README de lá):
+`freio-v-brake`, `18-velocidades`, `dupla-suspensao`, `pedivela-monobloco`,
+`aros-36-raios`, `descanso-lateral`, `cestinha-frontal`, `rodinhas-de-apoio`,
+`capa-de-protecao`.
+
+### 5. Doble tem 5 cards (não 6) → uma célula vazia no grid
+Você listou 4 características + aro para a Doble = 5 cards. O grid é 3×2, então
+sobra uma célula vazia no canto inferior direito. Fica aceitável, mas se quiser
+simetria, definir um 6º destaque para a Doble.
 
 ### 5. Labels dos cards (aro 29): manter detalhados ou encurtar?
 Ao definir a ordem você escreveu nomes curtos ("câmbio traseiro", "freio a

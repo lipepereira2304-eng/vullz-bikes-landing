@@ -194,9 +194,19 @@ const DETAILS: Record<string, { label: string; value: string }[]> = {
 };
 
 /*
-  Os seis cartões de destaque dos aro 29 (Oregon e Slim). Ordem = ordem no grid
-  (esquerda→direita, cima→baixo). Compartilhados por escolha do cliente ("mesma
-  coisa na Slim por enquanto"); separar quando divergirem.
+  ---------------------------------------------------------------------------
+  CARTÕES DE DESTAQUE por modelo.
+  ---------------------------------------------------------------------------
+  Ordem = ordem no grid (esquerda→direita, cima→baixo). O PRIMEIRO cartão é
+  sempre o aro da bike, e o ícone do aro é próprio de cada um (aro-16/20/26,
+  e "aro" = aro 29).
+
+  Sobre os ícones: os que já existem em src/assets/icons/ aparecem; os que ainda
+  não existem (ex.: "freio-v-brake", "descanso-lateral") mostram o espaço
+  reservado tracejado até o arquivo ser colocado — o cliente vai mandar depois.
+  Vários destaques diferentes reusam o MESMO ícone de propósito: "Quadro em aço
+  de carbono" usa o ícone `quadro` (mesma silhueta), e "Aros em alumínio" usa o
+  `aro-parede-dupla` (o de aros aéros).
 */
 const ARO29_HIGHLIGHTS = [
   { icon: "aro", label: "Aro 29" },
@@ -205,6 +215,53 @@ const ARO29_HIGHLIGHTS = [
   { icon: "freio", label: "Freio a disco 160 mm" },
   { icon: "alavanca", label: "Alavanca 3x7 V-Fire Index" },
   { icon: "aro-parede-dupla", label: "Aros aéros parede dupla" },
+];
+
+// Street é aro 26 mas tem as MESMAS características da Oregon — só o aro muda.
+const STREET_HIGHLIGHTS = [{ icon: "aro-26", label: "Aro 26" }, ...ARO29_HIGHLIGHTS.slice(1)];
+
+const DOBLE_HIGHLIGHTS = [
+  { icon: "aro-26", label: "Aro 26" },
+  { icon: "quadro", label: "Quadro em aço de carbono" },
+  { icon: "18-velocidades", label: "18 velocidades" },
+  { icon: "freio-v-brake", label: "Freio v-brake" },
+  { icon: "dupla-suspensao", label: "Dupla suspensão" },
+];
+
+const PULSE_HIGHLIGHTS = [
+  { icon: "aro-20", label: "Aro 20" },
+  { icon: "quadro", label: "Quadro em aço de carbono" },
+  { icon: "pedivela-monobloco", label: "Pedivela monobloco" },
+  { icon: "freio-v-brake", label: "Freio v-brake" },
+  { icon: "aros-36-raios", label: "Aros 36 raios" },
+  { icon: "descanso-lateral", label: "Descanso lateral" },
+];
+
+const MAJESTIC_HIGHLIGHTS = [
+  { icon: "aro-20", label: "Aro 20" },
+  { icon: "quadro", label: "Quadro em aço de carbono" },
+  { icon: "pedivela-monobloco", label: "Pedivela monobloco" },
+  { icon: "freio-v-brake", label: "Freio v-brake" },
+  { icon: "cestinha-frontal", label: "Cestinha frontal" },
+  { icon: "descanso-lateral", label: "Descanso lateral" },
+];
+
+const PRO_KIDS_HIGHLIGHTS = [
+  { icon: "aro-16", label: "Aro 16" },
+  { icon: "quadro", label: "Quadro em aço de carbono" },
+  { icon: "rodinhas-de-apoio", label: "Rodinhas de apoio" },
+  { icon: "freio-v-brake", label: "Freio v-brake" },
+  { icon: "capa-de-protecao", label: "Capa de proteção" },
+  { icon: "aro-parede-dupla", label: "Aros em alumínio" },
+];
+
+const LOVE_KIDS_HIGHLIGHTS = [
+  { icon: "aro-16", label: "Aro 16" },
+  { icon: "quadro", label: "Quadro em aço de carbono" },
+  { icon: "rodinhas-de-apoio", label: "Rodinhas de apoio" },
+  { icon: "freio-v-brake", label: "Freio v-brake" },
+  { icon: "capa-de-protecao", label: "Capa de proteção" },
+  { icon: "cestinha-frontal", label: "Cestinha frontal" },
 ];
 
 const SLIM_COLORS: ProductColor[] = [
@@ -234,12 +291,12 @@ const LOVE_KIDS_COLORS: ProductColor[] = [solid("love-kids", "rosa", "275/03"), 
 const MODELS: BikeModel[] = [
   { id: "oregon", name: "Oregon", aro: 29, colors: OREGON_COLORS, specs: { highlights: ARO29_HIGHLIGHTS, details: DETAILS.oregon } },
   { id: "slim", name: "Slim", aro: 29, colors: SLIM_COLORS, specs: { highlights: ARO29_HIGHLIGHTS, details: DETAILS.slim } },
-  { id: "street", name: "Street", aro: 26, colors: STREET_COLORS, specs: { details: DETAILS.street } },
-  { id: "doble", name: "Doble", aro: 26, colors: DOBLE_COLORS, specs: { details: DETAILS.doble } },
-  { id: "pulse", name: "Pulse", aro: 20, colors: PULSE_COLORS, specs: { details: DETAILS.pulse } },
-  { id: "majestic", name: "Majestic", aro: 20, colors: MAJESTIC_COLORS, specs: { details: DETAILS.majestic } },
-  { id: "pro-kids", name: "Pro Kids", aro: 16, colors: PRO_KIDS_COLORS, specs: { details: DETAILS["pro-kids"] } },
-  { id: "love-kids", name: "Love Kids", aro: 16, colors: LOVE_KIDS_COLORS, specs: { details: DETAILS["love-kids"] } },
+  { id: "street", name: "Street", aro: 26, colors: STREET_COLORS, specs: { highlights: STREET_HIGHLIGHTS, details: DETAILS.street } },
+  { id: "doble", name: "Doble", aro: 26, colors: DOBLE_COLORS, specs: { highlights: DOBLE_HIGHLIGHTS, details: DETAILS.doble } },
+  { id: "pulse", name: "Pulse", aro: 20, colors: PULSE_COLORS, specs: { highlights: PULSE_HIGHLIGHTS, details: DETAILS.pulse } },
+  { id: "majestic", name: "Majestic", aro: 20, colors: MAJESTIC_COLORS, specs: { highlights: MAJESTIC_HIGHLIGHTS, details: DETAILS.majestic } },
+  { id: "pro-kids", name: "Pro Kids", aro: 16, colors: PRO_KIDS_COLORS, specs: { highlights: PRO_KIDS_HIGHLIGHTS, details: DETAILS["pro-kids"] } },
+  { id: "love-kids", name: "Love Kids", aro: 16, colors: LOVE_KIDS_COLORS, specs: { highlights: LOVE_KIDS_HIGHLIGHTS, details: DETAILS["love-kids"] } },
 ];
 
 createCatalogPage<BikeModel>({

@@ -13,20 +13,37 @@ Coloque o arquivo nesta pasta com o nome que está no campo `icon` do destaque
 (em `src/scripts/catalogo-interativo.ts`). Extensões aceitas: `.svg`, `.png`,
 `.webp` — nessa ordem de preferência.
 
-### Nomes esperados hoje (Oregon)
+Os nomes são compartilhados entre modelos: "Quadro em aço de carbono" reusa o
+mesmo `quadro`, "Aros em alumínio" reusa o `aro-parede-dupla`. Só crie um
+arquivo novo quando o desenho for realmente outro.
 
-| Arquivo | Cartão |
+### ✅ Já na pasta
+
+| Arquivo | Usado em |
 | --- | --- |
-| `quadro.svg` | Quadro em alumínio |
-| `cambio.svg` | Câmbio traseiro Shimano TZ31 |
-| `freio.svg` | Freio a disco 160 mm |
-| `alavanca.svg` | Alavanca 3x7 V-Fire Index |
-| `aro-parede-dupla.svg` | Aros aéros parede dupla |
-| `aro.svg` | Aro 29 |
+| `quadro.png` | Quadro (alumínio ou aço) — todos |
+| `cambio.png` | Câmbio traseiro Shimano — aro 29 e Street |
+| `freio.png` | Freio a disco — aro 29 e Street |
+| `alavanca.png` | Alavanca 3x7 — aro 29 e Street |
+| `aro-parede-dupla.png` | Aros aéros / Aros em alumínio |
+| `aro.png` | Aro 29 |
+| `aro-16.png` `aro-20.png` `aro-26.png` | Aro de cada bike |
 
-Os nomes são compartilhados entre modelos: se a Slim também tiver "Quadro em
-alumínio", ela reusa o mesmo `quadro.svg`. Só crie um arquivo novo quando o
-desenho for realmente outro.
+### ⏳ Faltam (hoje mostram o espaço tracejado)
+
+Cartões que você pediu para reservar. Largar o arquivo com este nome exato:
+
+| Arquivo esperado | Cartão | Modelos |
+| --- | --- | --- |
+| `freio-v-brake.png` | Freio v-brake | Doble, Pulse, Majestic, Pro Kids, Love Kids |
+| `18-velocidades.png` | 18 velocidades | Doble |
+| `dupla-suspensao.png` | Dupla suspensão | Doble |
+| `pedivela-monobloco.png` | Pedivela monobloco | Pulse, Majestic |
+| `aros-36-raios.png` | Aros 36 raios | Pulse |
+| `descanso-lateral.png` | Descanso lateral | Pulse, Majestic |
+| `cestinha-frontal.png` | Cestinha frontal | Majestic, Love Kids |
+| `rodinhas-de-apoio.png` | Rodinhas de apoio | Pro Kids, Love Kids |
+| `capa-de-protecao.png` | Capa de proteção | Pro Kids, Love Kids |
 
 ## Como os arquivos devem ser
 
