@@ -9,16 +9,15 @@ _Última atualização: 2026-07-23._
 
 ## 🔴 Precisam de decisão/ação sua
 
-### 1. Resíduos da planilha (a REVISAR na fonte, não bloqueiam)
-A padronização de exibição já resolveu a heterogeneidade visual: tudo em
-MAIÚSCULO, "9 KG" com espaço, "NÃO" → traço (feito em formatSpecValue/CSS, não
-nos dados). Mas dois resíduos de conteúdo continuam nos dados e só o cliente
-resolve (`src/scripts/catalogo-interativo.ts`, const `DETAILS`):
-- **"ALUMINIO"** sem acento vira "ALUMINIO" na tela (o uppercase não inventa
-  acento). Se quiser "ALUMÍNIO", corrigir a string na fonte.
-- **"18.5kg"** (Doble) usa ponto decimal; os outros usam vírgula ("14,5"). O
-  uppercase não uniformiza isso. Decidir o separador padrão.
-- (resolvido) "90K" da Majestic → "90Kg" na fonte; exibe "90 KG".
+### 1. Erros da planilha — corrigidos; confirmar 1 escolha
+Revisão dos valores feita. Corrigido na fonte (`const DETAILS`): acento
+("ALUMINIO"→"ALUMÍNIO"); "90K"→"90Kg" (Majestic); separador decimal
+padronizado para vírgula (28.6/31.8 do trocador, 122.5, 18.5, 1.06, 15.5"/13.5"
+tinham ponto). **Confirmar:** 28,6/31,8 mm são diâmetros de padrão técnico às
+vezes escritos com ponto — padronizei para vírgula por coerência com o resto
+da tabela; se preferir o ponto NESSES campos, aviso e reverto só eles.
+Conteúdo não-corrigível por mim (precisa dos valores reais): confirmar se
+"Aço carbono" leva hífen, e revisar os números da tabela em si na fonte real.
 
 ### 2. Ordem das linhas da tabela
 Mantive a ordem exata da planilha. Nela "Freio traseiro" (7º) fica longe de
