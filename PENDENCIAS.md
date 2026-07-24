@@ -54,20 +54,17 @@ Todo o `catalogo-eletricos.ts` ainda está sem ficha técnica.
 
 ## 🟡 Qualidade / técnica (recomendo resolver antes de divulgar em massa)
 
-### 5. Ícones têm margens internas diferentes → tamanhos visuais desiguais
-Cada PNG tem uma margem transparente diferente (medido: `freio` ocupa 89% da
-altura do arquivo, `quadro` só 44%). Como todos entram na mesma caixa de 36px
-com `object-contain`, uns aparecem bem maiores que outros. **Correção
-definitiva:** reexportar todos com o desenho preenchendo o mesmo % do quadrado.
-Alternativa: compensar por CSS ícone a ícone (funciona, mas quebra se os
-arquivos forem reexportados). Não mexo nas imagens sem seu aval.
+### 5. (resolvido) Padronização dos ícones
+Todos os 18 ícones foram normalizados: canvas 256×256, desenho ocupando 86% da
+maior dimensão, centralizado — tamanho visual uniforme nos cards. De brinde, o
+peso caiu de ~2 MB para ~480 KB. Cor unificada em #737373 (exceto os aros, que
+ficaram num cinza mais claro — ver abaixo).
 
-### 6. Peso dos ícones PNG (relevante para mobile / QR Code)
-1,2 MB só de ícones — `freio.png` sozinho tem 383 KB para um ícone de 36px.
-Num catálogo aberto por QR Code em rede móvel, pesa mais que a foto da bike.
-**Ideal: SVG** (poucos KB, nítido em qualquer tela, e é desenho de traço). Se só
-houver PNG, reexportar a ~128px em vez de 1024px corta ~95% do peso. Você disse
-que salvou PNG "pra testar", então provavelmente já está no radar.
+### 6. Aros num cinza mais claro que os demais ícones
+Os ícones de aro (aro, aro-16/20/26) estão em ~#b0 (cinza claro), enquanto todos
+os outros estão em #737373. No card, o aro (1º) fica um pouco mais claro que os
+5 seguintes. Não foi pedido para uniformizar; se quiser, recoloro os aros para
+#737373 também.
 
 ---
 
