@@ -66,6 +66,12 @@ export interface ProductModel {
   name: string;
   colors: ProductColor[];
   /*
+    Texto de venda do modelo, exibido no quadro acima da ficha técnica.
+    Opcional: sem ele, o quadro simplesmente não aparece e a ficha ocupa o
+    lugar sozinha, como antes.
+  */
+  description?: string;
+  /*
     Opcional porque as fichas chegam modelo a modelo. Sem ela, a ficha abre
     com um aviso de "em breve" em vez de cartões vazios — some o conteúdo, não
     a interação.

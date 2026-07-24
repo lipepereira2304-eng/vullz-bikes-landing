@@ -113,16 +113,27 @@ export function specsPanelMarkup(
       data-visible="false"
       inert
       aria-label="Ficha técnica"
-      class="absolute inset-x-4 bottom-4 z-20 flex max-h-[calc(100%-2rem)] flex-col justify-end lg:inset-y-0 lg:left-auto lg:right-6 lg:w-[42%] lg:max-h-none lg:justify-center"
+      class="absolute inset-x-4 bottom-4 z-20 flex max-h-[74%] flex-col justify-end gap-3 lg:inset-y-4 lg:left-auto lg:right-6 lg:w-[42%] lg:max-h-none lg:justify-center"
     >
       <!--
-        Duas camadas de propósito: o <aside> só POSICIONA (ocupa a faixa
-        reservada e centraliza), e este <div> é o quadro visível. Enquanto o
-        fundo e a borda estavam no próprio <aside>, o quadro esticava por toda
-        a altura da faixa e sobrava um vazio enorme em volta de um texto curto.
-        Separando, o quadro abraça o conteúdo e a faixa cuida de onde ele fica.
+        O <aside> só POSICIONA (ocupa a faixa reservada e centraliza o
+        conjunto); os quadros visíveis são os <div> filhos. Enquanto o fundo e a
+        borda estavam no próprio <aside>, o quadro esticava por toda a altura da
+        faixa e sobrava um vazio enorme em volta de um texto curto.
+
+        São DOIS quadros empilhados — descrição em cima, ficha embaixo — dentro
+        do mesmo <aside> de propósito: assim entram e saem como uma coisa só (a
+        animação vive no <aside>) e o par fica centralizado em conjunto, o que
+        alinha a descrição com o logo e a ficha com a bike do lado esquerdo.
       -->
-      <div class="flex max-h-full flex-col gap-5 overflow-y-auto rounded-3xl border border-vullz-gray-200 bg-white px-6 py-5 shadow-[0_24px_60px_-32px_rgba(17,17,17,0.35)] lg:px-8 lg:py-7">
+      ${model.description ? descriptionCardMarkup(model.description) : ""}
+
+      <!--
+        min-h-0 (e não max-h-full): com dois filhos, é o que permite a ficha
+        encolher e rolar por dentro quando a tabela abre, em vez de empurrar a
+        descrição para fora da tela. A descrição é shrink-0 e fica intacta.
+      -->
+      <div class="flex min-h-0 flex-col gap-5 overflow-y-auto rounded-3xl border border-vullz-gray-200 bg-white px-6 py-5 shadow-[0_24px_60px_-32px_rgba(17,17,17,0.35)] lg:px-8 lg:py-7">
         <header class="flex flex-col gap-1">
           <h2 class="text-lg font-extrabold uppercase tracking-wide text-vullz-black">
             Ficha Técnica
@@ -135,6 +146,25 @@ export function specsPanelMarkup(
         ${model.specs ? specsContentMarkup(model.specs, icons) : specsEmptyMarkup()}
       </div>
     </aside>
+  `;
+}
+
+/*
+  Quadro da descrição do produto — mesma linguagem visual da ficha (cantos
+  arredondados, borda, sombra), só que baixo: é um parágrafo curto, então o
+  quadro fica com cerca de metade da altura do da ficha sem precisar de altura
+  fixa. `shrink-0` para ele não ser espremido quando a tabela da ficha abre.
+*/
+function descriptionCardMarkup(description: string): string {
+  return /* html */ `
+    <div
+      data-role="description-card"
+      class="shrink-0 rounded-3xl border border-vullz-gray-200 bg-white px-6 py-4 shadow-[0_24px_60px_-32px_rgba(17,17,17,0.35)] lg:px-8 lg:py-5"
+    >
+      <p class="text-[13px] leading-relaxed text-vullz-gray-500 lg:text-sm">
+        ${description}
+      </p>
+    </div>
   `;
 }
 
@@ -278,22 +308,36 @@ function specsContentMarkup(specs: ProductSpecs, icons: AssetMap): string {
             <div>${specsTableMarkup(details)}</div>
           </div>
 
-          <button
-            type="button"
-            data-role="specs-details-toggle"
-            aria-expanded="false"
-            aria-controls="specs-details"
-            class="btn-motion inline-flex items-center justify-center gap-2 self-center rounded-full border border-vullz-gray-500 px-5 py-2 text-xs font-bold uppercase tracking-widest text-vullz-gray-500 hover:border-vullz-black hover:text-vullz-black active:scale-[0.985] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vullz-black focus-visible:ring-offset-2"
-          >
-            <span data-role="specs-details-label">Mais informações</span>
-            <svg
-              data-role="specs-details-chevron"
-              width="12" height="12" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg"
-              class="chevron-motion shrink-0"
+          <!--
+            Rodapé fixo do card. Com a tabela aberta o conteúdo pode ficar mais
+            alto que o card e passar a rolar por dentro; sem o sticky, o botão —
+            que é a ÚNICA forma de fechar a tabela — sairia da área visível e só
+            reapareceria depois de rolar até o fim.
+
+            A faixa branca é este <div>, e não o próprio botão: o botão é um
+            pill arredondado, então o texto da tabela continuaria aparecendo nas
+            laterais dele. As margens negativas esticam a faixa até as bordas do
+            card (anulando o padding), para o conteúdo passar por baixo sem
+            vazar em nenhum ponto.
+          -->
+          <div class="sticky bottom-0 z-10 -mx-6 -mb-5 flex justify-center bg-white px-6 pb-5 pt-3 lg:-mx-8 lg:-mb-7 lg:px-8 lg:pb-7">
+            <button
+              type="button"
+              data-role="specs-details-toggle"
+              aria-expanded="false"
+              aria-controls="specs-details"
+              class="btn-motion inline-flex items-center justify-center gap-2 rounded-full border border-vullz-gray-500 px-5 py-2 text-xs font-bold uppercase tracking-widest text-vullz-gray-500 hover:border-vullz-black hover:text-vullz-black active:scale-[0.985] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vullz-black focus-visible:ring-offset-2"
             >
-              <path d="M1 3L5 7L9 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-            </svg>
-          </button>
+              <span data-role="specs-details-label">Mais informações</span>
+              <svg
+                data-role="specs-details-chevron"
+                width="12" height="12" viewBox="0 0 10 10" fill="none" xmlns="http://www.w3.org/2000/svg"
+                class="chevron-motion shrink-0"
+              >
+                <path d="M1 3L5 7L9 3" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </button>
+          </div>
         `
         : ""
     }

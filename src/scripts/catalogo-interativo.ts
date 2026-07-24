@@ -143,6 +143,33 @@ const OREGON_COLORS: ProductColor[] = [
 
 /*
   ---------------------------------------------------------------------------
+  DESCRIÇÕES — texto de venda de cada modelo (fornecido pelo cliente).
+  ---------------------------------------------------------------------------
+  Aparecem no quadro acima da ficha técnica. Texto corrido, em caixa natural:
+  é o único conteúdo do painel que se lê como frase, e não como dado, por isso
+  não recebe o MAIÚSCULO da tabela.
+*/
+const DESCRIPTIONS: Record<string, string> = {
+  oregon:
+    "A Oregon foi desenvolvida para quem busca uma bicicleta versátil, confortável e confiável para diferentes tipos de percurso. Ideal para passeios, deslocamentos e estradas de terra leves, ela oferece uma experiência de pedal equilibrada para quem quer aproveitar cada trajeto com segurança e controle.",
+  slim:
+    "A Slim foi criada para proporcionar uma pedalada confortável e equilibrada em diferentes tipos de percurso. Ideal para passeios, deslocamentos e estradas de terra leves, é uma bicicleta versátil que acompanha a rotina e os momentos de lazer com segurança e praticidade.",
+  street:
+    "A Street combina estilo e praticidade para quem procura uma bicicleta versátil e fácil de conduzir. Indicada para uso urbano, ciclovias e passeios, ela oferece uma pedalada confortável e ágil para diferentes momentos da rotina.",
+  doble:
+    "Com visual robusto e proposta voltada ao conforto, a Doble é ideal para quem busca uma experiência de pedal mais agradável em diferentes tipos de terreno. Indicada para passeios, estradas de terra leves e percursos urbanos, ela oferece mais absorção de impactos e uma condução estável.",
+  pulse:
+    "A Pulse é a companhia ideal para acompanhar a evolução dos pequenos sobre duas rodas. Confortável, fácil de conduzir e versátil, é perfeita para passeios, momentos de lazer e para incentivar a prática de atividades ao ar livre com mais confiança e diversão.",
+  majestic:
+    "A Majestic foi desenvolvida para transformar cada passeio em um momento ainda mais agradável. Confortável, prática e fácil de conduzir, é ideal para pedalar em parques, ciclovias e outros espaços de lazer, acompanhando a rotina com leveza e diversão.",
+  "pro-kids":
+    "A Pro Kids foi desenvolvida para acompanhar os primeiros pedais com conforto e segurança. Ideal para incentivar a diversão ao ar livre, ela oferece uma condução estável para que as crianças aprendam, ganhem confiança e aproveitem cada momento sobre duas rodas.",
+  "love-kids":
+    "A Love Kids foi desenvolvida para tornar os primeiros passeios ainda mais especiais. Confortável, estável e fácil de conduzir, acompanha as crianças em momentos de diversão ao ar livre, enquanto a cestinha completa o visual e leva um toque extra de charme a cada pedal.",
+};
+
+/*
+  ---------------------------------------------------------------------------
   FICHAS TÉCNICAS — dados reais do cliente (planilha "Ficha Técnica Bikes").
   ---------------------------------------------------------------------------
 
@@ -298,15 +325,16 @@ const MAJESTIC_COLORS: ProductColor[] = [solid("majestic", "rosa", "273/03"), so
 const PRO_KIDS_COLORS: ProductColor[] = [solid("pro-kids", "azul", "274/04"), solid("pro-kids", "vermelho", "274/07")];
 const LOVE_KIDS_COLORS: ProductColor[] = [solid("love-kids", "rosa", "275/03"), solid("love-kids", "branco", "275/05")];
 
+// prettier-ignore
 const MODELS: BikeModel[] = [
-  { id: "oregon", name: "Oregon", aro: 29, colors: OREGON_COLORS, specs: { highlights: ARO29_HIGHLIGHTS, details: DETAILS.oregon } },
-  { id: "slim", name: "Slim", aro: 29, colors: SLIM_COLORS, specs: { highlights: ARO29_HIGHLIGHTS, details: DETAILS.slim } },
-  { id: "street", name: "Street", aro: 26, colors: STREET_COLORS, specs: { highlights: STREET_HIGHLIGHTS, details: DETAILS.street } },
-  { id: "doble", name: "Doble", aro: 26, colors: DOBLE_COLORS, specs: { highlights: DOBLE_HIGHLIGHTS, details: DETAILS.doble } },
-  { id: "pulse", name: "Pulse", aro: 20, colors: PULSE_COLORS, specs: { highlights: PULSE_HIGHLIGHTS, details: DETAILS.pulse } },
-  { id: "majestic", name: "Majestic", aro: 20, colors: MAJESTIC_COLORS, specs: { highlights: MAJESTIC_HIGHLIGHTS, details: DETAILS.majestic } },
-  { id: "pro-kids", name: "Pro Kids", aro: 16, colors: PRO_KIDS_COLORS, specs: { highlights: PRO_KIDS_HIGHLIGHTS, details: DETAILS["pro-kids"] } },
-  { id: "love-kids", name: "Love Kids", aro: 16, colors: LOVE_KIDS_COLORS, specs: { highlights: LOVE_KIDS_HIGHLIGHTS, details: DETAILS["love-kids"] } },
+  { id: "oregon",    name: "Oregon",    aro: 29, colors: OREGON_COLORS,    description: DESCRIPTIONS.oregon,      specs: { highlights: ARO29_HIGHLIGHTS,     details: DETAILS.oregon } },
+  { id: "slim",      name: "Slim",      aro: 29, colors: SLIM_COLORS,      description: DESCRIPTIONS.slim,        specs: { highlights: ARO29_HIGHLIGHTS,     details: DETAILS.slim } },
+  { id: "street",    name: "Street",    aro: 26, colors: STREET_COLORS,    description: DESCRIPTIONS.street,      specs: { highlights: STREET_HIGHLIGHTS,    details: DETAILS.street } },
+  { id: "doble",     name: "Doble",     aro: 26, colors: DOBLE_COLORS,     description: DESCRIPTIONS.doble,       specs: { highlights: DOBLE_HIGHLIGHTS,     details: DETAILS.doble } },
+  { id: "pulse",     name: "Pulse",     aro: 20, colors: PULSE_COLORS,     description: DESCRIPTIONS.pulse,       specs: { highlights: PULSE_HIGHLIGHTS,     details: DETAILS.pulse } },
+  { id: "majestic",  name: "Majestic",  aro: 20, colors: MAJESTIC_COLORS,  description: DESCRIPTIONS.majestic,    specs: { highlights: MAJESTIC_HIGHLIGHTS,  details: DETAILS.majestic } },
+  { id: "pro-kids",  name: "Pro Kids",  aro: 16, colors: PRO_KIDS_COLORS,  description: DESCRIPTIONS["pro-kids"], specs: { highlights: PRO_KIDS_HIGHLIGHTS,  details: DETAILS["pro-kids"] } },
+  { id: "love-kids", name: "Love Kids", aro: 16, colors: LOVE_KIDS_COLORS, description: DESCRIPTIONS["love-kids"], specs: { highlights: LOVE_KIDS_HIGHLIGHTS, details: DETAILS["love-kids"] } },
 ];
 
 createCatalogPage<BikeModel>({

@@ -47,8 +47,9 @@ disco"...). Mantive os **detalhados** ("Câmbio traseiro Shimano TZ31" etc.) par
 não perder a informação técnica. **Decidir:** detalhado (alguns quebram em 3
 linhas) ou curto (cards mais limpos). Trivial trocar.
 
-### 6. Faltam as fichas do catálogo de ELÉTRICOS
-Todo o `catalogo-eletricos.ts` ainda está sem ficha técnica.
+### 6. Faltam ficha técnica E descrição do catálogo de ELÉTRICOS
+Todo o `catalogo-eletricos.ts` ainda está sem `specs` e sem `description`. A
+estrutura já aceita os dois — é só preencher, sem tocar em código.
 
 ---
 
@@ -97,3 +98,10 @@ testar Saira Condensed; foi revertido.
   com Aro 26; Doble fica com 5 cards de propósito). 9 ícones ainda a chegar.
 - Padronização de exibição da tabela: valores em MAIÚSCULO (rótulo em caixa
   natural), peso sempre "NN KG" com espaço, "NÃO" → traço.
+- Erros de digitação corrigidos (acento de ALUMÍNIO, "90K"→"90Kg", separador
+  decimal padronizado para vírgula).
+- Ícones normalizados: 256×256, desenho em 86% da caixa, cor #737373 — tamanho
+  visual uniforme. Peso caiu de ~2 MB para ~480 KB.
+- **Quadro de descrição** acima da ficha, nos 8 modelos. Botão "Mais
+  informações" virou sticky no rodapé do card (com a descrição ocupando espaço,
+  ele saía da área visível quando a tabela abria).
