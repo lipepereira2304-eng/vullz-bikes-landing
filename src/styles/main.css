@@ -628,4 +628,88 @@
   [data-role="specs-details-toggle"][aria-expanded="true"] [data-role="specs-details-chevron"] {
     rotate: 180deg;
   }
+
+  /*
+    ------------------------------------------------------------------
+    ÁREA DE TOQUE DA BOLINHA DE COR (só abaixo do desktop)
+    ------------------------------------------------------------------
+    A bolinha tem 32px e o dedo pede 44px (mínimo de iOS e Android), mas
+    engordar o botão mudaria a peça — e a trilha de cores está entre os
+    elementos mais calibrados da tela. Este `::before` é transparente e não
+    desenha nada: ele só estende a região que RECEBE o toque, 6px para cada
+    lado (32 + 12 = 44), sem deslocar um pixel do desenho.
+
+    O `gap` entre as bolinhas é de 12px, exatamente a soma das duas metades —
+    então duas áreas vizinhas encostam sem nunca se sobrepor, e nenhum toque
+    fica ambíguo. O botão já é `relative`, que é o que ancora este recuo.
+
+    POR QUE AQUI, e não como `max-lg:before:*` no markup: qualquer utility
+    `before:` do Tailwind v4 obriga o registro global de `--tw-content` (um
+    `@property` aplicado a `*`, `::before`, `::after` e `::backdrop`). O
+    registro é inerte — nenhuma regra de desktop consome essa variável — mas
+    ainda assim alteraria o CSS servido acima de 1024px, e o desktop está
+    congelado. Escrito à mão, o arquivo de desktop sai byte a byte igual ao de
+    antes desta etapa (conferido compilando os dois e comparando).
+  */
+  @media (width < 64rem) {
+    [data-color]::before {
+      content: "";
+      position: absolute;
+      inset: -6px;
+    }
+  }
+
+}
+
+/*
+  ------------------------------------------------------------------
+  NAVEGAÇÃO MOBILE EM DUAS TELAS
+  ------------------------------------------------------------------
+  Por trás de `mobileModelBrowser` em CatalogConfig (create-catalog-page.ts)
+  — hoje só as bicicletas ligam. `data-mobile-view` só existe no HTML de
+  quem ligou a flag; em quem não ligou (elétricos, por ora) o atributo nunca
+  aparece, então nenhuma regra abaixo tem o que casar — layout e
+  comportamento continuam exatamente os de hoje pra esse catálogo.
+
+  A ideia é "lista OU produto", nunca os dois na mesma tela: a barra de
+  aros ocupa a tela inteira até um modelo ser escolhido; a partir daí ela
+  sai e entra o palco (foto, cores, ficha). Sem transição própria — é uma
+  troca de tela, não um layout se reorganizando, e a entrada de cada lado já
+  tem a movimentação dela (reveal-left-in nos cards, crossfade na foto).
+
+  EM `@layer utilities`, e não dentro do `@layer components` acima, de
+  propósito: `[data-role="stage-section"]`/`[data-role="color-rail"]`/
+  `[data-role="model-nav"]` recebem `display:flex` de uma utility Tailwind
+  do próprio markup (`class="flex ..."`), que vive em `@layer utilities`. Em
+  camadas CSS, utilities SEMPRE vence components, não importa a
+  especificidade — é a mesma armadilha documentada em `btn-motion` logo
+  acima. Um `display:none` daqui de dentro de components nunca chegaria a
+  esconder nada.
+*/
+@layer utilities {
+  @media (width < 64rem) {
+    [data-mobile-view="list"] [data-role="stage-section"],
+    [data-mobile-view="list"] [data-role="color-rail"] {
+      display: none;
+    }
+
+    [data-mobile-view="product"] [data-role="model-nav"] {
+      display: none;
+    }
+
+    /*
+      A tela travada (`h-dvh` + `overflow-hidden`, ver create-catalog-page.ts)
+      é o comportamento certo para o PRODUTO — a mesma "uma tela só" que o
+      resto do catálogo já tinha. Mas a LISTA é conteúdo que ainda não
+      conhecemos por completo (4 cards, um deles podendo abrir 1 ou 2
+      modelos) — travar a altura arrisca recortar card em vez de só
+      incomodar. Só aqui ela relaxa: sobrando conteúdo, a página rola em vez
+      de cortar.
+    */
+    [data-mobile-view="list"] {
+      height: auto;
+      min-height: 100dvh;
+      overflow: visible;
+    }
+  }
 }

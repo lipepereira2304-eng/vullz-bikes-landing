@@ -33,6 +33,11 @@ import type { CatalogConfig, ProductColor, ProductModel } from "./types";
   um agrupamento por valor: a ordem dos modelos é decidida pelos dados e deve
   ser respeitada como está.
 */
+/** Mesmo ponto de corte do `max-lg:` do Tailwind (1024px) — usado pelas duas checagens de largura que o JS precisa fazer (rolagem da tira, navegação em duas telas). */
+function isMobileWidth(): boolean {
+  return !window.matchMedia("(width >= 64rem)").matches;
+}
+
 function groupConsecutive<M extends ProductModel>(
   models: M[],
   keyOf: (model: M) => number
@@ -51,7 +56,7 @@ function groupConsecutive<M extends ProductModel>(
 }
 
 export function createCatalogPage<M extends ProductModel>(config: CatalogConfig<M>): void {
-  const { models, photos, logos, emptyMessage, grouping, icons = {} } = config;
+  const { models, photos, logos, emptyMessage, grouping, icons = {}, mobileModelBrowser = false } = config;
 
   /*
     Nada selecionado até o cliente clicar num modelo na lateral: a tela abre
@@ -102,9 +107,46 @@ export function createCatalogPage<M extends ProductModel>(config: CatalogConfig<
     paintStage(container, stageMarkup(photos, model, color), kind);
   }
 
+  /*
+    A tira de modelos esconde parte da lista, e nada dizia que ela existe.
+
+    Abaixo do desktop a barra vira uma fita que rola na horizontal: medida em
+    390px de largura, ela tem 566px de conteúdo — 224px permanentemente fora da
+    vista. Enquanto a seleção não se mexia isso era só desconforto; o problema
+    real é que `render()` reconstrói o innerHTML inteiro e a fita volta ao
+    início, então escolher um modelo do fim da lista fazia a marca de "ativo"
+    nascer fora da tela. A barra passava a mostrar uma seleção que não era a
+    atual — que é a definição de navegação inconsistente.
+
+    Trazer o item de volta para a vista é a correção mínima: não muda o padrão
+    de navegação (isso fica para a etapa de UX), só impede que ele minta.
+
+    Guardado por `matchMedia`: no desktop esta mesma barra é uma coluna
+    vertical, sempre inteira na tela e dentro de um layout sem rolagem — lá um
+    scroll programático não teria nada a corrigir e só poderia atrapalhar.
+    `inline: "center"` age no eixo horizontal (o único que rola aqui) e
+    `block: "nearest"` garante que a vertical fique como está.
+  */
+  function revealActiveInNav(selector: string): void {
+    if (!isMobileWidth()) return;
+
+    const target = document.querySelector<HTMLElement>(`[data-role='model-nav'] ${selector}`);
+    if (!target) return;
+
+    target.scrollIntoView({
+      // Mesma deferência ao sistema que o resto do site: sem animação para
+      // quem pediu menos movimento (ver a regra de reduced-motion em main.css).
+      behavior: window.matchMedia("(prefers-reduced-motion: reduce)").matches ? "auto" : "smooth",
+      block: "nearest",
+      inline: "center",
+    });
+  }
+
   function sidebarMarkup(activeModelId: string | null): string {
     if (!grouping) {
-      return models.map((m, i) => sidebarItemMarkup(m, m.id === activeModelId, i)).join("");
+      // Lista solta (elétricos, hoje): sem grupo, não existe card de aro —
+      // mobileCard fica sempre false aqui, independente da flag.
+      return models.map((m, i) => sidebarItemMarkup(m, m.id === activeModelId, i, false)).join("");
     }
 
     return groupConsecutive(models, grouping.keyOf)
@@ -114,7 +156,8 @@ export function createCatalogPage<M extends ProductModel>(config: CatalogConfig<
           grouping.labelOf(group.key),
           group.models,
           activeModelId,
-          state.expandedGroup === group.key
+          state.expandedGroup === group.key,
+          mobileModelBrowser
         )
       )
       .join("");
@@ -136,7 +179,20 @@ export function createCatalogPage<M extends ProductModel>(config: CatalogConfig<
     const stageContent =
       activeModel && activeColor
         ? /* html */ `
-        <div id="stage-inner" class="relative h-full w-full"></div>
+        <!--
+          O piso de 240px é repetido aqui, e não só no contêiner de fora.
+
+          As camadas do crossfade são "absolute inset-0" e, por isso, tiram a
+          altura DESTE elemento — que a pede ao pai por "h-full", ou seja
+          height:100%. Uma altura percentual só resolve contra um pai de altura
+          DEFINIDA, e em paisagem o pai passou a ter apenas min-height: o
+          percentual vira "auto", este bloco fecha em 0 e a foto some inteira.
+          O piso próprio devolve a altura definida sem depender do pai.
+
+          Em retrato nada disto entra em ação: lá o pai recebe altura do
+          "flex-1" e o "h-full" resolve normalmente.
+        -->
+        <div id="stage-inner" class="relative h-full w-full max-lg:landscape:min-h-[240px]"></div>
       `
         : /* html */ `
         <p class="max-w-xs text-balance text-base text-vullz-gray-500">
@@ -174,22 +230,109 @@ export function createCatalogPage<M extends ProductModel>(config: CatalogConfig<
     */
     const navGapClass = grouping ? "lg:gap-8" : "lg:gap-0";
 
+    /*
+      NAVEGAÇÃO MOBILE EM DUAS TELAS (bicicletas, por trás de
+      `mobileModelBrowser`): a barra de aros e o produto nunca aparecem juntos
+      no mobile — é lista OU produto, nunca os dois na mesma tela. Quem decide
+      qual das duas é exatamente a mesma condição que já decide o conteúdo do
+      palco (`activeModel`), então basta expor essa condição como atributo; a
+      troca em si (esconder um lado, mostrar o outro) é regra de CSS em
+      main.css, guardada atrás de `@media (width < 64rem)`.
+
+      O atributo só existe quando a flag está ligada. Em quem ainda não ligou
+      (elétricos, por ora) ele nunca aparece no HTML, e as regras de CSS que
+      dependem dele — sempre escritas como `[data-mobile-view="..."] ...` —
+      simplesmente não têm o que casar. Layout e comportamento continuam
+      exatamente os de hoje pra esse catálogo, sem precisar de nenhuma
+      condição extra na própria regra CSS.
+    */
+    const mobileViewAttr = mobileModelBrowser
+      ? `data-mobile-view="${activeModel ? "product" : "list"}"`
+      : "";
+
+    /*
+      A tira horizontal (`overflow-x-auto`, chips lado a lado) vira uma pilha
+      vertical de cards — mesma direção que o desktop já usa (`lg:flex-col`),
+      só que aqui é o MOBILE assumindo esse eixo, então entra como `max-lg:` e
+      não mexe no que o desktop computa. Sem rolagem própria: a lista inteira
+      cabe na tela (ou a página rola, ver o relaxamento de overflow em
+      main.css) — não faz sentido herdar a contenção de overscroll horizontal
+      da tira, que existia só para conter o gesto de arrastar na horizontal.
+
+      NOTA: nome de classe por extenso fica de fora deste comentário de
+      propósito — o Tailwind v4 varre o arquivo por texto, sem saber o que é
+      código e o que é comentário (ver a nota igual mais abaixo, perto de
+      `overscroll-behavior-x`).
+    */
+    const navMobileClass = mobileModelBrowser
+      ? "max-lg:flex-col max-lg:overflow-visible"
+      : "max-lg:overscroll-x-contain";
+
     app.innerHTML = /* html */ `
-    <div class="relative flex h-dvh flex-col overflow-hidden bg-white text-vullz-black">
-      <header ${revealAttrs(0)} class="relative z-10 flex shrink-0 items-center justify-between px-6 pt-8 sm:px-10">
+    <!--
+      SAFE AREAS (as faixas do aparelho: entalhe, barra de status, indicador de
+      home). Os três HTMLs declaram viewport-fit=cover, ou seja, a página
+      recebe a tela INTEIRA e passa por baixo dessas faixas — mas nenhuma regra
+      recuava o conteúdo delas. Medido em retrato, a trilha de cores terminava a
+      24px da borda de baixo, dentro da área do indicador de home do iPhone.
+
+      Os recuos laterais entram AQUI, no contêiner externo, e são somados aos
+      px-6/sm:px-10 de dentro em vez de substituí-los. É o que mantém a
+      correção invisível onde não há entalhe: env() vale 0px nesses aparelhos,
+      então o cálculo devolve exatamente o espaçamento de hoje. Substituir o
+      padding interno exigiria repetir o valor de cada breakpoint aqui, e um
+      deles sairia errado.
+
+      PAISAGEM: h-dvh + overflow-hidden significa "tudo tem que caber na
+      tela, e o que não couber some". Em retrato cabe; num celular deitado
+      (390px de altura) não cabe, e o que sumia era a foto do produto. Abaixo do
+      desktop e só em paisagem a altura vira mínima em vez de fixa, e a página
+      passa a rolar — a peça mais alta do site deixa de ser recortada. O
+      desktop (≥1024px) continua com a tela travada, como aprovado.
+    -->
+    <div ${mobileViewAttr} class="relative flex h-dvh flex-col overflow-hidden bg-white text-vullz-black max-lg:pl-[env(safe-area-inset-left)] max-lg:pr-[env(safe-area-inset-right)] max-lg:landscape:h-auto max-lg:landscape:min-h-dvh max-lg:landscape:overflow-visible">
+      <!--
+        max-lg:pb-4 — o cabeçalho não tinha padding de baixo: a barra de
+        modelos começava exatamente no pixel em que ele terminava e "ARO 29"
+        encostava no botão Voltar. No desktop a barra é uma coluna lateral, bem
+        longe do cabeçalho, e o vão nunca existiu.
+
+        max(2rem, env(...)) no topo, em vez de somar como nas laterais: o
+        recuo do topo e o pt-8 cumprem a MESMA função (afastar o conteúdo da
+        borda de cima), então somar os dois empilharia dois respiros. O maior
+        dos dois é o que vale.
+
+        E 2rem é exatamente o pt-8 de hoje, de propósito: em aparelho sem
+        entalhe o valor não muda um pixel sequer, e em aparelho com entalhe ele
+        cresce só até onde a barra de status exige. Esta etapa é de correção
+        estrutural — o espaçamento do topo no celular comum não estava errado e
+        não tinha por que mudar.
+      -->
+      <header ${revealAttrs(0)} class="relative z-10 flex shrink-0 items-center justify-between px-6 pt-8 max-lg:pb-4 max-lg:pt-[max(2rem,env(safe-area-inset-top))] sm:px-10">
         ${headerBackMarkup()}
         ${headerBrandMarkup()}
       </header>
 
       <main
         data-role="catalog-main"
-        class="relative z-10 flex flex-1 flex-col gap-4 overflow-hidden px-6 pb-6 sm:px-10 lg:flex-row lg:gap-16 lg:py-8"
+        class="relative z-10 flex flex-1 flex-col gap-4 overflow-hidden px-6 pb-6 max-lg:pb-[max(1.5rem,env(safe-area-inset-bottom))] max-lg:landscape:overflow-visible sm:px-10 lg:flex-row lg:gap-16 lg:py-8"
       >
+        <!--
+          overscroll-behavior-x: a tira rola na horizontal e, ao chegar no fim,
+          o gesto vazava para o navegador (voltar/avançar por deslize). Quem
+          arrasta a lista de modelos não está pedindo para sair da página.
+
+          NOTA para quem editar este comentário: o Tailwind v4 varre os
+          arquivos por TEXTO, sem saber o que é código e o que é comentário —
+          escrever o nome de uma classe aqui gera a regra no CSS final, mesmo
+          que nenhum elemento a use. Por isso o nome da PROPRIEDADE acima, e
+          não o da classe.
+        -->
         <nav
           ${revealAttrs(1)}
           data-role="model-nav"
           aria-label="Modelos"
-          class="flex shrink-0 gap-4 overflow-x-auto pb-2 lg:w-52 lg:flex-col lg:justify-center ${navGapClass} lg:overflow-visible"
+          class="flex shrink-0 gap-4 overflow-x-auto pb-2 ${navMobileClass} lg:w-52 lg:flex-col lg:justify-center ${navGapClass} lg:overflow-visible"
         >
           ${sidebarMarkup(activeModel?.id ?? null)}
         </nav>
@@ -258,6 +401,7 @@ export function createCatalogPage<M extends ProductModel>(config: CatalogConfig<
     if (activeModel && activeColor) {
       paint(activeModel, activeColor, activeModel.id === lastPaintedModelId ? "color" : "model");
       lastPaintedModelId = activeModel.id;
+      revealActiveInNav(`[data-model="${activeModel.id}"]`);
     } else {
       lastPaintedModelId = null;
     }
@@ -303,6 +447,10 @@ export function createCatalogPage<M extends ProductModel>(config: CatalogConfig<
   */
   function toggleGroup(key: number): void {
     state.expandedGroup = state.expandedGroup === key ? null : key;
+
+    // Abrir um grupo que está meio fora da fita deixaria os modelos dele
+    // escondidos à direita, e o clique pareceria não ter feito nada.
+    if (state.expandedGroup !== null) revealActiveInNav(`[data-group="${key}"]`);
 
     document.querySelectorAll<HTMLElement>("[data-group]").forEach((button) => {
       const isOpen = Number(button.dataset.group) === state.expandedGroup;
@@ -507,15 +655,29 @@ export function createCatalogPage<M extends ProductModel>(config: CatalogConfig<
       const target = event.target as HTMLElement;
 
       /*
-        Com a ficha aberta, o "Voltar" do cabeçalho fecha a ficha em vez de ir
-        para a home: ele volta UM passo, e o passo mais recente foi abrir a
-        ficha. Sair direto da página aqui seria pular um nível de navegação que
-        o usuário não pediu — e é o que o link faria sozinho, por isso o
-        preventDefault.
+        O "Voltar" do cabeçalho volta um passo de cada vez, na ordem inversa
+        de como se entrou: ficha aberta → fecha a ficha; produto selecionado
+        (só na navegação em duas telas, `mobileModelBrowser`) → devolve para a
+        lista de aros; nenhuma das duas → é a home mesmo, e o link segue sem
+        interferência (por isso o `return` final não chama preventDefault).
+
+        A ordem dos dois `if`s importa: com a ficha aberta E um modelo
+        selecionado, fechar a ficha primeiro é o passo mais recente.
       */
-      if (specsOpen && target.closest("[data-role='header-back']")) {
-        event.preventDefault();
-        void setSpecsOpen(false);
+      if (target.closest("[data-role='header-back']")) {
+        if (specsOpen) {
+          event.preventDefault();
+          void setSpecsOpen(false);
+          return;
+        }
+
+        if (mobileModelBrowser && isMobileWidth() && state.modelId !== null) {
+          event.preventDefault();
+          state.modelId = null;
+          render();
+          return;
+        }
+
         return;
       }
 

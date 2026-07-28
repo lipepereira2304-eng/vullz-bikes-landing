@@ -105,4 +105,16 @@ export interface CatalogConfig<M extends ProductModel = ProductModel> {
   /** Convite mostrado no palco enquanto nenhum modelo foi escolhido. */
   emptyMessage: string;
   grouping?: CatalogGrouping<M>;
+  /*
+    Liga a NOVA navegação mobile em duas telas: os grupos viram cards que
+    expandem/recolhem (em vez da tira horizontal), e escolher um modelo troca
+    a tela inteira para o produto — o "Voltar" do cabeçalho passa a devolver
+    para a lista antes de ir para a home.
+
+    Opcional e por catálogo de propósito: é um rollout em etapas (bicicletas
+    primeiro, elétricos depois, mediante aprovação). Enquanto um catálogo não
+    ligar a flag, o motor compartilhado continua desenhando ele exatamente
+    como desenha hoje — nenhuma regra nova alcança quem não ligou.
+  */
+  mobileModelBrowser?: boolean;
 }

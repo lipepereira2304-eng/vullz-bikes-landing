@@ -24,6 +24,12 @@ export function headerBrandMarkup(): string {
   "Voltar" com contorno (mesmo tom cinza do texto) + ícone de casinha ao lado,
   os dois à esquerda, os dois indo pra home. A casinha é um atalho reconhecível
   por ícone.
+
+  `max-lg:min-h-11` / `max-lg:h-11` — ÁREA DE TOQUE, só abaixo do desktop.
+  Medidos no celular, os dois alvos tinham 34px e 32px de altura, contra os
+  44px que iOS e Android pedem como mínimo. No desktop o ponteiro do mouse tem
+  precisão de pixel e a altura menor é a proporção aprovada, então o piso vive
+  atrás de `max-lg:` e o CSS de ≥1024px não muda.
 */
 export function headerBackMarkup(): string {
   return /* html */ `
@@ -31,7 +37,7 @@ export function headerBackMarkup(): string {
       <a
         href="/"
         data-role="header-back"
-        class="inline-flex items-center gap-1.5 rounded-full border border-vullz-gray-500 px-4 py-1.5 text-sm font-medium text-vullz-gray-500 tint-motion hover:border-vullz-black hover:text-vullz-black active:scale-95"
+        class="inline-flex items-center gap-1.5 rounded-full border border-vullz-gray-500 px-4 py-1.5 text-sm font-medium text-vullz-gray-500 tint-motion hover:border-vullz-black hover:text-vullz-black active:scale-95 max-lg:min-h-11"
       >
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M12.5 8H3.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
@@ -42,7 +48,7 @@ export function headerBackMarkup(): string {
       <a
         href="/"
         aria-label="Página inicial"
-        class="inline-flex h-8 w-8 items-center justify-center rounded-full text-vullz-gray-500 tint-motion hover:text-vullz-black active:scale-95"
+        class="inline-flex h-8 w-8 items-center justify-center rounded-full text-vullz-gray-500 tint-motion hover:text-vullz-black active:scale-95 max-lg:h-11 max-lg:w-11"
       >
         <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
           <path d="M2 7.5L8 2.5L14 7.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
@@ -75,7 +81,7 @@ export function specsButtonMarkup(): string {
       data-role="specs-toggle"
       aria-expanded="false"
       aria-controls="specs-panel"
-      class="btn-motion mt-1 inline-flex items-center gap-2 rounded-full border border-vullz-gray-500 px-5 py-2 text-xs font-bold uppercase tracking-widest text-vullz-gray-500 hover:-translate-y-[var(--shift-sm)] hover:border-vullz-black hover:text-vullz-black active:translate-y-0 active:scale-[0.985] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vullz-black focus-visible:ring-offset-2"
+      class="btn-motion mt-1 inline-flex items-center gap-2 rounded-full border border-vullz-gray-500 px-5 py-2 text-xs font-bold uppercase tracking-widest text-vullz-gray-500 hover:-translate-y-[var(--shift-sm)] hover:border-vullz-black hover:text-vullz-black active:translate-y-0 active:scale-[0.985] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vullz-black focus-visible:ring-offset-2 max-lg:min-h-11"
     >
       Ficha Técnica
     </button>
@@ -326,7 +332,7 @@ function specsContentMarkup(specs: ProductSpecs, icons: AssetMap): string {
               data-role="specs-details-toggle"
               aria-expanded="false"
               aria-controls="specs-details"
-              class="btn-motion inline-flex items-center justify-center gap-2 rounded-full border border-vullz-gray-500 px-5 py-2 text-xs font-bold uppercase tracking-widest text-vullz-gray-500 hover:border-vullz-black hover:text-vullz-black active:scale-[0.985] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vullz-black focus-visible:ring-offset-2"
+              class="btn-motion inline-flex items-center justify-center gap-2 rounded-full border border-vullz-gray-500 px-5 py-2 text-xs font-bold uppercase tracking-widest text-vullz-gray-500 hover:border-vullz-black hover:text-vullz-black active:scale-[0.985] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vullz-black focus-visible:ring-offset-2 max-lg:min-h-11"
             >
               <span data-role="specs-details-label">Mais informações</span>
               <svg
@@ -410,6 +416,18 @@ export function modelNameMarkup(logos: AssetMap, model: ProductModel): string {
   respiro entre os dois sem risco de cortar o logo: ele já está encostado no
   topo, e empurrá-lo pra cima exigiria invadir a área com overflow:hidden
   (necessário pra conter o crossfade), cortando a própria imagem do logo.
+
+  `max-lg:landscape:min-h-[240px]` — O PISO DO PALCO NO CELULAR DEITADO.
+  Com `flex-1` e `min-h-0`, este contêiner aceita qualquer altura sobrando,
+  inclusive nenhuma: num celular em paisagem (medido em 844x390) a barra de
+  modelos, o rótulo, o botão e a trilha de cores consumiam a altura toda e a
+  foto colapsava para ~30px — restava uma faixa do logo e nada do produto.
+  Um piso resolve porque o problema não era distribuição, era falta de espaço:
+  abaixo de 240px a foto deixa de cumprir a única função da tela. O que passar
+  disso vira rolagem da página (ver o contêiner externo em
+  create-catalog-page.ts), que é preferível a um produto invisível.
+
+  Só em paisagem: em retrato a altura sobra e o piso nunca entra em ação.
 */
 export function stageWrapperMarkup(
   logos: AssetMap,
@@ -417,7 +435,7 @@ export function stageWrapperMarkup(
   stageContent: string
 ): string {
   return /* html */ `
-    <div data-role="stage-wrapper" class="relative flex min-h-0 w-full flex-1 items-center justify-center overflow-hidden pt-4">
+    <div data-role="stage-wrapper" class="relative flex min-h-0 w-full flex-1 items-center justify-center overflow-hidden pt-4 max-lg:landscape:min-h-[240px]">
       ${activeModel ? modelNameMarkup(logos, activeModel) : ""}
       ${stageContent}
     </div>
@@ -430,22 +448,39 @@ export function stageWrapperMarkup(
   modelo ATIVO fica mais grossa e preta em vez de preencher o fundo — mantém a
   paleta clean, só reforça o traço. No mobile é um chip arredondado numa tira
   horizontal.
+
+  `max-lg:min-h-11`: o chip tinha 36px de altura, abaixo do mínimo de toque.
+  Como <button> centraliza o próprio conteúdo na vertical, um piso de altura
+  basta — não precisa mexer no padding, que é o que definiria a proporção
+  visual do item no desktop.
+
+  `mobileCard`: por trás de `mobileModelBrowser` em CatalogConfig — hoje só as
+  bicicletas ligam. true veste a linha como o desktop (bloco de largura
+  total, traço embaixo), só que dentro do card do aro em vez de numa coluna
+  solta; a última linha do grupo não recebe traço, pra não duplicar a borda
+  do próprio card logo abaixo dela. false é o chip de tira horizontal de
+  sempre — o que qualquer catálogo que ainda não ligou a flag continua vendo.
 */
 export function sidebarItemMarkup(
   model: ProductModel,
   active: boolean,
-  revealIndex: number
+  revealIndex: number,
+  mobileCard: boolean
 ): string {
+  const mobile = mobileCard
+    ? "max-lg:block max-lg:w-full max-lg:whitespace-normal max-lg:rounded-none max-lg:border-b max-lg:px-0 max-lg:py-3 max-lg:last:border-b-0"
+    : "";
+
+  const tone = active
+    ? `text-vullz-black lg:border-b-2 lg:border-vullz-black ${mobileCard ? "max-lg:border-vullz-black" : ""}`
+    : `text-vullz-gray-400 hover:text-vullz-black lg:border-b lg:border-vullz-gray-200 ${mobileCard ? "max-lg:border-vullz-gray-200" : ""}`;
+
   return /* html */ `
     <button
       type="button"
       data-model="${model.id}"
       style="animation-delay:calc(var(--stagger) * ${revealIndex})"
-      class="reveal-left-in item-motion shrink-0 whitespace-nowrap rounded-lg px-4 py-2 text-left text-sm font-bold uppercase tracking-widest hover:translate-x-[var(--shift-sm)] active:translate-x-0 lg:block lg:w-full lg:whitespace-normal lg:rounded-none lg:px-0 lg:py-3 ${
-        active
-          ? "text-vullz-black lg:border-b-2 lg:border-vullz-black"
-          : "text-vullz-gray-400 hover:text-vullz-black lg:border-b lg:border-vullz-gray-200"
-      }"
+      class="reveal-left-in item-motion shrink-0 whitespace-nowrap rounded-lg px-4 py-2 text-left text-sm font-bold uppercase tracking-widest hover:translate-x-[var(--shift-sm)] active:translate-x-0 max-lg:min-h-11 lg:block lg:w-full lg:whitespace-normal lg:rounded-none lg:px-0 lg:py-3 ${mobile} ${tone}"
     >
       ${model.name}
     </button>
@@ -467,21 +502,38 @@ export function sidebarItemMarkup(
   como animar a saída de um elemento que deixa de existir no mesmo quadro. O
   custo é renderizar alguns botões invisíveis; em troca, abrir e fechar viram o
   mesmo movimento em duas direções.
+
+  `mobileCard`: por trás de `mobileModelBrowser` em CatalogConfig — hoje só as
+  bicicletas ligam. true veste o grupo inteiro (cabeçalho + painel) como um
+  card de cantos arredondados — mesma linguagem de "card branco" já usada na
+  ficha técnica e no quadro de descrição desta página (rounded-3xl,
+  border-vullz-gray-200, mesma sombra), em vez dos cards escuros da home, que
+  não fariam sentido numa página branca. false mantém a sanfona/tira de hoje.
+
+  O padding do card vive no CONTÊINER (wrapperMobile), não no botão nem nas
+  linhas — assim cabeçalho e modelos alinham à mesma margem interna sem
+  repetir o valor em três lugares.
 */
 export function sidebarGroupMarkup(
   key: number,
   label: string,
   models: ProductModel[],
   activeModelId: string | null,
-  expanded: boolean
+  expanded: boolean,
+  mobileCard: boolean
 ): string {
+  const wrapperMobile = mobileCard
+    ? "max-lg:rounded-3xl max-lg:border max-lg:border-vullz-gray-200 max-lg:bg-white max-lg:px-5 max-lg:py-4 max-lg:shadow-[0_24px_60px_-32px_rgba(17,17,17,0.35)]"
+    : "";
+  const headerMobile = mobileCard ? "max-lg:px-0" : "";
+
   return /* html */ `
-    <div class="flex shrink-0 flex-col gap-2 lg:gap-0">
+    <div class="flex shrink-0 flex-col gap-2 lg:gap-0 ${wrapperMobile}">
       <button
         type="button"
         data-group="${key}"
         aria-expanded="${expanded}"
-        class="flex origin-left items-center gap-2 px-4 text-left text-xl font-extrabold uppercase tracking-wide text-vullz-black tint-motion active:scale-[0.985] lg:border-b lg:border-vullz-gray-200 lg:px-0 lg:pb-3"
+        class="flex origin-left items-center gap-2 px-4 text-left text-xl font-extrabold uppercase tracking-wide text-vullz-black tint-motion active:scale-[0.985] max-lg:min-h-11 ${headerMobile} lg:border-b lg:border-vullz-gray-200 lg:px-0 lg:pb-3"
       >
         <svg
           data-role="group-chevron"
@@ -510,7 +562,7 @@ export function sidebarGroupMarkup(
       <div data-panel data-open="${expanded}">
         <div>
           <div class="flex flex-col gap-1 lg:mt-2 lg:gap-0">
-            ${models.map((m, i) => sidebarItemMarkup(m, m.id === activeModelId, i)).join("")}
+            ${models.map((m, i) => sidebarItemMarkup(m, m.id === activeModelId, i, mobileCard)).join("")}
           </div>
         </div>
       </div>
@@ -531,6 +583,10 @@ export function colorLabelMarkup(color: ProductColor): string {
   elementos pequenos e animados) — lê como um "corte" na borda. Um span
   interno, recuado a distância exata da borda, cobre tudo com folga e não
   depende desse alinhamento de sub-pixel.
+
+  A área de toque desta bolinha no celular NÃO mora aqui: é um `::before`
+  declarado em main.css, dentro de um @media que só alcança abaixo do desktop.
+  Ver a explicação lá.
 */
 export function colorSwatchMarkup(
   color: ProductColor,

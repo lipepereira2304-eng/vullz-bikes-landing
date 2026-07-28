@@ -3,7 +3,63 @@
 Relatório vivo do que ficou em aberto. Atualizado conforme surgem itens; revisar
 quando quiser. Ordenado por prioridade dentro de cada seção.
 
-_Última atualização: 2026-07-23._
+_Última atualização: 2026-07-28 (navegação de modelos das bicicletas)._
+
+---
+
+## 📱 Fase mobile (tudo abaixo de 1024px)
+
+O desktop (≥1024px) está **congelado**. Toda alteração desta fase vive atrás de
+`max-lg:` ou de um `@media (width < 64rem)`, e isso é verificável: compilando o
+CSS antes e depois e descartando os blocos que não alcançam 1024px, os dois
+arquivos saem **idênticos byte a byte** (31.166 bytes). Qualquer mudança futura
+nesta fase deveria passar no mesmo teste.
+
+### Etapa 1 — correções estruturais (concluída)
+Espaçamentos/colisões, áreas de toque, safe areas, paisagem e consistência da
+navegação. Detalhe no fim deste arquivo.
+
+### Etapa 2 — navegação de modelos (bicicletas: concluída; elétricos: aguardando aprovação)
+Nova navegação mobile em **duas telas** para o catálogo de bicicletas:
+
+- Os 4 aros viram cards de cantos arredondados, empilhados, fechados por
+  padrão. Clicar expande e mostra os modelos daquele aro (linhas de lista);
+  só um aro fica aberto por vez.
+- Escolher um modelo troca a tela inteira para o produto (foto, cores, ficha)
+  — a lista de aros sai completamente, não convive mais com o produto.
+- "Voltar" ganhou uma camada: com um modelo selecionado, o primeiro clique
+  devolve para a lista de aros (com o aro do modelo já aberto) em vez de ir
+  direto para a home; a home continua a um clique de distância depois disso.
+  Com a ficha técnica aberta, a ordem é ficha → produto → lista → home.
+
+**Como foi escondido dos elétricos por enquanto:** o motor compartilhado
+(`src/catalog/`) ganhou uma flag opcional, `mobileModelBrowser`, em
+`CatalogConfig`. Só `catalogo-interativo.ts` (bicicletas) liga ela. Enquanto
+um catálogo não ligar, o motor desenha ele exatamente como desenhava antes —
+inclusive o atributo que decide qual tela mostrar (`data-mobile-view`) nem
+chega a existir no HTML de quem não ligou. Verificado no navegador: elétricos
+continua com a tira horizontal de sempre, lista e produto convivendo, sem
+nenhuma mudança visual ou de comportamento.
+
+**Quando aprovar para os elétricos:** é uma linha — acrescentar
+`mobileModelBrowser: true` na chamada de `createCatalogPage` em
+`catalogo-eletricos.ts`. Como lá não há agrupamento por aro (pedido explícito
+do cliente), o efeito prático seria só a troca de tela lista↔produto e o
+"Voltar" em camadas; o card de aro não se aplica (não existe grupo).
+
+Itens que continuam em aberto:
+
+1. **Ficha técnica.** Ainda sem tratamento mobile próprio — no celular ela
+   cobre o produto inteiro e mostra 4 das 14 linhas da tabela em 390×844 (1 de
+   14 em 360×640), com ~250px de tela vazia acima. A coreografia de dois atos
+   (produto sai para a esquerda → ficha entra pela direita) só faz sentido no
+   desktop.
+2. **Ficha em paisagem.** Consequência conhecida da etapa 1: com a página
+   rolando, o painel abre 304px abaixo da dobra em 844×390. Some quando a
+   ficha ganhar o tratamento mobile próprio.
+3. **"Escolha um modelo ao lado…"** — não aparece mais na Tela 1 (fica
+   escondida junto com o resto do palco), mas o texto em si não foi reescrito
+   porque vem do config e é compartilhado com o desktop.
 
 ---
 
@@ -105,3 +161,30 @@ testar Saira Condensed; foi revertido.
 - **Quadro de descrição** acima da ficha, nos 8 modelos. Botão "Mais
   informações" virou sticky no rodapé do card (com a descrição ocupando espaço,
   ele saía da área visível quando a tabela abria).
+
+### Mobile — etapa 1, correções estruturais (2026-07-28)
+- **Colisão cabeçalho/barra de modelos**: a barra começava no pixel exato em
+  que o cabeçalho terminava (respiro de 0px). Agora são 16px entre o "Voltar" e
+  o primeiro grupo.
+- **Áreas de toque**: todos os alvos do catálogo estavam entre 28px e 36px,
+  contra os 44px de mínimo de iOS/Android. Todos passaram a 44px. A bolinha de
+  cor foi a exceção proposital: manteve os 32px de desenho e ganhou área de
+  toque de 44px por um `::before` transparente (main.css), porque engordar a
+  peça mudaria a trilha de cores.
+- **Safe areas**: os três HTMLs declaram `viewport-fit=cover` e nenhuma regra
+  recuava o conteúdo das faixas do aparelho — a trilha de cores terminava
+  dentro da área do indicador de home. Os quatro recuos entram agora nos
+  contêineres externos; em aparelho sem entalhe `env()` vale 0 e nada muda.
+- **Paisagem**: a tela era `h-dvh` + `overflow-hidden`, então em 844×390 a foto
+  do produto era espremida a ~30px. Abaixo de 1024px e só em paisagem a altura
+  virou mínima e a página rola; o palco ganhou piso de 240px. O piso precisou
+  ser repetido no `#stage-inner`: as camadas do crossfade são `absolute`, então
+  ele tira a altura do pai por `h-full`, e um `height:100%` não resolve contra
+  pai que só tem `min-height` — sem isso a foto ia a 0.
+- **Navegação**: o item ativo (e o grupo recém-aberto) passou a ser trazido
+  para a vista na tira horizontal; antes a seleção podia nascer fora da tela e
+  a barra mostrava um estado que não era o atual. Gesto de rolagem da tira não
+  vaza mais para o "voltar" do navegador.
+- **`theme-color`**: os dois catálogos declaravam o grafite da home apesar de
+  terem fundo branco — a barra de status do celular ficava escura sobre página
+  clara. Agora é branco nas duas.

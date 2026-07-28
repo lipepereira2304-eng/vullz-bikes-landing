@@ -19,7 +19,18 @@ const app = document.querySelector<HTMLDivElement>("#app");
 
 if (app) {
   app.innerHTML = /* html */ `
-    <div class="relative isolate flex min-h-dvh flex-col overflow-hidden bg-vullz-graphite">
+    <!--
+      Safe areas (entalhe, barra de status, indicador de home). Aqui os quatro
+      recuos são SOMADOS ao espaçamento existente, e não combinados com max()
+      como nos catálogos. A diferença tem motivo: os catálogos vivem numa tela
+      de altura travada, onde cada pixel vertical disputa espaço com a foto do
+      produto — lá empilhar dois respiros custaria caro. Esta página rola, então
+      somar é seguro e evita ter que repetir aqui o valor de padding de cada
+      breakpoint (pt-10 sm:pt-14, pb-8) só para compará-los.
+
+      Em aparelho sem entalhe todo env() vale 0px e nada muda.
+    -->
+    <div class="relative isolate flex min-h-dvh flex-col overflow-hidden bg-vullz-graphite max-lg:pb-[env(safe-area-inset-bottom)] max-lg:pl-[env(safe-area-inset-left)] max-lg:pr-[env(safe-area-inset-right)] max-lg:pt-[env(safe-area-inset-top)]">
       ${fluidBackgroundMarkup()}
 
       <header class="relative z-10 flex justify-center pt-10 sm:pt-14" data-reveal>

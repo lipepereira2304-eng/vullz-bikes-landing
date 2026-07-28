@@ -347,4 +347,7 @@ createCatalogPage<BikeModel>({
     keyOf: (model) => model.aro,
     labelOf: (aro) => `Aro ${aro}`,
   },
+  // Nova navegação mobile em duas telas — ver o campo em types.ts.
+  // Elétricos ainda não ligou; entra quando aprovado separadamente.
+  mobileModelBrowser: true,
 });
