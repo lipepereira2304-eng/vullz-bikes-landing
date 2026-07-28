@@ -3,7 +3,7 @@
 Relatório vivo do que ficou em aberto. Atualizado conforme surgem itens; revisar
 quando quiser. Ordenado por prioridade dentro de cada seção.
 
-_Última atualização: 2026-07-28 (ficha técnica em folha cheia nas bicicletas)._
+_Última atualização: 2026-07-28 (correção do rodapé sticky + linha divisória em todas as larguras)._
 
 ---
 
@@ -123,6 +123,34 @@ resolução comum de notebook) — testado e confirmado que um navegador com
 mouse nessa mesma largura continua com o `-26%` de sempre, sem nenhuma
 mudança. Verificado byte a byte que nenhuma regra alcançável por um desktop
 comum (sem essa combinação de orientação + toque) mudou.
+
+### Rodapé sticky da ficha: mesmo bug do mobile, agora no desktop/iPad (2026-07-28)
+O mesmo vazamento corrigido antes no mobile (linha da tabela aparecendo atrás
+do botão "Menos informações" ao rolar) também acontecia no desktop e no iPad
+em paisagem — mesma causa (margem negativa cancelando o padding do card não
+convive bem com `position: sticky`), só que com os valores maiores do
+desktop (28px de padding + 1px de borda = 29px de vão, contra 17px no
+mobile). Corrigida com a MESMA técnica: o card não tem mais padding-bottom
+próprio em nenhuma largura — quem cobre esse respiro agora é só o padding do
+próprio rodapé. Testado rolando a tabela até o fim em iPad landscape
+(1194px) e desktop largo (1440px): vão caiu para 1px (só a borda) nos dois.
+
+Diferente do ajuste de posição da bike (esse sim isolado só ao iPad via
+media query), esta correção é da MESMA técnica CSS compartilhada entre
+desktop e iPad — não dá pra isolar sem duplicar a lógica, e não faria
+sentido isolar mesmo: é bug, não estilo.
+
+### Linha divisória: estendida para desktop e iPad em paisagem (2026-07-28)
+A linha abaixo do cabeçalho (criada na fase mobile) passou a valer em
+qualquer largura, por pedido — o cliente gostou do resultado e pediu para
+repetir no desktop/iPad. Detalhe que precisou de ajuste: no desktop o
+cabeçalho nunca teve respiro de baixo próprio (a barra de modelos é uma
+coluna lateral, longe dele, e o vão nunca fez falta) — sem adicionar um, a
+linha ficaria colada no "Voltar"/na logo. Acrescentado `lg:pb-6` (24px) só
+para isso. Testado com um modelo selecionado (a logo "OREGON" ficou a 48px
+da linha, confortável) e com a ficha técnica aberta — nenhuma sobreposição
+em nenhum dos dois casos. Mesma flag `mobileModelBrowser` de sempre —
+elétricos continuam sem a linha até aprovar.
 
 ---
 

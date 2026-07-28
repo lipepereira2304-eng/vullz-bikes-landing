@@ -170,8 +170,13 @@ export function specsPanelMarkup(
         embaixo do botão — o justify-content: center do <aside> (ver
         main.css) já centraliza o conjunto sozinho, sem precisar esticar
         nada.
+
+        O respiro de baixo do desktop também foi zerado (o padding vertical
+        virou só de cima), pelo mesmo motivo do mobile: o rodapé sticky é
+        quem cobre esse espaço agora, em QUALQUER largura — ver o comentário
+        completo no próprio rodapé, mais abaixo.
       -->
-      <div class="flex min-h-0 flex-col gap-5 overflow-y-auto rounded-3xl border border-vullz-gray-200 bg-white px-6 py-5 shadow-[0_24px_60px_-32px_rgba(17,17,17,0.35)] lg:px-8 lg:py-7 ${fichaCardMobile}">
+      <div class="flex min-h-0 flex-col gap-5 overflow-y-auto rounded-3xl border border-vullz-gray-200 bg-white px-6 py-5 shadow-[0_24px_60px_-32px_rgba(17,17,17,0.35)] lg:px-8 lg:pt-7 lg:pb-0 ${fichaCardMobile}">
         <header class="flex flex-col gap-1">
           <h2 class="text-lg font-extrabold uppercase tracking-wide text-vullz-black ${titleMobile}">
             Ficha Técnica
@@ -336,19 +341,8 @@ function specsContentMarkup(specs: ProductSpecs, icons: AssetMap, mobileSheet: b
   // título + 6 cards + botão na tela sem precisar rolar.
   const cardMobile = mobileSheet ? "max-lg:min-h-[56px] max-lg:gap-2 max-lg:px-2 max-lg:py-2" : "";
   const gridMobile = mobileSheet ? "max-lg:gap-1.5" : "";
-  /*
-    A margem negativa vertical é ZERADA explicitamente, pelo mesmo motivo do
-    padding em fichaCardMobile: a classe base compartilhada com o desktop já
-    tem uma margem negativa própria, e sem anulá-la ela continua valendo por
-    baixo. Era exatamente essa margem negativa, combinada com "sticky", que
-    deixava faltar ~17px bem no fim (o padding do card + a borda de 1px) —
-    testado e medido, não é só suspeita: a última linha da tabela aparecia
-    por trás do botão ao rolar. Por isso fichaCardMobile (acima) também não
-    dá mais respiro de baixo próprio ao card na folha mobile: quem cobre
-    esse respiro agora é só o padding de baixo deste rodapé, que sticky ou
-    não, é sempre o ÚLTIMO elemento — chegando puro até a borda do card, sem
-    precisar cancelar nada.
-  */
+  // Reduz padding/gap do rodapé só na folha mobile (ver o "porquê" da margem
+  // vertical zerada no comentário do próprio <div>, mais abaixo).
   const footerMobile = mobileSheet ? "max-lg:-mx-4 max-lg:mb-0 max-lg:px-4 max-lg:pb-4 max-lg:pt-2" : "";
 
   return /* html */ `
@@ -394,13 +388,23 @@ function specsContentMarkup(specs: ProductSpecs, icons: AssetMap, mobileSheet: b
 
             A faixa branca é este <div>, e não o próprio botão: o botão é um
             pill arredondado, então o texto da tabela continuaria aparecendo nas
-            laterais dele. As margens negativas (horizontais, nas duas
-            larguras; verticais, só no desktop) esticam a faixa até as bordas
-            do card, cancelando o padding dele — pra nenhum ponto vazar. Na
-            folha mobile a margem vertical foi retirada de propósito: ver o
-            comentário de footerMobile em specsContentMarkup.
+            laterais dele. As margens negativas HORIZONTAIS (nas duas larguras)
+            esticam a faixa até as bordas do card, cancelando o padding — pra
+            nenhum ponto vazar dos lados.
+
+            VERTICAL não é mais margem negativa em NENHUMA largura (era só no
+            mobile antes; agora vale também para o desktop e o iPad em
+            paisagem, que usam as mesmas classes lg:) — "sticky" não convive
+            bem com essa técnica: sobrava padding do card + borda (17px no
+            mobile, 29px no desktop) sem cobertura, e a última linha da
+            tabela aparecia por trás do botão ao rolar. Testado e medido nos
+            dois, não é só suspeita. Por isso o card (acima) não tem mais
+            respiro de baixo próprio em nenhuma largura — quem cobre esse
+            respiro agora é só o padding de baixo deste rodapé, que sticky ou
+            não, é sempre o ÚLTIMO elemento — chegando puro até a borda do
+            card, sem precisar cancelar nada.
           -->
-          <div class="sticky bottom-0 z-10 -mx-6 -mb-5 flex justify-center bg-white px-6 pb-5 pt-3 lg:-mx-8 lg:-mb-7 lg:px-8 lg:pb-7 ${footerMobile}">
+          <div class="sticky bottom-0 z-10 -mx-6 mb-0 flex justify-center bg-white px-6 pb-5 pt-3 lg:-mx-8 lg:px-8 lg:pb-7 ${footerMobile}">
             <button
               type="button"
               data-role="specs-details-toggle"

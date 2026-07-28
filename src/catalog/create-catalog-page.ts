@@ -231,6 +231,16 @@ export function createCatalogPage<M extends ProductModel>(config: CatalogConfig<
     const navGapClass = grouping ? "lg:gap-8" : "lg:gap-0";
 
     /*
+      Respiro de baixo do cabeçalho no desktop e no iPad em paisagem (só
+      bicicletas, mesma flag da linha divisória logo abaixo). No desktop o
+      cabeçalho nunca teve padding-bottom próprio — a barra de modelos é uma
+      coluna lateral, longe dele, e o vão nunca fez falta. Agora que a linha
+      divisória passa a valer em qualquer largura, ela ficaria colada no
+      "Voltar"/na logo sem este respiro.
+    */
+    const headerBottomGap = mobileModelBrowser ? "lg:pb-6" : "";
+
+    /*
       NAVEGAÇÃO MOBILE EM DUAS TELAS (bicicletas, por trás de
       `mobileModelBrowser`): a barra de aros e o produto nunca aparecem juntos
       no mobile — é lista OU produto, nunca os dois na mesma tela. Quem decide
@@ -308,27 +318,32 @@ export function createCatalogPage<M extends ProductModel>(config: CatalogConfig<
         estrutural — o espaçamento do topo no celular comum não estava errado e
         não tinha por que mudar.
       -->
-      <header ${revealAttrs(0)} class="relative z-10 flex shrink-0 items-center justify-between px-6 pt-8 max-lg:pb-4 max-lg:pt-[max(2rem,env(safe-area-inset-top))] sm:px-10">
+      <header ${revealAttrs(0)} class="relative z-10 flex shrink-0 items-center justify-between px-6 pt-8 max-lg:pb-4 max-lg:pt-[max(2rem,env(safe-area-inset-top))] sm:px-10 ${headerBottomGap}">
         ${headerBackMarkup()}
         ${headerBrandMarkup()}
       </header>
 
       <!--
         Linha divisória entre cabeçalho e conteúdo (só bicicletas, mesma
-        flag). Elemento IRMÃO do header/main, e não algo dentro de um dos
-        dois — não mexe na estrutura interna de nenhum, risco zero pro
-        desktop. Todas as classes são max-lg:, sem nenhuma base sem prefixo:
-        a única forma de garantir que nada daqui alcance o CSS de >=1024px é
-        não deixar nada fora do prefixo — no desktop a div fica sem estilo
-        nenhum, um bloco vazio de altura 0, invisível por conta própria.
+        flag — elétricos continuam sem ela até aprovar). Elemento IRMÃO do
+        header/main, e não algo dentro de um dos dois — não mexe na
+        estrutura interna de nenhum.
 
-        O respiro de cima já vem do padding-bottom do header (16px); a
-        margem-abaixo aqui dá o mesmo respiro antes do conteúdo começar —
-        nem colada no cabeçalho, nem colada no que vem a seguir.
+        Nasceu só no mobile (era uma classe restrita àquela largura) e agora
+        vale em QUALQUER largura, por pedido: o cliente gostou do resultado
+        no mobile e pediu para repetir no desktop e no iPad em paisagem. O
+        recuo lateral repete o mesmo que o header/main já usam (nenhum dos
+        dois tem recuo próprio de desktop — o recuo padrão já vale para toda
+        largura), então a linha fica sempre alinhada com o conteúdo.
+
+        O respiro de cima já vem do padding-bottom do header (16px no
+        mobile, 24px no desktop, ver headerBottomGap); a margem-abaixo aqui
+        dá o respiro antes do conteúdo começar — nem colada no cabeçalho,
+        nem colada no que vem a seguir.
       -->
       ${
         mobileModelBrowser
-          ? /* html */ `<div aria-hidden="true" class="max-lg:mx-6 max-lg:mb-4 max-lg:h-px max-lg:bg-vullz-gray-200"></div>`
+          ? /* html */ `<div aria-hidden="true" class="mx-6 mb-4 h-px bg-vullz-gray-200 sm:mx-10"></div>`
           : ""
       }
 
