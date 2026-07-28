@@ -567,6 +567,40 @@
   }
 
   /*
+    EXCEÇÃO SÓ PARA IPAD EM PAISAGEM — mesmo layout do desktop (mesma escala,
+    mesma duração, mesma curva), só a posição final horizontal muda.
+
+    Medido nos três tamanhos de iPad em paisagem (1024, 1194 e 1366px de
+    largura): a sobreposição entre a foto e o painel da ficha é sempre
+    ~75-82px, praticamente CONSTANTE em pixels — não escala com a largura da
+    tela, porque o painel (`lg:w-[42%]`) cresce mais rápido, em pixels, do
+    que o `-26%` empurra a foto. Por isso o ajuste aqui é um deslocamento
+    FIXO somado ao de sempre (`calc(var(--specs-x) - 90px)`), e não uma
+    porcentagem maior — uma porcentagem só precisaria de um valor
+    diferente em cada tamanho de iPad para fechar a mesma sobreposição.
+
+    90px elimina a sobreposição nos três tamanhos testados, com folga
+    (34-78px) nos dois menores e só ~11px além da borda esquerda no maior
+    (iPad Pro 12.9", 1366px) — imperceptível, dado que as fotos têm bastante
+    margem transparente na própria arte.
+
+    A faixa 1024-1366px cobre a largura em paisagem de todos os iPads atuais
+    (mini/9ª e 10ª geração até o Pro 12.9"). `hover: none` e `pointer: coarse`
+    são o que de fato restringe isto a um TABLET touch, e não a um notebook
+    real que por acaso tenha uma tela nessa mesma faixa (1366×768 é uma
+    resolução comum de notebook) — um mouse/trackpad físico sempre reporta
+    hover:hover e pointer:fine, mesmo numa janela redimensionada para caber
+    nessa largura, então esta regra nunca alcança quem tem um ponteiro
+    preciso. Só CSS não distingue "é um iPad" de forma alguma; esta é a
+    combinação mais próxima disso.
+  */
+  @media (min-width: 1024px) and (max-width: 1366px) and (orientation: landscape) and (hover: none) and (pointer: coarse) {
+    [data-specs="open"] [data-role="stage-section"] {
+      translate: calc(var(--specs-x) - 90px) 0;
+    }
+  }
+
+  /*
     A ficha é `absolute` de propósito: fora do fluxo, ela não empurra nem
     reposiciona nada ao aparecer — o bloco do produto já parou no lugar dele
     no ato 1, e nada deve se mexer de novo depois disso.

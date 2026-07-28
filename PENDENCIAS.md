@@ -104,6 +104,26 @@ zerando o respiro de baixo do card e deixando só o padding do próprio rodapé
 cobrir esse espaço — testado rolando até o fim da tabela, sem vazamento.
 Só bicicletas (mesma flag); desktop conferido byte a byte idêntico.
 
+### Exceção: iPad em paisagem — bike sobrepondo a ficha técnica (2026-07-28)
+Este é o único ajuste desta leva que NÃO é mobile: no desktop (≥1024px), abrir
+a ficha técnica encolhe o produto e desloca ele para a esquerda (`--specs-x:
+-26%`) para abrir espaço para a ficha à direita. No iPad em paisagem (1024 a
+1366px de largura, faixa que cobre do mini/9ª geração ao Pro 12.9"), esse
+deslocamento não é suficiente: sobra ~75-82px de sobreposição entre a foto e
+o painel — medido nos três tamanhos, e é uma sobreposição praticamente
+CONSTANTE em pixels (não em porcentagem), porque o painel da ficha cresce
+mais rápido em pixels do que o `-26%` empurra a foto.
+
+Corrigido com uma media query adicional, só para essa faixa, somando um
+deslocamento fixo (`calc(var(--specs-x) - 90px)`) ao de sempre — mesma
+escala, mesma duração, mesma curva, só a posição final muda. Escopada com
+`hover: none` e `pointer: coarse` para pegar só um tablet touch de verdade, e
+não um notebook que por acaso tenha uma tela na mesma faixa (1366×768 é uma
+resolução comum de notebook) — testado e confirmado que um navegador com
+mouse nessa mesma largura continua com o `-26%` de sempre, sem nenhuma
+mudança. Verificado byte a byte que nenhuma regra alcançável por um desktop
+comum (sem essa combinação de orientação + toque) mudou.
+
 ---
 
 ## 🔴 Precisam de decisão/ação sua
