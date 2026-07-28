@@ -78,4 +78,8 @@ createCatalogPage({
   photos,
   logos,
   emptyMessage: "Escolha um modelo ao lado para ver o elétrico.",
+  // Replica em elétricos toda a experiência já aprovada nas bicicletas
+  // (navegação mobile em duas telas, ficha em folha cheia, linha divisória,
+  // exceção do iPad em paisagem) — ver mobileModelBrowser em types.ts.
+  mobileModelBrowser: true,
 });

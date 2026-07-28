@@ -3,7 +3,7 @@
 Relatório vivo do que ficou em aberto. Atualizado conforme surgem itens; revisar
 quando quiser. Ordenado por prioridade dentro de cada seção.
 
-_Última atualização: 2026-07-28 (correção do rodapé sticky + linha divisória em todas as larguras)._
+_Última atualização: 2026-07-28 (elétricos: estrutura replicada das bicicletas)._
 
 ---
 
@@ -19,38 +19,34 @@ nesta fase deveria passar no mesmo teste.
 Espaçamentos/colisões, áreas de toque, safe areas, paisagem e consistência da
 navegação. Detalhe no fim deste arquivo.
 
-### Etapa 2 — navegação de modelos (bicicletas: concluída; elétricos: aguardando aprovação)
-Nova navegação mobile em **duas telas** para o catálogo de bicicletas:
+### Etapa 2 — navegação de modelos (concluída para bicicletas e elétricos)
+Nova navegação mobile em **duas telas**, hoje ligada nos dois catálogos:
 
-- Os 4 aros viram cards de cantos arredondados, empilhados, fechados por
-  padrão. Clicar expande e mostra os modelos daquele aro (linhas de lista);
-  só um aro fica aberto por vez. Os cards ficam centralizados no espaço
-  vertical disponível.
+- Os 4 aros das bicicletas viram cards de cantos arredondados, empilhados,
+  fechados por padrão. Clicar expande e mostra os modelos daquele aro
+  (linhas de lista); só um aro fica aberto por vez. Os cards ficam
+  centralizados no espaço vertical disponível.
 - Escolher um modelo troca a tela inteira para o produto (foto, cores, ficha)
-  — a lista de aros sai completamente, não convive mais com o produto.
+  — a lista sai completamente, não convive mais com o produto.
 - "Voltar" ganhou uma camada: com um modelo selecionado, o primeiro clique
-  devolve para a lista de aros (com o aro do modelo já aberto) em vez de ir
-  direto para a home; a home continua a um clique de distância depois disso.
-  Com a ficha técnica aberta, a ordem é ficha → produto → lista → home.
+  devolve para a lista (com o aro do modelo já aberto, nas bicicletas) em vez
+  de ir direto para a home; a home continua a um clique de distância depois
+  disso. Com a ficha técnica aberta, a ordem é ficha → produto → lista → home.
 
-**Como foi escondido dos elétricos por enquanto:** o motor compartilhado
-(`src/catalog/`) ganhou uma flag opcional, `mobileModelBrowser`, em
-`CatalogConfig`. Só `catalogo-interativo.ts` (bicicletas) liga ela. Enquanto
-um catálogo não ligar, o motor desenha ele exatamente como desenhava antes —
-inclusive o atributo que decide qual tela mostrar (`data-mobile-view`) nem
-chega a existir no HTML de quem não ligou. Verificado no navegador: elétricos
-continua com a tira horizontal de sempre, lista e produto convivendo, sem
-nenhuma mudança visual ou de comportamento.
+**Mecanismo:** o motor compartilhado (`src/catalog/`) tem uma flag,
+`mobileModelBrowser`, em `CatalogConfig` — liga tudo isto de uma vez.
+`catalogo-interativo.ts` e `catalogo-eletricos.ts` ligam a mesma flag hoje.
 
-**Quando aprovar para os elétricos:** é uma linha — acrescentar
-`mobileModelBrowser: true` na chamada de `createCatalogPage` em
-`catalogo-eletricos.ts`. Como lá não há agrupamento por aro (pedido explícito
-do cliente), o efeito prático seria só a troca de tela lista↔produto, o
-"Voltar" em camadas e a ficha em folha cheia; o card de aro não se aplica
-(não existe grupo).
+**A única diferença real entre os dois catálogos** (pedido explícito): sem
+agrupamento por aro, cada elétrico não abre um grupo — ele JÁ nasce como o
+próprio card, com o nome dentro, clicável direto (mesma seta ">" dos aros
+fechados, só que sem girar, já que não há o que expandir). Implementado em
+`standaloneModelCardMarkup` (markup.ts), usado só quando o catálogo não tem
+`grouping`. Testado nos dois catálogos, nas três larguras (mobile, iPad
+landscape, desktop) — bicicletas conferidas sem nenhuma mudança.
 
-### Etapa 3 — ficha técnica em folha cheia (bicicletas: concluída; elétricos: aguardando aprovação)
-Mesma flag `mobileModelBrowser`, mesmo status (só bicicletas por enquanto):
+### Etapa 3 — ficha técnica em folha cheia (concluída para bicicletas e elétricos)
+Mesma flag `mobileModelBrowser`, hoje ligada nos dois catálogos:
 
 - A foto do produto para de se mover ao abrir a ficha no mobile (o Ato 1 do
   desktop — encolher e sair do centro — foi neutralizado só ali).
@@ -149,8 +145,8 @@ coluna lateral, longe dele, e o vão nunca fez falta) — sem adicionar um, a
 linha ficaria colada no "Voltar"/na logo. Acrescentado `lg:pb-6` (24px) só
 para isso. Testado com um modelo selecionado (a logo "OREGON" ficou a 48px
 da linha, confortável) e com a ficha técnica aberta — nenhuma sobreposição
-em nenhum dos dois casos. Mesma flag `mobileModelBrowser` de sempre —
-elétricos continuam sem a linha até aprovar.
+em nenhum dos dois casos. Mesma flag `mobileModelBrowser` de sempre — desde
+que os elétricos ligaram a flag (ver Etapa 2), a linha aparece lá também.
 
 ---
 
@@ -292,3 +288,16 @@ testar Saira Condensed; foi revertido.
 - "Mais informações" esconde a descrição junto com os destaques, liberando a
   tela inteira para a tabela; volta junto ao fechar. Mesma flag, só
   bicicletas por enquanto.
+
+### Elétricos: mesma estrutura das bicicletas (2026-07-28)
+- `mobileModelBrowser` ligada em `catalogo-eletricos.ts` — navegação em duas
+  telas, ficha em folha cheia, linha divisória, exceção do iPad em paisagem:
+  tudo replicado, sem tocar em código do motor compartilhado.
+- Única diferença pedida: sem agrupamento por aro, cada elétrico aparece como
+  seu próprio card no mobile (`standaloneModelCardMarkup`), com o mesmo peso
+  visual do cabeçalho de um card de aro fechado. Desktop/iPad landscape
+  continuam com a lista sublinhada de sempre — só ganharam a linha divisória.
+- Testado nos dois catálogos e nas três larguras; bicicletas conferidas sem
+  nenhuma mudança visual ou de comportamento.
+- Conteúdo (fotos, logos, descrições, ficha técnica real) continua faltando —
+  ver a seção de decisões abertas.

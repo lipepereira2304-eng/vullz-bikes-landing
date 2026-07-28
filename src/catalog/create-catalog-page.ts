@@ -8,6 +8,7 @@ import {
   sidebarGroupMarkup,
   sidebarItemMarkup,
   specsButtonMarkup,
+  standaloneModelCardMarkup,
   specsPanelMarkup,
   stageMarkup,
   stageWrapperMarkup,
@@ -144,9 +145,20 @@ export function createCatalogPage<M extends ProductModel>(config: CatalogConfig<
 
   function sidebarMarkup(activeModelId: string | null): string {
     if (!grouping) {
-      // Lista solta (elétricos, hoje): sem grupo, não existe card de aro —
-      // mobileCard fica sempre false aqui, independente da flag.
-      return models.map((m, i) => sidebarItemMarkup(m, m.id === activeModelId, i, false)).join("");
+      /*
+        Lista solta (elétricos): sem grupo, não existe card de aro pra
+        abrir — com a folha mobile ligada, cada modelo já nasce como o
+        próprio card (standaloneModelCardMarkup). Sem a flag, continua o
+        chip de tira horizontal de sempre (sidebarItemMarkup, mobileCard
+        sempre false aqui).
+      */
+      return models
+        .map((m, i) =>
+          mobileModelBrowser
+            ? standaloneModelCardMarkup(m, m.id === activeModelId, i)
+            : sidebarItemMarkup(m, m.id === activeModelId, i, false)
+        )
+        .join("");
     }
 
     return groupConsecutive(models, grouping.keyOf)

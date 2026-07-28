@@ -580,6 +580,54 @@ export function sidebarItemMarkup(
 }
 
 /*
+  Card individual por modelo — usado só quando o catálogo NÃO tem
+  agrupamento (elétricos, com a folha mobile ligada). Sem aro, não existe
+  "grupo" pra abrir: cada modelo já É o card, e o clique leva direto ao
+  produto. Por isso a mesma seta ">" que os cards de aro mostram fechados
+  aparece aqui sempre nesse estado — nunca gira, porque não há o que
+  expandir, só "ir".
+
+  Tipografia igual ao CABEÇALHO do card de aro (o mesmo tamanho e peso
+  grandes), não à linha pequena de dentro dele: aqui o modelo ocupa o card
+  sozinho, tem o mesmo peso visual que um aro fechado tem na tela das
+  bicicletas — replicar "a mesma coisa" também é replicar a proporção, não
+  só a moldura.
+
+  Desktop INTOCADO: todas as classes novas são max-lg:, então em ≥1024px o
+  botão continua exatamente a linha sublinhada de sempre — a mesma que
+  sidebarItemMarkup(..., false) já produz hoje pra elétricos.
+*/
+export function standaloneModelCardMarkup(model: ProductModel, active: boolean, revealIndex: number): string {
+  const tone = active
+    ? "text-vullz-black lg:border-b-2 lg:border-vullz-black"
+    : "text-vullz-gray-400 hover:text-vullz-black lg:border-b lg:border-vullz-gray-200";
+
+  return /* html */ `
+    <div class="max-lg:rounded-3xl max-lg:border max-lg:border-vullz-gray-200 max-lg:bg-white max-lg:px-5 max-lg:py-4 max-lg:shadow-[0_24px_60px_-32px_rgba(17,17,17,0.35)]">
+      <button
+        type="button"
+        data-model="${model.id}"
+        style="animation-delay:calc(var(--stagger) * ${revealIndex})"
+        class="reveal-left-in item-motion shrink-0 whitespace-nowrap rounded-lg px-4 py-2 text-left text-sm font-bold uppercase tracking-widest hover:translate-x-[var(--shift-sm)] active:translate-x-0 max-lg:flex max-lg:min-h-11 max-lg:w-full max-lg:items-center max-lg:gap-2 max-lg:whitespace-normal max-lg:rounded-none max-lg:px-0 max-lg:text-xl max-lg:font-extrabold max-lg:tracking-wide lg:block lg:w-full lg:whitespace-normal lg:rounded-none lg:px-0 lg:py-3 ${tone}"
+      >
+        <svg
+          width="14"
+          height="14"
+          viewBox="0 0 10 10"
+          fill="none"
+          xmlns="http://www.w3.org/2000/svg"
+          class="lg:hidden shrink-0"
+          aria-hidden="true"
+        >
+          <path d="M2.5 1L7.5 5L2.5 9" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+        </svg>
+        ${model.name}
+      </button>
+    </div>
+  `;
+}
+
+/*
   Cabeçalho de cada grupo é um botão (sanfona): controla se os modelos daquele
   grupo aparecem ou não. Só a seta gira — o texto do rótulo não muda de
   peso/cor ao abrir, pra não competir com os nomes dos modelos.
