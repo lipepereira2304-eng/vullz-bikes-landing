@@ -108,9 +108,21 @@ export function specsButtonMarkup(): string {
 export function specsPanelMarkup(
   model: ProductModel,
   activeColor: ProductColor,
-  icons: AssetMap
+  icons: AssetMap,
+  mobileSheet: boolean
 ): string {
   const ref = activeColor.ref ? ` — REF. ${activeColor.ref}` : "";
+
+  /*
+    `mobileSheet` (= `mobileModelBrowser` do CatalogConfig — hoje só as
+    bicicletas ligam): reduz o padding/gap do quadro da ficha e do título,
+    para descrição + 6 cards + botão caberem na tela sem rolar. O
+    posicionamento em folha cheia (cobre a foto, sobe do fundo, borra o que
+    fica atrás) é CSS puro em main.css, escopado pelo mesmo `[data-mobile-view]`
+    — não precisa de classe daqui.
+  */
+  const fichaCardMobile = mobileSheet ? "max-lg:gap-3 max-lg:px-4 max-lg:py-4" : "";
+  const titleMobile = mobileSheet ? "max-lg:text-base" : "";
 
   return /* html */ `
     <aside
@@ -132,16 +144,25 @@ export function specsPanelMarkup(
         animação vive no <aside>) e o par fica centralizado em conjunto, o que
         alinha a descrição com o logo e a ficha com a bike do lado esquerdo.
       -->
-      ${model.description ? descriptionCardMarkup(model.description) : ""}
+      ${model.description ? descriptionCardMarkup(model.description, mobileSheet) : ""}
 
       <!--
         min-h-0 (e não max-h-full): com dois filhos, é o que permite a ficha
         encolher e rolar por dentro quando a tabela abre, em vez de empurrar a
         descrição para fora da tela. A descrição é shrink-0 e fica intacta.
+
+        Sem flex-1 de propósito, mesmo na folha mobile: o quadro cresce só o
+        que o próprio conteúdo pede (min-h-0 + overflow-y-auto já cobrem o
+        caso da tabela mais alta que a tela). Testado com flex-1 aqui: ele
+        esticava o quadro até preencher a folha inteira mesmo com os
+        destaques (conteúdo curto) na tela, sobrando uma faixa branca vazia
+        embaixo do botão — o justify-content: center do <aside> (ver
+        main.css) já centraliza o conjunto sozinho, sem precisar esticar
+        nada.
       -->
-      <div class="flex min-h-0 flex-col gap-5 overflow-y-auto rounded-3xl border border-vullz-gray-200 bg-white px-6 py-5 shadow-[0_24px_60px_-32px_rgba(17,17,17,0.35)] lg:px-8 lg:py-7">
+      <div class="flex min-h-0 flex-col gap-5 overflow-y-auto rounded-3xl border border-vullz-gray-200 bg-white px-6 py-5 shadow-[0_24px_60px_-32px_rgba(17,17,17,0.35)] lg:px-8 lg:py-7 ${fichaCardMobile}">
         <header class="flex flex-col gap-1">
-          <h2 class="text-lg font-extrabold uppercase tracking-wide text-vullz-black">
+          <h2 class="text-lg font-extrabold uppercase tracking-wide text-vullz-black ${titleMobile}">
             Ficha Técnica
           </h2>
           <p data-role="specs-subtitle" class="text-xs font-medium uppercase tracking-widest text-vullz-gray-500">
@@ -149,7 +170,7 @@ export function specsPanelMarkup(
           </p>
         </header>
 
-        ${model.specs ? specsContentMarkup(model.specs, icons) : specsEmptyMarkup()}
+        ${model.specs ? specsContentMarkup(model.specs, icons, mobileSheet) : specsEmptyMarkup()}
       </div>
     </aside>
   `;
@@ -161,15 +182,35 @@ export function specsPanelMarkup(
   quadro fica com cerca de metade da altura do da ficha sem precisar de altura
   fixa. `shrink-0` para ele não ser espremido quando a tabela da ficha abre.
 */
-function descriptionCardMarkup(description: string): string {
-  return /* html */ `
+function descriptionCardMarkup(description: string, mobileSheet: boolean): string {
+  const cardMobile = mobileSheet ? "max-lg:px-4 max-lg:py-3" : "";
+
+  const card = /* html */ `
     <div
       data-role="description-card"
-      class="shrink-0 rounded-3xl border border-vullz-gray-200 bg-white px-6 py-4 shadow-[0_24px_60px_-32px_rgba(17,17,17,0.35)] lg:px-8 lg:py-5"
+      class="shrink-0 rounded-3xl border border-vullz-gray-200 bg-white px-6 py-4 shadow-[0_24px_60px_-32px_rgba(17,17,17,0.35)] lg:px-8 lg:py-5 ${cardMobile}"
     >
       <p class="text-[13px] leading-relaxed text-vullz-gray-500 lg:text-sm">
         ${description}
       </p>
+    </div>
+  `;
+
+  if (!mobileSheet) return card;
+
+  /*
+    Só na folha mobile: a descrição precisa poder SUMIR quando "Mais
+    informações" abre a tabela (ver toggleSpecsDetails em
+    create-catalog-page.ts), acompanhando os destaques — as duas formam a
+    "vista compacta" da ficha. Reusa a MESMA sanfona de [data-panel] (
+    grid-template-rows 0fr↔1fr) que já anima destaques/tabela, em vez de
+    inventar uma segunda técnica. Nasce aberta (data-open="true"): é o estado
+    inicial de toda ficha, e o loop de `settled` no fim de render() (ver
+    create-catalog-page.ts) cuida de liberar o recorte no primeiro quadro.
+  */
+  return /* html */ `
+    <div data-panel data-open="true" data-role="description-panel" class="shrink-0">
+      <div>${card}</div>
     </div>
   `;
 }
@@ -198,12 +239,13 @@ function specsEmptyMarkup(): string {
   que ali cabia algo, o que é preferível a um buraco branco que parece
   intencional.
 */
-function specIconSlotMarkup(icons: AssetMap, iconId: string): string {
+function specIconSlotMarkup(icons: AssetMap, iconId: string, mobileSheet: boolean): string {
   const src = findSpecIcon(icons, iconId);
+  const sizeMobile = mobileSheet ? "max-lg:h-7 max-lg:w-7" : "";
 
   if (src) {
     return /* html */ `
-      <img src="${src}" alt="" aria-hidden="true" class="h-9 w-9 shrink-0 object-contain" />
+      <img src="${src}" alt="" aria-hidden="true" class="h-9 w-9 shrink-0 object-contain ${sizeMobile}" />
     `;
   }
 
@@ -211,7 +253,7 @@ function specIconSlotMarkup(icons: AssetMap, iconId: string): string {
     <span
       data-role="spec-icon-slot"
       aria-hidden="true"
-      class="h-9 w-9 shrink-0 rounded-md border border-dashed border-vullz-gray-200"
+      class="h-9 w-9 shrink-0 rounded-md border border-dashed border-vullz-gray-200 ${sizeMobile}"
     ></span>
   `;
 }
@@ -271,13 +313,21 @@ function specsTableMarkup(details: SpecDetail[]): string {
     recolher, então nada a alternar. Quando o modelo ganhar destaques, cai
     automaticamente no primeiro caso.
 */
-function specsContentMarkup(specs: ProductSpecs, icons: AssetMap): string {
+function specsContentMarkup(specs: ProductSpecs, icons: AssetMap, mobileSheet: boolean): string {
   const highlights = specs.highlights ?? [];
   const details = specs.details ?? [];
 
   if (highlights.length === 0) {
     return details.length > 0 ? /* html */ `<div>${specsTableMarkup(details)}</div>` : "";
   }
+
+  // Reduz card/ícone/gap só na folha mobile — a ideia é caber descrição +
+  // título + 6 cards + botão na tela sem precisar rolar.
+  const cardMobile = mobileSheet ? "max-lg:min-h-[56px] max-lg:gap-2 max-lg:px-2 max-lg:py-2" : "";
+  const gridMobile = mobileSheet ? "max-lg:gap-1.5" : "";
+  const footerMobile = mobileSheet
+    ? "max-lg:-mx-4 max-lg:-mb-4 max-lg:px-4 max-lg:pb-4 max-lg:pt-2"
+    : "";
 
   return /* html */ `
     <div data-panel data-open="true" data-role="specs-highlights">
@@ -288,16 +338,16 @@ function specsContentMarkup(specs: ProductSpecs, icons: AssetMap): string {
           auto-fit a quantidade por linha mudaria com a largura do painel e a
           simetria se perderia.
         -->
-        <ul class="grid grid-cols-2 gap-2 sm:grid-cols-3">
+        <ul class="grid grid-cols-2 gap-2 sm:grid-cols-3 ${gridMobile}">
           ${highlights
             .map(
               (item, i) => /* html */ `
                 <li
                   data-role="spec-card"
                   style="animation-delay:calc(var(--stagger-tight) * ${i})"
-                  class="flex min-h-[72px] items-center gap-2.5 rounded-2xl border border-vullz-gray-200 bg-vullz-gray-50 px-3 py-3 text-xs font-semibold uppercase leading-snug tracking-wide text-vullz-black"
+                  class="flex min-h-[72px] items-center gap-2.5 rounded-2xl border border-vullz-gray-200 bg-vullz-gray-50 px-3 py-3 text-xs font-semibold uppercase leading-snug tracking-wide text-vullz-black ${cardMobile}"
                 >
-                  ${specIconSlotMarkup(icons, item.icon)}
+                  ${specIconSlotMarkup(icons, item.icon, mobileSheet)}
                   <span>${item.label}</span>
                 </li>
               `
@@ -324,9 +374,11 @@ function specsContentMarkup(specs: ProductSpecs, icons: AssetMap): string {
             pill arredondado, então o texto da tabela continuaria aparecendo nas
             laterais dele. As margens negativas esticam a faixa até as bordas do
             card (anulando o padding), para o conteúdo passar por baixo sem
-            vazar em nenhum ponto.
+            vazar em nenhum ponto. Na folha mobile o padding do card mudou
+            (ver fichaCardMobile em specsPanelMarkup), então a margem negativa
+            precisa cancelar o valor NOVO, não o antigo.
           -->
-          <div class="sticky bottom-0 z-10 -mx-6 -mb-5 flex justify-center bg-white px-6 pb-5 pt-3 lg:-mx-8 lg:-mb-7 lg:px-8 lg:pb-7">
+          <div class="sticky bottom-0 z-10 -mx-6 -mb-5 flex justify-center bg-white px-6 pb-5 pt-3 lg:-mx-8 lg:-mb-7 lg:px-8 lg:pb-7 ${footerMobile}">
             <button
               type="button"
               data-role="specs-details-toggle"

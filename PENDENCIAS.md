@@ -3,7 +3,7 @@
 Relatório vivo do que ficou em aberto. Atualizado conforme surgem itens; revisar
 quando quiser. Ordenado por prioridade dentro de cada seção.
 
-_Última atualização: 2026-07-28 (navegação de modelos das bicicletas)._
+_Última atualização: 2026-07-28 (ficha técnica em folha cheia nas bicicletas)._
 
 ---
 
@@ -24,7 +24,8 @@ Nova navegação mobile em **duas telas** para o catálogo de bicicletas:
 
 - Os 4 aros viram cards de cantos arredondados, empilhados, fechados por
   padrão. Clicar expande e mostra os modelos daquele aro (linhas de lista);
-  só um aro fica aberto por vez.
+  só um aro fica aberto por vez. Os cards ficam centralizados no espaço
+  vertical disponível.
 - Escolher um modelo troca a tela inteira para o produto (foto, cores, ficha)
   — a lista de aros sai completamente, não convive mais com o produto.
 - "Voltar" ganhou uma camada: com um modelo selecionado, o primeiro clique
@@ -44,20 +45,33 @@ nenhuma mudança visual ou de comportamento.
 **Quando aprovar para os elétricos:** é uma linha — acrescentar
 `mobileModelBrowser: true` na chamada de `createCatalogPage` em
 `catalogo-eletricos.ts`. Como lá não há agrupamento por aro (pedido explícito
-do cliente), o efeito prático seria só a troca de tela lista↔produto e o
-"Voltar" em camadas; o card de aro não se aplica (não existe grupo).
+do cliente), o efeito prático seria só a troca de tela lista↔produto, o
+"Voltar" em camadas e a ficha em folha cheia; o card de aro não se aplica
+(não existe grupo).
+
+### Etapa 3 — ficha técnica em folha cheia (bicicletas: concluída; elétricos: aguardando aprovação)
+Mesma flag `mobileModelBrowser`, mesmo status (só bicicletas por enquanto):
+
+- A foto do produto para de se mover ao abrir a ficha no mobile (o Ato 1 do
+  desktop — encolher e sair do centro — foi neutralizado só ali).
+- A ficha (descrição + cards de destaque) sobe do fundo da tela como uma
+  folha cheia, cobrindo completamente a foto e a logo do modelo — só o
+  cabeçalho (Voltar + logo Vullz) fica visível por cima.
+- O que fica atrás borra (`filter: blur`) enquanto a ficha está aberta.
+- Padding/gap/tamanho dos cards de destaque e do quadro de descrição foram
+  reduzidos no mobile para caber tudo (descrição + título + 6 cards + botão)
+  sem precisar rolar — testado nos 8 modelos, incluindo a Doble (5 cards, uma
+  célula vazia).
+- "Mais informações" agora esconde a descrição junto com os destaques,
+  deixando o espaço inteiro para a tabela completa; "Menos informações" traz
+  os dois de volta juntos.
 
 Itens que continuam em aberto:
 
-1. **Ficha técnica.** Ainda sem tratamento mobile próprio — no celular ela
-   cobre o produto inteiro e mostra 4 das 14 linhas da tabela em 390×844 (1 de
-   14 em 360×640), com ~250px de tela vazia acima. A coreografia de dois atos
-   (produto sai para a esquerda → ficha entra pela direita) só faz sentido no
-   desktop.
-2. **Ficha em paisagem.** Consequência conhecida da etapa 1: com a página
-   rolando, o painel abre 304px abaixo da dobra em 844×390. Some quando a
-   ficha ganhar o tratamento mobile próprio.
-3. **"Escolha um modelo ao lado…"** — não aparece mais na Tela 1 (fica
+1. **Ficha em paisagem.** Com a página rolando (herdado da etapa 1), a folha
+   cheia da ficha fica mais alta que a tela em 844×390 e é preciso rolar para
+   ver tudo — funciona, mas não foi desenhada pensando nesse caso.
+2. **"Escolha um modelo ao lado…"** — não aparece mais na Tela 1 (fica
    escondida junto com o resto do palco), mas o texto em si não foi reescrito
    porque vem do config e é compartilhado com o desktop.
 
@@ -188,3 +202,16 @@ testar Saira Condensed; foi revertido.
 - **`theme-color`**: os dois catálogos declaravam o grafite da home apesar de
   terem fundo branco — a barra de status do celular ficava escura sobre página
   clara. Agora é branco nas duas.
+
+### Mobile — etapa 2, navegação de modelos das bicicletas (2026-07-28)
+- Aros viraram cards expansíveis, centralizados no espaço vertical.
+- Modelo selecionado troca para tela cheia do produto; "Voltar" devolve à
+  lista antes da home. Atrás da flag `mobileModelBrowser` (só bicicletas).
+
+### Mobile — etapa 3, ficha técnica em folha cheia (2026-07-28)
+- Foto para de se mover ao abrir a ficha; a ficha sobe do fundo como folha
+  cheia cobrindo foto e logo, com blur no que fica atrás.
+- Cards de destaque e quadro de descrição reduzidos para caber sem rolar.
+- "Mais informações" esconde a descrição junto com os destaques, liberando a
+  tela inteira para a tabela; volta junto ao fechar. Mesma flag, só
+  bicicletas por enquanto.

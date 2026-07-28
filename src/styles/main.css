@@ -698,6 +698,18 @@
     }
 
     /*
+      Os cards de aro centralizados no espaço vertical disponível, e não
+      grudados no topo logo abaixo do cabeçalho. `<main>` já é `flex-col` — só
+      precisa de `justify-content: center`. Some sozinho quando o conteúdo
+      já preenche ou passa da tela (a lista rolando, ver a regra logo abaixo):
+      não sobra espaço para centralizar, então não há o que a propriedade
+      fazer.
+    */
+    [data-mobile-view="list"] [data-role="catalog-main"] {
+      justify-content: center;
+    }
+
+    /*
       A tela travada (`h-dvh` + `overflow-hidden`, ver create-catalog-page.ts)
       é o comportamento certo para o PRODUTO — a mesma "uma tela só" que o
       resto do catálogo já tinha. Mas a LISTA é conteúdo que ainda não
@@ -710,6 +722,86 @@
       height: auto;
       min-height: 100dvh;
       overflow: visible;
+    }
+
+    /*
+      --------------------------------------------------------------
+      FICHA TÉCNICA NO MOBILE: FOLHA CHEIA
+      --------------------------------------------------------------
+      No desktop a ficha entra pela direita enquanto o produto encolhe e sai
+      do centro (Ato 1 + Ato 2 — ver "Ficha técnica: reorganização de layout
+      em dois atos" mais acima em @layer components). No mobile isso muda de
+      figura: a foto fica PARADA (nunca encolhe nem se desloca) e quem se
+      move é só a ficha, que sobe do fundo da tela como uma folha cheia,
+      cobrindo completamente a foto e a logo do modelo. O cabeçalho (Voltar +
+      logo Vullz) continua visível por cima de propósito: a ficha vive dentro
+      de `<main>`, que já começa exatamente abaixo dele, então "cobrir tudo
+      dentro de main" já respeita o cabeçalho sem precisar calcular a altura
+      dele.
+
+      Tudo aqui é SOBRESCRITA das regras de @layer components acima (a base
+      continua escrita do jeito que estava) — nunca a fonte delas. É a mesma
+      razão de estar em @layer utilities: a base do Ato 1 vive em components,
+      e teria que perder de "utilities sempre vence" pra estas regras
+      valerem.
+    */
+
+    /* A foto não participa mais do Ato 1 no mobile: fica onde já estava. */
+    [data-mobile-view] [data-specs="open"] [data-role="stage-section"] {
+      scale: 1;
+      translate: 0 0;
+    }
+
+    /*
+      Borrão no que fica atrás enquanto a ficha está aberta. Mesma
+      duração/curva que o resto do Ato 1 já usa neste elemento
+      (`--duration-layout`/`--ease-layout`, herdadas da regra em
+      @layer components) — só a LISTA de propriedades que transicionam
+      precisa crescer para incluir `filter`.
+    */
+    [data-mobile-view] [data-role="stage-section"] {
+      transition-property: translate, scale, opacity, filter;
+      filter: blur(0);
+    }
+
+    [data-mobile-view] [data-specs="open"] [data-role="stage-section"] {
+      filter: blur(16px);
+    }
+
+    /*
+      A ficha vira uma folha cheia: mantém a margem lateral de sempre
+      (`inset-x-4`, não sobrescrita aqui — os quadros continuam com a mesma
+      respiração das bordas), mas passa a ocupar do topo ao fundo do <main>
+      em vez de só os 74% de baixo. `max-height: none` solta o teto que
+      existia para caber na faixa menor de antes.
+
+      `bottom: env(safe-area-inset-bottom)`, e não `bottom: 0`: um elemento
+      `absolute` usa a caixa de PADDING do ancestral posicionado como
+      referência — ou seja, ignora o próprio padding-bottom do `<main>`
+      (que já reserva a faixa seguro do indicador de home, ver
+      create-catalog-page.ts) e iria até a borda física da tela. Sem isto, o
+      botão "Mais informações" da tabela aberta poderia ficar embaixo do
+      indicador em aparelhos com ele. Em aparelho sem esse indicador, o valor
+      é 0 e nada muda.
+    */
+    [data-mobile-view] [data-role="specs-panel"] {
+      top: 0;
+      bottom: env(safe-area-inset-bottom, 0px);
+      max-height: none;
+      justify-content: center;
+
+      /*
+        Entrada vertical, e não horizontal como no desktop: a folha sobe de
+        baixo pra cima. `calc(--shift-md * 2)` é o MESMO dobro já usado no
+        Ato 1 do desktop para este mesmo tipo de gesto "maior" (ver
+        `[data-specs="open"] [data-role="stage-section"]` em
+        @layer components) — não é um número novo.
+      */
+      translate: 0 calc(var(--shift-md) * 2);
+    }
+
+    [data-mobile-view] [data-role="specs-panel"][data-visible="true"] {
+      translate: 0 0;
     }
   }
 }

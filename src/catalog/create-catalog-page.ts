@@ -363,7 +363,7 @@ export function createCatalogPage<M extends ProductModel>(config: CatalogConfig<
           ${colorRailContent}
         </aside>
 
-        ${activeModel && activeColor ? specsPanelMarkup(activeModel, activeColor, icons) : ""}
+        ${activeModel && activeColor ? specsPanelMarkup(activeModel, activeColor, icons, mobileModelBrowser) : ""}
       </main>
     </div>
   `;
@@ -603,6 +603,9 @@ export function createCatalogPage<M extends ProductModel>(config: CatalogConfig<
     const details = document.querySelector<HTMLElement>("[data-role='specs-details']");
     const toggle = document.querySelector<HTMLElement>("[data-role='specs-details-toggle']");
     const label = document.querySelector<HTMLElement>("[data-role='specs-details-label']");
+    // Existe só na folha mobile das bicicletas (ver descriptionCardMarkup);
+    // nos demais casos o seletor não acha nada e as linhas abaixo não fazem nada.
+    const descriptionPanel = document.querySelector<HTMLElement>("[data-role='description-panel']");
 
     if (highlights) {
       highlights.dataset.open = "true";
@@ -612,16 +615,40 @@ export function createCatalogPage<M extends ProductModel>(config: CatalogConfig<
       details.dataset.open = "false";
       delete details.dataset.settled;
     }
+    if (descriptionPanel) {
+      descriptionPanel.dataset.open = "true";
+      descriptionPanel.dataset.settled = "true";
+    }
     toggle?.setAttribute("aria-expanded", "false");
     if (label) label.textContent = "Mais informações";
   }
 
+  /*
+    Na folha mobile (bicicletas), a descrição acompanha os destaques: as duas
+    formam a "vista compacta" da ficha, e nunca a tabela. Abrindo "Mais
+    informações" ela sai JUNTO com os destaques (não junto com a tabela, que
+    entra depois); fechando, ela volta JUNTO com os destaques que reentram.
+    É por isso que ela participa do mesmo "sai"/"entra" encadeado, e não de um
+    terceiro passo — encaixa na sequência existente sem adicionar um novo
+    momento em que algo anima sozinho.
+
+    `isMobileWidth()` (e não só "o elemento existe"): no desktop das
+    bicicletas o wrapper da descrição também está no DOM (a mesma folha
+    HTML serve as duas larguras), mas lá ele nunca deve se mexer — o
+    "Mais informações" do desktop só troca destaques por tabela, como
+    sempre. Tratar como se não existisse fora do mobile é o que preserva
+    esse comportamento sem precisar de um HTML diferente por largura.
+  */
   async function toggleSpecsDetails(): Promise<void> {
     const highlights = document.querySelector<HTMLElement>("[data-role='specs-highlights']");
     const details = document.querySelector<HTMLElement>("[data-role='specs-details']");
     const toggle = document.querySelector<HTMLElement>("[data-role='specs-details-toggle']");
     const label = document.querySelector<HTMLElement>("[data-role='specs-details-label']");
     if (!highlights || !details || !toggle) return;
+
+    const descriptionPanel = isMobileWidth()
+      ? document.querySelector<HTMLElement>("[data-role='description-panel']")
+      : null;
 
     detailsOpen = !detailsOpen;
     const run = ++detailsRun;
@@ -631,19 +658,35 @@ export function createCatalogPage<M extends ProductModel>(config: CatalogConfig<
 
     const sai = detailsOpen ? highlights : details;
     const entra = detailsOpen ? details : highlights;
+    // A descrição sai quando quem sai são os destaques, entra quando quem
+    // entra são os destaques — nunca acompanha a tabela.
+    const descriptionSai = detailsOpen ? descriptionPanel : null;
+    const descriptionEntra = detailsOpen ? null : descriptionPanel;
 
     delete sai.dataset.settled;
     sai.dataset.open = "false";
-    await animationsSettled(sai);
+    if (descriptionSai) {
+      delete descriptionSai.dataset.settled;
+      descriptionSai.dataset.open = "false";
+    }
+    await Promise.all([
+      animationsSettled(sai),
+      ...(descriptionSai ? [animationsSettled(descriptionSai)] : []),
+    ]);
     if (run !== detailsRun) return;
 
     entra.dataset.open = "true";
-    await animationsSettled(entra);
+    if (descriptionEntra) descriptionEntra.dataset.open = "true";
+    await Promise.all([
+      animationsSettled(entra),
+      ...(descriptionEntra ? [animationsSettled(descriptionEntra)] : []),
+    ]);
     if (run !== detailsRun) return;
 
     // Solta o recorte só com a altura estabilizada — senão o anel de foco de
     // teclado do primeiro e do último item fica cortado na borda do bloco.
     entra.dataset.settled = "true";
+    if (descriptionEntra) descriptionEntra.dataset.settled = "true";
   }
 
   /*
