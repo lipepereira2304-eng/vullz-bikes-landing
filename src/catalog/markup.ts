@@ -439,14 +439,27 @@ export function stageMarkup(photos: AssetMap, model: ProductModel, color: Produc
   `flex-col`, então um item normal ficaria lado a lado com a foto (linha), não
   acima dela.
 */
-export function modelNameMarkup(logos: AssetMap, model: ProductModel): string {
+export function modelNameMarkup(logos: AssetMap, model: ProductModel, mobileSheet: boolean): string {
   const logo = findLogo(logos, model.id);
+
+  /*
+    `mobileSheet` (= `mobileModelBrowser`, só bicicletas por enquanto):
+    aproxima a logo da foto no mobile. O vão entre as duas dependia só da
+    centralização da foto dentro do palco — variava bastante de modelo pra
+    modelo (a Street, por exemplo, ficava com um vão enorme) sem relação com
+    o tamanho real da logo. mobileShift desce a logo em metade da PRÓPRIA
+    altura (translate no eixo Y); combina com a centralização horizontal já
+    existente (eixo X) porque as duas viram propriedades independentes
+    (--tw-translate-x/-y) que o Tailwind v4 junta na hora de montar o
+    `translate` final — uma não sobrescreve a outra.
+  */
+  const mobileShift = mobileSheet ? "max-lg:translate-y-1/2" : "";
 
   if (logo) {
     return /* html */ `
       <div
         data-role="model-logo"
-        class="absolute left-1/2 top-0 z-10 h-11 w-full max-w-xl -translate-x-1/2 sm:h-14 lg:h-[77px]"
+        class="absolute left-1/2 top-0 z-10 h-11 w-full max-w-xl -translate-x-1/2 sm:h-14 lg:h-[77px] ${mobileShift}"
       >
         <img src="${logo}" alt="${model.name}" class="h-full w-full object-contain" />
       </div>
@@ -454,7 +467,7 @@ export function modelNameMarkup(logos: AssetMap, model: ProductModel): string {
   }
 
   return /* html */ `
-    <h1 class="absolute left-1/2 top-0 z-10 w-full max-w-xl -translate-x-1/2 text-center text-2xl font-extrabold uppercase tracking-wide text-vullz-black">
+    <h1 class="absolute left-1/2 top-0 z-10 w-full max-w-xl -translate-x-1/2 text-center text-2xl font-extrabold uppercase tracking-wide text-vullz-black ${mobileShift}">
       ${model.name}
     </h1>
   `;
@@ -484,11 +497,12 @@ export function modelNameMarkup(logos: AssetMap, model: ProductModel): string {
 export function stageWrapperMarkup(
   logos: AssetMap,
   activeModel: ProductModel | null,
-  stageContent: string
+  stageContent: string,
+  mobileSheet: boolean
 ): string {
   return /* html */ `
     <div data-role="stage-wrapper" class="relative flex min-h-0 w-full flex-1 items-center justify-center overflow-hidden pt-4 max-lg:landscape:min-h-[240px]">
-      ${activeModel ? modelNameMarkup(logos, activeModel) : ""}
+      ${activeModel ? modelNameMarkup(logos, activeModel, mobileSheet) : ""}
       ${stageContent}
     </div>
   `;

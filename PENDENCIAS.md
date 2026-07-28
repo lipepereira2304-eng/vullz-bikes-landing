@@ -68,12 +68,31 @@ Mesma flag `mobileModelBrowser`, mesmo status (só bicicletas por enquanto):
 
 Itens que continuam em aberto:
 
-1. **Ficha em paisagem.** Com a página rolando (herdado da etapa 1), a folha
-   cheia da ficha fica mais alta que a tela em 844×390 e é preciso rolar para
-   ver tudo — funciona, mas não foi desenhada pensando nesse caso.
+1. **Ficha em paisagem.** Confirmado pelo cliente como aceitável por ora
+   ("por enquanto está funcional") — com a página rolando, a folha cheia da
+   ficha fica mais alta que a tela em 844×390 e é preciso rolar para ver
+   tudo.
 2. **"Escolha um modelo ao lado…"** — não aparece mais na Tela 1 (fica
    escondida junto com o resto do palco), mas o texto em si não foi reescrito
    porque vem do config e é compartilhado com o desktop.
+
+### Ajustes finos (2026-07-28)
+- **Cards de aro centralizados** no espaço vertical da lista.
+- **Blur ao abrir a ficha**: curva trocada para `linear` (a mesma lição já
+  aplicada em `stage-fade-color` — blur não é posição, é valor mudando, e uma
+  curva não-linear escondia a transição nos pixels finais, que quase não se
+  distinguem a olho) + duração igualada à da folha subindo (`--duration-slow`).
+- **Máscara de gradiente** no topo da foto borrada: desvanece pra transparente
+  nos primeiros 64px, evitando o corte seco perto da linha divisória.
+- **Linha divisória** entre cabeçalho e conteúdo, com respiro dos dois lados.
+- **Logo do modelo** descida em 50% da própria altura, mais perto da foto.
+  **Achado ao testar (Oregon/Street):** a maior parte do vão visual que
+  restou não vem da posição da logo — vem da própria FOTO: o arquivo tem
+  canvas fixo 1800×1320 e a bike começa só a ~15% da altura pra baixo (medido
+  pixel a pixel), sobrando uma faixa transparente enorme acima do quadro em
+  toda foto que usa esse recorte. Descer a logo fechou a parte que era dela;
+  fechar o resto seria recortar/reenquadrar as fotos em si (fora do que foi
+  pedido agora — aviso para decidir depois).
 
 ---
 

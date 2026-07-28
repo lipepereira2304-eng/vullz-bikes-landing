@@ -753,19 +753,47 @@
     }
 
     /*
-      Borrão no que fica atrás enquanto a ficha está aberta. Mesma
-      duração/curva que o resto do Ato 1 já usa neste elemento
-      (`--duration-layout`/`--ease-layout`, herdadas da regra em
-      @layer components) — só a LISTA de propriedades que transicionam
-      precisa crescer para incluir `filter`.
+      Borrão no que fica atrás enquanto a ficha está aberta. Duração e curva
+      PRÓPRIAS, diferentes do resto deste elemento (que herdaria
+      `--duration-layout`/`--ease-layout` da regra em @layer components,
+      pensada para TRANSLATE/SCALE — percurso de posição, não usado mais
+      aqui: ver a regra logo acima, que já neutraliza os dois no mobile).
+
+      Blur não é posição, é só um valor mudando — o mesmo caso já resolvido
+      em `stage-fade-color`: "numa dissolução pura, sem nada se deslocando,
+      uma curva com desaceleração segura a imagem antiga no fim". Sem essa
+      lição aplicada aqui, o resultado media era pior: os PRIMEIROS pixels de
+      desfoque mudam MUITO a leitura da imagem, os ÚLTIMOS quase nada — então
+      uma curva não-linear (que gasta boa parte do tempo justamente nesse
+      trecho final pouco perceptível) faz o efeito parecer instantâneo,
+      mesmo durando quase 400ms. `linear` distribui o tempo por igual em vez
+      de concentrar nos pixels que menos importam.
+
+      `--duration-slow`, a mesma da folha subindo (ver
+      `[data-role="specs-panel"]`): as duas coisas — fundo escurecendo e
+      folha entrando — ficam sincronizadas, lidas como um gesto só.
     */
     [data-mobile-view] [data-role="stage-section"] {
-      transition-property: translate, scale, opacity, filter;
+      transition-property: filter;
+      transition-duration: var(--duration-slow);
+      transition-timing-function: linear;
       filter: blur(0);
     }
 
+    /*
+      A máscara de gradiente é o que evita o corte seco no topo: sem ela, o
+      borrão começa exatamente na borda de cima do palco (logo abaixo da
+      linha divisória) com intensidade total, de repente. Aqui a mesma foto
+      borrada desvanece para transparente nos primeiros 64px — revelando o
+      branco da página por trás — antes de assentar na intensidade cheia. É
+      um recorte espacial (de cima pra baixo), não uma animação própria: não
+      precisa de transition, muda junto com o filter porque os dois vivem no
+      mesmo elemento e a mesma condição (`[data-specs="open"]`) liga ambos.
+    */
     [data-mobile-view] [data-specs="open"] [data-role="stage-section"] {
       filter: blur(16px);
+      mask-image: linear-gradient(to bottom, transparent, black 64px);
+      -webkit-mask-image: linear-gradient(to bottom, transparent, black 64px);
     }
 
     /*

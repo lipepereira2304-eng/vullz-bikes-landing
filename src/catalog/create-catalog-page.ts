@@ -313,6 +313,25 @@ export function createCatalogPage<M extends ProductModel>(config: CatalogConfig<
         ${headerBrandMarkup()}
       </header>
 
+      <!--
+        Linha divisória entre cabeçalho e conteúdo (só bicicletas, mesma
+        flag). Elemento IRMÃO do header/main, e não algo dentro de um dos
+        dois — não mexe na estrutura interna de nenhum, risco zero pro
+        desktop. Todas as classes são max-lg:, sem nenhuma base sem prefixo:
+        a única forma de garantir que nada daqui alcance o CSS de >=1024px é
+        não deixar nada fora do prefixo — no desktop a div fica sem estilo
+        nenhum, um bloco vazio de altura 0, invisível por conta própria.
+
+        O respiro de cima já vem do padding-bottom do header (16px); a
+        margem-abaixo aqui dá o mesmo respiro antes do conteúdo começar —
+        nem colada no cabeçalho, nem colada no que vem a seguir.
+      -->
+      ${
+        mobileModelBrowser
+          ? /* html */ `<div aria-hidden="true" class="max-lg:mx-6 max-lg:mb-4 max-lg:h-px max-lg:bg-vullz-gray-200"></div>`
+          : ""
+      }
+
       <main
         data-role="catalog-main"
         class="relative z-10 flex flex-1 flex-col gap-4 overflow-hidden px-6 pb-6 max-lg:pb-[max(1.5rem,env(safe-area-inset-bottom))] max-lg:landscape:overflow-visible sm:px-10 lg:flex-row lg:gap-16 lg:py-8"
@@ -342,7 +361,7 @@ export function createCatalogPage<M extends ProductModel>(config: CatalogConfig<
           data-role="stage-section"
           class="flex min-w-0 flex-1 flex-col items-center justify-center gap-4 overflow-hidden"
         >
-          ${stageWrapperMarkup(logos, activeModel, stageContent)}
+          ${stageWrapperMarkup(logos, activeModel, stageContent, mobileModelBrowser)}
           ${
             activeModel && activeColor
               ? /* html */ `
