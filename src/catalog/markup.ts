@@ -121,7 +121,18 @@ export function specsPanelMarkup(
     fica atrás) é CSS puro em main.css, escopado pelo mesmo `[data-mobile-view]`
     — não precisa de classe daqui.
   */
-  const fichaCardMobile = mobileSheet ? "max-lg:gap-3 max-lg:px-4 max-lg:py-4" : "";
+  /*
+    Padding de cima e de baixo tratados em separado, e o de baixo ZERADO
+    explicitamente — não basta deixar de escrever uma classe pra ele: a base
+    (compartilhada com o desktop) já dá padding IGUAL nos dois lados, e uma
+    classe mobile que nunca é escrita não apaga a base, só deixa de competir
+    com ela. O card não tem MAIS respiro de baixo próprio na folha mobile —
+    quem dá esse respiro agora é só o rodapé sticky (footerMobile, mais
+    abaixo), de propósito: ver o comentário lá para o motivo ("sticky" não
+    convivia bem com a técnica antiga de cancelar o padding por margem
+    negativa).
+  */
+  const fichaCardMobile = mobileSheet ? "max-lg:gap-3 max-lg:px-4 max-lg:pt-4 max-lg:pb-0" : "";
   const titleMobile = mobileSheet ? "max-lg:text-base" : "";
 
   return /* html */ `
@@ -325,9 +336,20 @@ function specsContentMarkup(specs: ProductSpecs, icons: AssetMap, mobileSheet: b
   // título + 6 cards + botão na tela sem precisar rolar.
   const cardMobile = mobileSheet ? "max-lg:min-h-[56px] max-lg:gap-2 max-lg:px-2 max-lg:py-2" : "";
   const gridMobile = mobileSheet ? "max-lg:gap-1.5" : "";
-  const footerMobile = mobileSheet
-    ? "max-lg:-mx-4 max-lg:-mb-4 max-lg:px-4 max-lg:pb-4 max-lg:pt-2"
-    : "";
+  /*
+    A margem negativa vertical é ZERADA explicitamente, pelo mesmo motivo do
+    padding em fichaCardMobile: a classe base compartilhada com o desktop já
+    tem uma margem negativa própria, e sem anulá-la ela continua valendo por
+    baixo. Era exatamente essa margem negativa, combinada com "sticky", que
+    deixava faltar ~17px bem no fim (o padding do card + a borda de 1px) —
+    testado e medido, não é só suspeita: a última linha da tabela aparecia
+    por trás do botão ao rolar. Por isso fichaCardMobile (acima) também não
+    dá mais respiro de baixo próprio ao card na folha mobile: quem cobre
+    esse respiro agora é só o padding de baixo deste rodapé, que sticky ou
+    não, é sempre o ÚLTIMO elemento — chegando puro até a borda do card, sem
+    precisar cancelar nada.
+  */
+  const footerMobile = mobileSheet ? "max-lg:-mx-4 max-lg:mb-0 max-lg:px-4 max-lg:pb-4 max-lg:pt-2" : "";
 
   return /* html */ `
     <div data-panel data-open="true" data-role="specs-highlights">
@@ -372,11 +394,11 @@ function specsContentMarkup(specs: ProductSpecs, icons: AssetMap, mobileSheet: b
 
             A faixa branca é este <div>, e não o próprio botão: o botão é um
             pill arredondado, então o texto da tabela continuaria aparecendo nas
-            laterais dele. As margens negativas esticam a faixa até as bordas do
-            card (anulando o padding), para o conteúdo passar por baixo sem
-            vazar em nenhum ponto. Na folha mobile o padding do card mudou
-            (ver fichaCardMobile em specsPanelMarkup), então a margem negativa
-            precisa cancelar o valor NOVO, não o antigo.
+            laterais dele. As margens negativas (horizontais, nas duas
+            larguras; verticais, só no desktop) esticam a faixa até as bordas
+            do card, cancelando o padding dele — pra nenhum ponto vazar. Na
+            folha mobile a margem vertical foi retirada de propósito: ver o
+            comentário de footerMobile em specsContentMarkup.
           -->
           <div class="sticky bottom-0 z-10 -mx-6 -mb-5 flex justify-center bg-white px-6 pb-5 pt-3 lg:-mx-8 lg:-mb-7 lg:px-8 lg:pb-7 ${footerMobile}">
             <button

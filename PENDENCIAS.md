@@ -94,6 +94,16 @@ Itens que continuam em aberto:
   fechar o resto seria recortar/reenquadrar as fotos em si (fora do que foi
   pedido agora — aviso para decidir depois).
 
+### Correção: botão "Menos informações" deixava linha da tabela vazar (2026-07-28)
+Ao rolar a tabela completa com pouca altura de tela disponível, a última
+linha visível aparecia por trás do botão fixo no rodapé. Causa: a "cortina"
+branca atrás do botão cancelava o respiro do card por margem negativa — uma
+técnica que não convive bem com `position: sticky` (o caso do botão), e
+sobrava ~17px (padding do card + borda de 1px) sem cobertura. Corrigido
+zerando o respiro de baixo do card e deixando só o padding do próprio rodapé
+cobrir esse espaço — testado rolando até o fim da tabela, sem vazamento.
+Só bicicletas (mesma flag); desktop conferido byte a byte idêntico.
+
 ---
 
 ## 🔴 Precisam de decisão/ação sua
