@@ -1,9 +1,10 @@
 import "../styles/main.css";
-import { fluidBackgroundMarkup } from "../components/fluid-background";
 import { catalogCardMarkup } from "../components/catalog-card";
 import { socialButtonsMarkup } from "../components/social-buttons";
 import { initRevealOnScroll } from "./animations";
-import vullzLogo from "../assets/images/vullz-logo.png";
+// Mesmo arquivo usado no cabeçalho dos catálogos: a home agora é branca como
+// eles, então usa a mesma versão escura da logo (a clara era feita pro grafite).
+import vullzLogo from "../assets/images/vullz-logo-dark-text.webp";
 
 /*
   Este caminho é a URL pública do catálogo e também o nome que o cliente vê ao
@@ -30,9 +31,7 @@ if (app) {
 
       Em aparelho sem entalhe todo env() vale 0px e nada muda.
     -->
-    <div class="relative isolate flex min-h-dvh flex-col overflow-hidden bg-vullz-graphite max-lg:pb-[env(safe-area-inset-bottom)] max-lg:pl-[env(safe-area-inset-left)] max-lg:pr-[env(safe-area-inset-right)] max-lg:pt-[env(safe-area-inset-top)]">
-      ${fluidBackgroundMarkup()}
-
+    <div class="relative isolate flex min-h-dvh flex-col overflow-hidden bg-white text-vullz-black max-lg:pb-[env(safe-area-inset-bottom)] max-lg:pl-[env(safe-area-inset-left)] max-lg:pr-[env(safe-area-inset-right)] max-lg:pt-[env(safe-area-inset-top)]">
       <header class="relative z-10 flex justify-center pt-10 sm:pt-14" data-reveal>
         <img
           src="${vullzLogo}"
@@ -52,32 +51,38 @@ if (app) {
           mudar um número em main.css.
         -->
         <div class="flex flex-col items-center gap-5" style="transition-delay:calc(var(--stagger) * 1)" data-reveal>
-          <h1 class="text-balance text-4xl font-extrabold tracking-tight text-white sm:text-6xl md:text-7xl">
+          <h1 class="text-balance text-4xl font-extrabold tracking-tight text-vullz-black sm:text-6xl md:text-7xl">
             Catálogos Digitais
           </h1>
-          <p class="max-w-md text-balance text-base text-white/60 sm:text-lg">
+          <p class="max-w-md text-balance text-base text-vullz-gray-500 sm:text-lg">
             Explore toda nossa linha de bicicletas e veículos elétricos.
           </p>
         </div>
 
+        <!--
+          Ordem = ordem de prioridade pro cliente que chega pelo QR Code: os
+          dois catálogos interativos primeiro (bicicletas, depois elétricos),
+          o PDF por último como alternativa pra quem prefere baixar/imprimir.
+        -->
         <div class="grid w-full max-w-5xl gap-5 sm:grid-cols-2 sm:gap-6 lg:grid-cols-3">
           ${catalogCardMarkup({
             title: "Bicicletas",
-            href: CATALOGO_BICICLETAS,
-            revealStep: 2,
-          })}
-          ${catalogCardMarkup({
-            title: "Catálogo Interativo",
             href: "/catalogo-interativo.html",
             newTab: false,
             linkLabel: "Explorar modelos",
-            revealStep: 3,
+            revealStep: 2,
           })}
           ${catalogCardMarkup({
             title: "Elétricos",
             href: "/catalogo-eletricos.html",
             newTab: false,
             linkLabel: "Explorar modelos",
+            revealStep: 3,
+          })}
+          ${catalogCardMarkup({
+            title: "Bicicletas",
+            subtitle: "(Catálogo PDF)",
+            href: CATALOGO_BICICLETAS,
             revealStep: 4,
           })}
         </div>
@@ -89,8 +94,8 @@ if (app) {
         })}
       </main>
 
-      <!-- white/50 é o menor passo que atinge contraste AA (5.24:1) em 12px sobre o grafite. -->
-      <footer class="relative z-10 pb-8 text-center text-xs text-white/50">
+      <!-- vullz-gray-500 é o mesmo tom usado como texto secundário em todo o site (ver catálogos). -->
+      <footer class="relative z-10 pb-8 text-center text-xs text-vullz-gray-500">
         © ${new Date().getFullYear()} Vullz Bikes. Todos os direitos reservados.
       </footer>
     </div>

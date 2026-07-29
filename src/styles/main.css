@@ -134,9 +134,14 @@
     scroll-behavior: smooth;
   }
 
+  /*
+    Todo o site é branco agora (a home era a última página grafite). --color-
+    vullz-graphite* continua definida no tema — não é usada por nenhuma página
+    hoje, mas nada aqui exigia removê-la.
+  */
   body {
-    background: var(--color-vullz-graphite);
-    color: var(--color-vullz-white);
+    background: var(--color-vullz-white);
+    color: var(--color-vullz-black);
     overflow-x: hidden;
   }
 
