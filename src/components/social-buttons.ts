@@ -9,12 +9,12 @@ export interface SocialButtonsOptions {
 /*
   `btn-motion` carrega a mesma linguagem de movimento dos cards (ver main.css), e
   o glow é um halo externo (box-shadow, que por especificação só pinta fora da
-  borda — nunca por baixo do botão). Escuro e discreto de propósito: o amarelo
+  borda — nunca por baixo do botão). Branco e discreto de propósito: o amarelo
   é a cor de marca, não um efeito de hover — reservá-la para logo/foco evita que
   a interface pisque amarelo toda vez que o cursor passa por cima de algo.
 */
 const BASE_BUTTON_CLASSES =
-  "group inline-flex flex-1 items-center justify-center gap-2.5 rounded-2xl border border-vullz-gray-200 bg-vullz-gray-50 px-6 py-4 text-sm font-semibold text-vullz-black btn-motion hover:-translate-y-[var(--shift-sm)] hover:border-vullz-black hover:bg-vullz-gray-100 hover:shadow-[0_0_55px_-14px_rgba(17,17,17,0.18)] active:translate-y-0 active:scale-[0.985] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vullz-yellow focus-visible:ring-offset-2 sm:text-base";
+  "group inline-flex flex-1 items-center justify-center gap-2.5 rounded-2xl border border-white/10 bg-white/[0.04] px-6 py-4 text-sm font-semibold text-white btn-motion hover:-translate-y-[var(--shift-sm)] hover:border-white/25 hover:bg-white/[0.07] hover:shadow-[0_0_55px_-14px_rgba(255,255,255,0.22)] active:translate-y-0 active:scale-[0.985] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vullz-yellow focus-visible:ring-offset-2 focus-visible:ring-offset-vullz-graphite sm:text-base";
 
 export function socialButtonsMarkup({
   whatsappNumber,
