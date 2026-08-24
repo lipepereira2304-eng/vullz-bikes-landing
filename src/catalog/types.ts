@@ -117,4 +117,22 @@ export interface CatalogConfig<M extends ProductModel = ProductModel> {
     como desenha hoje — nenhuma regra nova alcança quem não ligou.
   */
   mobileModelBrowser?: boolean;
+  /*
+    Sombra flutuante (`filter: drop-shadow`) sob a foto do produto no palco.
+    Padrão `true` — é o que faz a bike "pousar" na página em vez de flutuar
+    seca, e depende de a foto ter fundo transparente: o filtro segue o
+    CONTORNO REAL do alfa da imagem. Numa foto sem transparência (fundo
+    branco sólido, canto a canto) o alfa é um retângulo, e a sombra que "segue
+    o contorno" vira uma sombra do RETÂNGULO — um contorno visível ao redor do
+    fundo da foto, competindo com a sombra de estúdio que a própria foto já
+    tem.
+
+    `false` nos elétricos por enquanto: as fotos ainda chegam sem
+    transparência (ver src/assets/eletricos/README.md), e como a página
+    também é branca, a foto já se funde sozinha ao fundo sem precisar de
+    sombra nenhuma — a sombra de estúdio original faz esse trabalho. Volta a
+    `true` (ou remove a flag) assim que os elétricos passarem a ter PNG/WebP
+    com fundo transparente, no mesmo padrão das bicicletas.
+  */
+  stageShadow?: boolean;
 }

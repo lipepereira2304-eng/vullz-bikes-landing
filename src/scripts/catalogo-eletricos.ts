@@ -82,4 +82,10 @@ createCatalogPage({
   // (navegação mobile em duas telas, ficha em folha cheia, linha divisória,
   // exceção do iPad em paisagem) — ver mobileModelBrowser em types.ts.
   mobileModelBrowser: true,
+  // As fotos dos elétricos ainda vêm com fundo branco sólido (sem
+  // transparência), e a página também é branca — sem essa flag, a sombra
+  // flutuante do palco desenharia um contorno visível ao redor do retângulo
+  // da foto. Volta a `true` (ou remove) quando os elétricos ganharem fundo
+  // transparente — ver stageShadow em types.ts.
+  stageShadow: false,
 });

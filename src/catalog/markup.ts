@@ -432,16 +432,25 @@ function specsContentMarkup(specs: ProductSpecs, icons: AssetMap, mobileSheet: b
   Sem foto real ainda: mensagem simples em vez de qualquer desenho de
   substituição — mais honesto que fingir um produto que não existe na tela.
 */
-export function stageMarkup(photos: AssetMap, model: ProductModel, color: ProductColor): string {
+export function stageMarkup(
+  photos: AssetMap,
+  model: ProductModel,
+  color: ProductColor,
+  shadow: boolean
+): string {
   const photo = findPhoto(photos, model.id, color.id);
 
   if (photo) {
+    // Ver o comentário de `stageShadow` em types.ts: só entra com foto de
+    // fundo transparente — numa foto opaca, o filtro desenharia a sombra do
+    // RETÂNGULO da imagem, não do produto.
+    const shadowStyle = shadow ? `style="filter: drop-shadow(0 16px 24px rgba(17,17,17,0.12));"` : "";
     return /* html */ `
       <img
         src="${photo}"
         alt="${model.name} — ${color.name}"
         class="h-full w-full object-contain"
-        style="filter: drop-shadow(0 16px 24px rgba(17,17,17,0.12));"
+        ${shadowStyle}
       />
     `;
   }
