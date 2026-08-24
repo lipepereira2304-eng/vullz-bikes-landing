@@ -15,20 +15,20 @@ src/assets/eletricos/<id-do-modelo>/<id-da-cor>.jpg
 ## Modelos e cores (por enquanto)
 
 Todos os modelos abaixo têm as mesmas 3 cores padrão: `branco`, `preto` e
-`vermelho`. Enquanto uma foto não existe, o catálogo mostra "Em breve..." no
-lugar dela — não precisa ser tudo de uma vez, cor por cor já funciona.
+`vermelho`. Ainda faltam fotos reais de todos — enquanto não existem, o
+catálogo mostra "Em breve..." no lugar da foto.
 
-| Modelo         | Pasta                                  | Status                          |
-| -------------- | --------------------------------------- | -------------------------------- |
-| Urban Citycoco | `src/assets/eletricos/urban-citycoco/` | sem fotos ainda                  |
-| Urban Drive    | `src/assets/eletricos/urban-drive/`    | sem fotos ainda                  |
-| Urban Max      | `src/assets/eletricos/urban-max/`      | `preto` e `vermelho` (falta `branco`) |
-| Urban Plus     | `src/assets/eletricos/urban-plus/`     | sem fotos ainda                  |
-| V-10           | `src/assets/eletricos/v-10/`           | sem fotos ainda                  |
-| V-50           | `src/assets/eletricos/v-50/`           | sem fotos ainda                  |
+| Modelo         | Pasta                              |
+| -------------- | ----------------------------------- |
+| Urban Citycoco | `src/assets/eletricos/urban-citycoco/` |
+| Urban Drive    | `src/assets/eletricos/urban-drive/`    |
+| Urban Max      | `src/assets/eletricos/urban-max/`      |
+| Urban Plus     | `src/assets/eletricos/urban-plus/`     |
+| V-10           | `src/assets/eletricos/v-10/`           |
+| V-50           | `src/assets/eletricos/v-50/`           |
 
-Arquivos esperados em cada pasta: `branco.webp`, `preto.webp`, `vermelho.webp`
-(ou `.jpg`/`.jpeg`/`.png`).
+Arquivos esperados em cada pasta: `branco.jpg`, `preto.jpg`, `vermelho.jpg`
+(ou `.jpeg`/`.png`/`.webp`).
 
 ## Padrão de canvas (o mesmo do catálogo das bikes)
 
