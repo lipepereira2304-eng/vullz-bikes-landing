@@ -90,6 +90,35 @@ depois — **não repetir essa técnica em outro modelo sem revisar antes**. Se
 um dia a Urban Plus ganhar fotos novas com recorte consistente entre as três
 cores, o problema todo deixa de existir.
 
+## Ficha técnica (25/08/2026)
+
+Todos os 5 modelos têm ficha técnica agora, no mesmo padrão das bikes (ver
+`ProductSpecs`/`SpecHighlight` em types.ts) — só com uma diferença
+deliberada: **sem o botão "Mais informações"**, a pedido do cliente ("não
+precisa ter... por não ter uma ficha muito detalhada e extensa"). Isso não
+exigiu nenhuma mudança no motor: o botão só aparece quando o modelo declara
+`details` (a tabela completa) em `ProductSpecs`, e nenhum elétrico declara —
+só `highlights`, os cartões.
+
+Os 5 cartões (Tipo de Bateria, Potência do Motor, Autonomia, Velocidade
+Máxima, Capacidade de Carga) vêm da planilha `Vullz_Ficha_Tecnica_Modelos.xlsx`
+que o cliente enviou, na mesma ordem das colunas dela. **3 campos da Urban
+Drive são PROVISÓRIOS na planilha original** (potência, autonomia e carga —
+só bateria e velocidade são confirmados pelo cliente); ver o comentário de
+`electricHighlights` em `catalogo-eletricos.ts` antes de tratar esses
+números como definitivos.
+
+**REF. placeholder:** nenhuma cor de elétrico tem código de referência real
+ainda. Todas usam o texto fixo `xxx/xx` (constante `REF_PLACEHOLDER`) — troca
+por um código de verdade por cor assim que ele existir.
+
+**Descrição genérica:** o quadro acima da ficha técnica (campo `description`)
+usa o mesmo texto placeholder pros 5 modelos por enquanto — o cliente ainda
+vai escrever a descrição própria de cada um (`GENERIC_DESCRIPTION` em
+`catalogo-eletricos.ts`).
+
+Ícones dos 5 cartões: ver `src/assets/icons/README.md`.
+
 ## Logos (nome estilizado de cada modelo)
 
 Mesma pasta do modelo, arquivo `logo.svg` (ou `.png`/`.webp`), fundo

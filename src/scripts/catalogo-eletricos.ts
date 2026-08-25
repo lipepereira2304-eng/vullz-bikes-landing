@@ -1,6 +1,6 @@
 import "../styles/main.css";
 import { createCatalogPage } from "../catalog/create-catalog-page";
-import type { ProductColor, ProductModel } from "../catalog/types";
+import type { ProductColor, ProductModel, SpecHighlight } from "../catalog/types";
 
 /*
   Catálogo interativo dos ELÉTRICOS. Mesma tela do catálogo das bicicletas
@@ -8,7 +8,8 @@ import type { ProductColor, ProductModel } from "../catalog/types";
 
   A diferença fica na configuração: aqui não existe agrupamento por aro — os
   modelos aparecem soltos, direto na lateral, sem gaveta de categoria nenhuma
-  (foi um pedido explícito) — e as cores ainda não têm código de referência.
+  (foi um pedido explícito) — e as cores ainda não têm código de referência
+  real (todas usam o placeholder `REF_PLACEHOLDER`, ver mais abaixo).
 
   FOTOS: src/assets/eletricos/<model-id>/<color-id>.jpg (ou .jpeg/.png/.webp),
   mesma convenção do catálogo das bikes. Enquanto não existe, aparece
@@ -25,6 +26,21 @@ const photos = import.meta.glob<string>(
 );
 
 const logos = import.meta.glob<string>("../assets/eletricos/*/logo.{svg,png,webp}", {
+  eager: true,
+  import: "default",
+});
+
+/*
+  ÍCONES dos destaques da ficha técnica: mesma convenção das bikes, qualquer
+  arquivo em src/assets/icons/ é encontrado pelo NOME (sem extensão) — os 5
+  usados aqui (tipo-de-bateria, potencia-do-motor, autonomia,
+  velocidade-maxima, capacidade-de-peso) foram processados a partir do que o
+  cliente colocou na pasta: fundo removido (a arte original tinha fundo
+  opaco quase-branco, não transparente) e recolorido pro mesmo cinza das
+  bikes — sem isso, ficariam com um retângulo claro visível atrás e um tom
+  levemente diferente dos ícones das bikes na mesma tela.
+*/
+const icons = import.meta.glob<string>("../assets/icons/*.{svg,png,webp}", {
   eager: true,
   import: "default",
 });
@@ -73,6 +89,15 @@ function resolveColor(modelId: string, key: keyof typeof PALETTE): string {
 }
 
 /*
+  Nenhuma cor de elétrico tem código de referência real ainda — em vez de
+  omitir o campo (o que apagaria a REF. da ficha técnica e do rótulo abaixo
+  da foto), usa um placeholder visível, a pedido do cliente. Troca por um
+  código de verdade por cor assim que ele chegar; até lá, todo mundo mostra
+  o mesmo texto.
+*/
+const REF_PLACEHOLDER = "xxx/xx";
+
+/*
   Cada modelo tem sua própria lista de cores — diferente das bikes, aqui as
   cores não são as mesmas 3 pra todo mundo. A lista abaixo é a linha atual de
   produto (confirmada pelo cliente em 25/08/2026): o que não está aqui não é
@@ -84,26 +109,98 @@ function colors(modelId: string, ids: (keyof typeof PALETTE)[]): ProductColor[] 
     id,
     name: PALETTE_NAMES[id],
     swatch: resolveColor(modelId, id),
+    ref: REF_PLACEHOLDER,
   }));
 }
 
+/*
+  Texto genérico pro quadro de descrição, igual pra todo modelo por enquanto
+  — o cliente ainda vai escrever a descrição própria de cada um (mesmo
+  padrão das bikes, campo `description` em ProductModel). Existir já com
+  algo plausível evita a ficha nascer com um buraco vazio acima dela.
+*/
+const GENERIC_DESCRIPTION =
+  "Desenvolvido para o dia a dia urbano, este elétrico Vullz une praticidade, economia e conforto em cada trajeto.";
+
+/*
+  Ficha técnica dos elétricos: só o primeiro nível (6 destaques vira 5 aqui,
+  um por coluna da planilha do cliente, na mesma ordem dela) — SEM tabela de
+  "Mais informações", a pedido do cliente ("não precisa ter o botão").  Isso
+  já é suportado pelo motor sem mudar nada nele: `specsContentMarkup` só
+  desenha o botão quando `details` existe (ver markup.ts) — aqui nenhum
+  modelo declara `details`, então ele nunca aparece.
+
+  Valores da planilha Vullz_Ficha_Tecnica_Modelos.xlsx (25/08/2026). Urban
+  Drive tem 3 dos 5 campos marcados como PROVISÓRIOS na planilha original
+  (potência, autonomia e carga — só bateria e velocidade são confirmados);
+  troque assim que os valores reais chegarem.
+*/
+function electricHighlights(
+  bateria: string,
+  potenciaW: number,
+  autonomia: string,
+  velocidade: string,
+  cargaKg: string
+): SpecHighlight[] {
+  return [
+    { icon: "tipo-de-bateria", label: `Bateria de ${bateria}` },
+    { icon: "potencia-do-motor", label: `Motor ${potenciaW}W` },
+    { icon: "autonomia", label: `Autonomia de ${autonomia}` },
+    { icon: "velocidade-maxima", label: `Até ${velocidade}` },
+    { icon: "capacidade-de-peso", label: `Carga até ${cargaKg}` },
+  ];
+}
+
 const MODELS: ProductModel[] = [
-  { id: "urban-citycoco", name: "Urban Citycoco", colors: colors("urban-citycoco", ["preto"]) },
-  { id: "urban-drive", name: "Urban Drive", colors: colors("urban-drive", ["azul", "laranja", "verde"]) },
-  { id: "urban-max", name: "Urban Max", colors: colors("urban-max", ["preto", "vermelho"]) },
-  { id: "urban-plus", name: "Urban Plus", colors: colors("urban-plus", ["branco", "preto", "vermelho"]) },
+  {
+    id: "urban-citycoco",
+    name: "Urban Citycoco",
+    colors: colors("urban-citycoco", ["preto"]),
+    description: GENERIC_DESCRIPTION,
+    specs: { highlights: electricHighlights("Lítio", 1000, "20 a 30 km", "32 km/h", "200 kg") },
+  },
+  {
+    id: "urban-drive",
+    name: "Urban Drive",
+    colors: colors("urban-drive", ["azul", "laranja", "verde"]),
+    description: GENERIC_DESCRIPTION,
+    // Potência, autonomia e carga são PROVISÓRIOS na planilha do cliente —
+    // ver o comentário de electricHighlights.
+    specs: { highlights: electricHighlights("Lítio", 800, "20 a 30 km", "32 km/h", "120 kg") },
+  },
+  {
+    id: "urban-max",
+    name: "Urban Max",
+    colors: colors("urban-max", ["preto", "vermelho"]),
+    description: GENERIC_DESCRIPTION,
+    specs: { highlights: electricHighlights("Chumbo", 1000, "20 a 30 km", "32 km/h", "180 kg") },
+  },
+  {
+    id: "urban-plus",
+    name: "Urban Plus",
+    colors: colors("urban-plus", ["branco", "preto", "vermelho"]),
+    description: GENERIC_DESCRIPTION,
+    specs: { highlights: electricHighlights("Chumbo", 1000, "20 a 30 km", "32 km/h", "180 kg") },
+  },
   // V-10 removido — é o mesmo produto que a Urban Citycoco, não um modelo à parte.
   // Nome trocado de "V-50" para "Urban Volt (V-50)" a pedido do cliente —
   // passa a ser o nome exibido em qualquer lugar do site que mostre este
   // modelo. `id` e a pasta de fotos (src/assets/eletricos/urban-volt-v50/)
   // acompanham o novo nome.
-  { id: "urban-volt-v50", name: "Urban Volt (V-50)", colors: colors("urban-volt-v50", ["preto", "vermelho"]) },
+  {
+    id: "urban-volt-v50",
+    name: "Urban Volt (V-50)",
+    colors: colors("urban-volt-v50", ["preto", "vermelho"]),
+    description: GENERIC_DESCRIPTION,
+    specs: { highlights: electricHighlights("Chumbo", 1000, "20 a 30 km", "32 km/h", "120 kg") },
+  },
 ];
 
 createCatalogPage({
   models: MODELS,
   photos,
   logos,
+  icons,
   emptyMessage: "Escolha um modelo ao lado para ver o elétrico.",
   // Nenhuma foto de elétrico hoje é um recorte "premium" com sombra
   // sintética planejada — a sombra de cada foto (quando existe) é a de

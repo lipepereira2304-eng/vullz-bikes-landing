@@ -37,8 +37,17 @@ arquivo novo quando o desenho for realmente outro.
 | `cestinha.png` | Cestinha frontal — Majestic, Love Kids |
 | `rodinha.png` | Rodinhas de apoio — Pro Kids, Love Kids |
 | `capa-de-protecao.png` | Capa de proteção — Pro Kids, Love Kids |
+| `tipo-de-bateria.png` | Tipo de bateria — todos os elétricos |
+| `potencia-do-motor.png` | Potência do motor — todos os elétricos |
+| `autonomia.png` | Autonomia — todos os elétricos |
+| `velocidade-maxima.png` | Velocidade máxima — todos os elétricos |
+| `capacidade-de-peso.png` | Capacidade de carga — todos os elétricos |
 
-Todos os 8 modelos de bicicleta têm os 6 ícones. Nada reservado no momento.
+Todos os 8 modelos de bicicleta têm os 6 ícones. Os 5 modelos elétricos com
+ficha técnica reusam os últimos 5 ícones da tabela (mesmos ícones pros 5,
+só o valor de cada cartão muda) — processados a partir da arte que o
+cliente colocou aqui (fundo removido, recolorida pro mesmo cinza,
+redimensionada pra 256×256) em 25/08/2026. Nada reservado no momento.
 
 ## Como os arquivos devem ser
 
