@@ -30,22 +30,30 @@ const logos = import.meta.glob<string>("../assets/eletricos/*/logo.{svg,png,webp
 });
 
 /*
-  3 cores padrão por enquanto, as mesmas pra todo modelo — REFs e detalhes
-  finos ficam pra depois. Mantém o mesmo padrão de override do catálogo das
-  bikes: hoje vazio porque nenhum modelo precisa de um tom próprio ainda, mas
-  se algum elétrico precisar (ex.: um "vermelho" ligeiramente diferente), é só
-  adicionar uma entrada aqui, sem mexer no resto.
+  Paleta de referência. Mesmos tons hexadecimais já usados no catálogo das
+  bikes (azul/laranja/verde) — reaproveitados de propósito, é a mesma cor de
+  marca em outro produto, não uma decisão nova. Mantém o mesmo padrão de
+  override do catálogo das bikes: hoje vazio porque nenhum modelo precisa de
+  um tom próprio ainda, mas se algum elétrico precisar (ex.: um "azul"
+  ligeiramente diferente), é só adicionar uma entrada aqui, sem mexer no
+  resto.
 */
 const PALETTE = {
   branco: "#fcfefd",
   preto: "#060606",
   vermelho: "#c60314",
+  azul: "#0084d2",
+  laranja: "#fc3901",
+  verde: "#82fc03",
 } as const;
 
 const PALETTE_NAMES: Record<keyof typeof PALETTE, string> = {
   branco: "Branco",
   preto: "Preto",
   vermelho: "Vermelho",
+  azul: "Azul",
+  laranja: "Laranja",
+  verde: "Verde",
 };
 
 const MODEL_COLOR_OVERRIDES: Partial<Record<string, Partial<Record<keyof typeof PALETTE, string>>>> = {};
@@ -54,10 +62,15 @@ function resolveColor(modelId: string, key: keyof typeof PALETTE): string {
   return MODEL_COLOR_OVERRIDES[modelId]?.[key] ?? PALETTE[key];
 }
 
-const DEFAULT_COLOR_IDS: (keyof typeof PALETTE)[] = ["branco", "preto", "vermelho"];
-
-function defaultColors(modelId: string): ProductColor[] {
-  return DEFAULT_COLOR_IDS.map((id) => ({
+/*
+  Cada modelo tem sua própria lista de cores — diferente das bikes, aqui as
+  cores não são as mesmas 3 pra todo mundo. A lista abaixo é a linha atual de
+  produto (confirmada pelo cliente em 25/08/2026): o que não está aqui não é
+  "falta foto", é "não existe nessa cor" — a bolinha nem aparece, ao contrário
+  de uma cor sem foto ainda, que aparece e mostra "Em breve...".
+*/
+function colors(modelId: string, ids: (keyof typeof PALETTE)[]): ProductColor[] {
+  return ids.map((id) => ({
     id,
     name: PALETTE_NAMES[id],
     swatch: resolveColor(modelId, id),
@@ -65,16 +78,16 @@ function defaultColors(modelId: string): ProductColor[] {
 }
 
 const MODELS: ProductModel[] = [
-  { id: "urban-citycoco", name: "Urban Citycoco", colors: defaultColors("urban-citycoco") },
-  { id: "urban-drive", name: "Urban Drive", colors: defaultColors("urban-drive") },
-  { id: "urban-max", name: "Urban Max", colors: defaultColors("urban-max") },
-  { id: "urban-plus", name: "Urban Plus", colors: defaultColors("urban-plus") },
-  { id: "v-10", name: "V-10", colors: defaultColors("v-10") },
+  { id: "urban-citycoco", name: "Urban Citycoco", colors: colors("urban-citycoco", ["preto"]) },
+  { id: "urban-drive", name: "Urban Drive", colors: colors("urban-drive", ["azul", "laranja", "verde"]) },
+  { id: "urban-max", name: "Urban Max", colors: colors("urban-max", ["preto", "vermelho"]) },
+  { id: "urban-plus", name: "Urban Plus", colors: colors("urban-plus", ["branco", "preto", "vermelho"]) },
+  // V-10 removido — é o mesmo produto que a Urban Citycoco, não um modelo à parte.
   // Nome trocado de "V-50" para "Urban Volt (V-50)" a pedido do cliente —
   // passa a ser o nome exibido em qualquer lugar do site que mostre este
   // modelo. `id` e a pasta de fotos (src/assets/eletricos/urban-volt-v50/)
   // acompanham o novo nome.
-  { id: "urban-volt-v50", name: "Urban Volt (V-50)", colors: defaultColors("urban-volt-v50") },
+  { id: "urban-volt-v50", name: "Urban Volt (V-50)", colors: colors("urban-volt-v50", ["preto", "vermelho"]) },
 ];
 
 createCatalogPage({
