@@ -23,7 +23,7 @@ lugar dela — não precisa ser tudo de uma vez, cor por cor já funciona.
 | Urban Citycoco      | `src/assets/eletricos/urban-citycoco/`       | sem fotos ainda                          |
 | Urban Drive         | `src/assets/eletricos/urban-drive/`          | sem fotos ainda                          |
 | Urban Max           | `src/assets/eletricos/urban-max/`            | `preto`/`vermelho`, fundo opaco — falta `branco` |
-| Urban Plus          | `src/assets/eletricos/urban-plus/`           | sem fotos ainda                          |
+| Urban Plus          | `src/assets/eletricos/urban-plus/`           | `preto`/`branco`/`vermelho` completo (sombra do `preto` reconstruída — ver nota abaixo) |
 | V-10                | `src/assets/eletricos/v-10/`                 | sem fotos ainda                          |
 | Urban Volt (V-50)   | `src/assets/eletricos/urban-volt-v50/`       | `preto`/`vermelho`, fundo transparente (sem sombra própria — ver nota abaixo) — falta `branco` |
 
@@ -55,6 +55,19 @@ Cuidado ao subir uma foto SEM nenhuma sombra própria (silhueta limpa, fundo
 liso até nos cantos onde teria chão): sem a sombra sintética E sem a sombra
 real, o produto fica sem nenhum apoio visual — "flutuando" de verdade. Vale
 conferir visualmente antes de publicar.
+
+**Urban Plus `preto` — sombra reconstruída manualmente.** As fotos `branco` e
+`vermelho` vieram com um pedaço retangular do chão de estúdio (com sombra)
+ainda colado no recorte; a `preto` recebeu um recorte mais limpo, sem sobra
+de chão nenhuma — e por isso, sem sombra. Como as três fotos não são
+pixel-alinhadas entre si (escala/enquadramento variam um pouco de uma sessão
+de captura pra outra), copiar a sombra das irmãs direto por cima da preta
+ficaria deslocado. A sombra da `preto` foi reconstruída do zero: uma sombra
+de contato sintética, ancorada nos pontos reais de onde as rodas TOCAM O CHÃO
+nessa própria foto (medidos no alfa dela, que é confiável por ser um recorte
+limpo), no mesmo tom e suavidade das irmãs. Se um dia a Urban Plus ganhar
+fotos novas, com recorte consistente entre as três cores, esse ajuste manual
+deixa de ser necessário.
 
 ## Logos (nome estilizado de cada modelo)
 
