@@ -67,10 +67,22 @@ function defaultColors(modelId: string): ProductColor[] {
 const MODELS: ProductModel[] = [
   { id: "urban-citycoco", name: "Urban Citycoco", colors: defaultColors("urban-citycoco") },
   { id: "urban-drive", name: "Urban Drive", colors: defaultColors("urban-drive") },
-  { id: "urban-max", name: "Urban Max", colors: defaultColors("urban-max") },
+  /*
+    Fotos ainda com fundo branco sólido (sem transparência) — ver
+    src/assets/eletricos/README.md. Sem `stageShadow: false`, a sombra
+    flutuante do palco desenharia um contorno visível ao redor do retângulo
+    da foto. Remove esta linha quando a Urban Max ganhar fotos com fundo
+    transparente, no mesmo padrão da Urban Volt logo abaixo.
+  */
+  { id: "urban-max", name: "Urban Max", colors: defaultColors("urban-max"), stageShadow: false },
   { id: "urban-plus", name: "Urban Plus", colors: defaultColors("urban-plus") },
   { id: "v-10", name: "V-10", colors: defaultColors("v-10") },
-  { id: "v-50", name: "V-50", colors: defaultColors("v-50") },
+  // Nome trocado de "V-50" para "Urban Volt (V-50)" a pedido do cliente —
+  // passa a ser o nome exibido em qualquer lugar do site que mostre este
+  // modelo. `id` e a pasta de fotos (src/assets/eletricos/urban-volt-v50/)
+  // acompanham o novo nome; fotos já vêm com fundo transparente real, então
+  // usa o `stageShadow` padrão (sem precisar declarar nada aqui).
+  { id: "urban-volt-v50", name: "Urban Volt (V-50)", colors: defaultColors("urban-volt-v50") },
 ];
 
 createCatalogPage({
@@ -82,10 +94,4 @@ createCatalogPage({
   // (navegação mobile em duas telas, ficha em folha cheia, linha divisória,
   // exceção do iPad em paisagem) — ver mobileModelBrowser em types.ts.
   mobileModelBrowser: true,
-  // As fotos dos elétricos ainda vêm com fundo branco sólido (sem
-  // transparência), e a página também é branca — sem essa flag, a sombra
-  // flutuante do palco desenharia um contorno visível ao redor do retângulo
-  // da foto. Volta a `true` (ou remove) quando os elétricos ganharem fundo
-  // transparente — ver stageShadow em types.ts.
-  stageShadow: false,
 });
