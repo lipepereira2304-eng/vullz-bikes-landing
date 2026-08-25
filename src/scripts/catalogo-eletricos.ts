@@ -56,7 +56,17 @@ const PALETTE_NAMES: Record<keyof typeof PALETTE, string> = {
   verde: "Verde",
 };
 
-const MODEL_COLOR_OVERRIDES: Partial<Record<string, Partial<Record<keyof typeof PALETTE, string>>>> = {};
+/*
+  Urban Drive: cor é só um acento (punho, garfo, faixa da carenagem) sobre o
+  corpo preto — não a pintura inteira, como nas outras. O tom genérico da
+  paleta ficava visivelmente errado nas bolinhas. Valores medidos por
+  amostragem de pixel direto nas fotos reais (ponta do punho + faixa da
+  carenagem, dois pontos por cor, com filtro de saturação HSV pra descartar
+  borda/reflexo e pegar só o "miolo" puro da cor) — não são um palpite visual.
+*/
+const MODEL_COLOR_OVERRIDES: Partial<Record<string, Partial<Record<keyof typeof PALETTE, string>>>> = {
+  "urban-drive": { azul: "#01affd", laranja: "#fa7807", verde: "#74d812" },
+};
 
 function resolveColor(modelId: string, key: keyof typeof PALETTE): string {
   return MODEL_COLOR_OVERRIDES[modelId]?.[key] ?? PALETTE[key];

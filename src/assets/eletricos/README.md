@@ -26,7 +26,7 @@ mostra "Em breve..." no lugar da imagem.
 | Modelo             | Pasta                                       | Cores da linha         | Status                          |
 | ------------------- | -------------------------------------------- | ------------------------ | ---------------------------------- |
 | Urban Citycoco      | `src/assets/eletricos/urban-citycoco/`       | `preto`                  | completo                          |
-| Urban Drive         | `src/assets/eletricos/urban-drive/`          | `azul`, `laranja`, `verde` | sem fotos ainda                 |
+| Urban Drive         | `src/assets/eletricos/urban-drive/`          | `azul`, `laranja`, `verde` | completo (tons próprios — ver nota abaixo) |
 | Urban Max           | `src/assets/eletricos/urban-max/`            | `preto`, `vermelho`      | completo, fundo opaco             |
 | Urban Plus          | `src/assets/eletricos/urban-plus/`           | `branco`, `preto`, `vermelho` | completo (sombra do `preto` reconstruída — ver nota abaixo, **resultado ainda não aprovado**) |
 | Urban Volt (V-50)   | `src/assets/eletricos/urban-volt-v50/`       | `preto`, `vermelho`      | completo, fundo transparente (sem sombra própria — ver nota abaixo) |
@@ -42,6 +42,17 @@ separada em `MODELS` nem como pasta de assets.
 **Urban Volt (V-50)** era exibida como "V-50" — nome trocado a pedido do
 cliente. O nome novo é o que aparece em qualquer lugar do site que mostre
 este modelo; `id`/pasta acompanharam a troca.
+
+**Urban Drive — cor é acento, não pintura inteira.** Diferente dos outros
+modelos (corpo inteiro numa cor), a Urban Drive é preta com só um acento
+colorido (punho do guidão, garfo, faixa da carenagem) — o tom genérico da
+`PALETTE` (pensado pra pintura de corpo inteiro) ficava visivelmente errado
+nas bolinhas de seleção. Por isso tem entrada própria em
+`MODEL_COLOR_OVERRIDES`, com os três tons medidos direto das fotos reais
+(amostra de pixel em dois pontos do acento por cor, filtrando por saturação
+HSV pra pegar só o "miolo" puro da cor, sem borda nem reflexo). Se a Urban
+Drive ganhar fotos novas, vale reconferir se o tom do acento mudou antes de
+reaproveitar esses valores.
 
 ## Padrão de canvas (o mesmo do catálogo das bikes)
 
