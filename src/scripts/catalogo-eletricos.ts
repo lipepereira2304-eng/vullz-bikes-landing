@@ -67,21 +67,13 @@ function defaultColors(modelId: string): ProductColor[] {
 const MODELS: ProductModel[] = [
   { id: "urban-citycoco", name: "Urban Citycoco", colors: defaultColors("urban-citycoco") },
   { id: "urban-drive", name: "Urban Drive", colors: defaultColors("urban-drive") },
-  /*
-    Fotos ainda com fundo branco sólido (sem transparência) — ver
-    src/assets/eletricos/README.md. Sem `stageShadow: false`, a sombra
-    flutuante do palco desenharia um contorno visível ao redor do retângulo
-    da foto. Remove esta linha quando a Urban Max ganhar fotos com fundo
-    transparente, no mesmo padrão da Urban Volt logo abaixo.
-  */
-  { id: "urban-max", name: "Urban Max", colors: defaultColors("urban-max"), stageShadow: false },
+  { id: "urban-max", name: "Urban Max", colors: defaultColors("urban-max") },
   { id: "urban-plus", name: "Urban Plus", colors: defaultColors("urban-plus") },
   { id: "v-10", name: "V-10", colors: defaultColors("v-10") },
   // Nome trocado de "V-50" para "Urban Volt (V-50)" a pedido do cliente —
   // passa a ser o nome exibido em qualquer lugar do site que mostre este
   // modelo. `id` e a pasta de fotos (src/assets/eletricos/urban-volt-v50/)
-  // acompanham o novo nome; fotos já vêm com fundo transparente real, então
-  // usa o `stageShadow` padrão (sem precisar declarar nada aqui).
+  // acompanham o novo nome.
   { id: "urban-volt-v50", name: "Urban Volt (V-50)", colors: defaultColors("urban-volt-v50") },
 ];
 
@@ -90,6 +82,15 @@ createCatalogPage({
   photos,
   logos,
   emptyMessage: "Escolha um modelo ao lado para ver o elétrico.",
+  // Nenhuma foto de elétrico hoje é um recorte "premium" com sombra
+  // sintética planejada — a sombra de cada foto (quando existe) é a de
+  // estúdio, feita na hora da captura, e é ela que deve valer. Sem isto, o
+  // filtro CSS do palco tentaria desenhar uma sombra própria por cima —
+  // ver o comentário completo em `stageShadow` (types.ts). Padrão do
+  // catálogo inteiro: todo modelo novo cai aqui sem precisar declarar nada,
+  // a menos que um dia um modelo específico ganhe recorte com sombra
+  // pensada pelo site (aí é `stageShadow: true` só nesse modelo).
+  stageShadow: false,
   // Replica em elétricos toda a experiência já aprovada nas bicicletas
   // (navegação mobile em duas telas, ficha em folha cheia, linha divisória,
   // exceção do iPad em paisagem) — ver mobileModelBrowser em types.ts.

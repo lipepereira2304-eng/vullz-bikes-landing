@@ -65,6 +65,7 @@ export function createCatalogPage<M extends ProductModel>(config: CatalogConfig<
     grouping,
     icons = {},
     mobileModelBrowser = false,
+    stageShadow: catalogStageShadow = true,
   } = config;
 
   /*
@@ -113,7 +114,7 @@ export function createCatalogPage<M extends ProductModel>(config: CatalogConfig<
   function paint(model: M, color: ProductColor, kind: StageTransition): void {
     const container = document.querySelector<HTMLElement>("#stage-inner");
     if (!container) return;
-    paintStage(container, stageMarkup(photos, model, color, model.stageShadow ?? true), kind);
+    paintStage(container, stageMarkup(photos, model, color, model.stageShadow ?? catalogStageShadow), kind);
   }
 
   /*

@@ -79,19 +79,10 @@ export interface ProductModel {
   specs?: ProductSpecs;
   /*
     Sombra flutuante (`filter: drop-shadow`) sob a foto do produto no palco.
-    Padrão `true` — é o que faz o produto "pousar" na página em vez de
-    flutuar seco, e depende de a foto ter fundo transparente: o filtro segue o
-    CONTORNO REAL do alfa da imagem. Numa foto sem transparência (fundo
-    branco sólido, canto a canto) o alfa é um retângulo, e a sombra que "segue
-    o contorno" vira sombra do RETÂNGULO — um contorno visível ao redor do
-    fundo da foto, competindo com a sombra de estúdio que a própria foto já
-    tem.
-
-    É POR MODELO, não por catálogo: dentro do mesmo catálogo de elétricos já
-    convivem fotos sem transparência (Urban Max, fundo branco sólido — usa
-    `false`) e fotos com transparência real (as demais, conforme chegam — usa
-    o padrão `true`). Cada modelo liga/desliga conforme a foto que TEM, não
-    conforme o catálogo a que pertence.
+    Sem valor aqui, usa o padrão do CATÁLOGO (`CatalogConfig.stageShadow`).
+    Existe só para o dia em que UM modelo precisar destoar do resto do
+    catálogo (ex.: catálogo todo sem sombra, mas um modelo específico ganha
+    recorte premium) — declare aqui só nesse caso; hoje nenhum modelo usa.
   */
   stageShadow?: boolean;
 }
@@ -134,4 +125,27 @@ export interface CatalogConfig<M extends ProductModel = ProductModel> {
     como desenha hoje — nenhuma regra nova alcança quem não ligou.
   */
   mobileModelBrowser?: boolean;
+  /*
+    Sombra flutuante (`filter: drop-shadow`) sob a foto do produto no palco,
+    padrão para todo modelo do catálogo (um modelo pode destoar via
+    `ProductModel.stageShadow` — ver o campo lá). Padrão `true` — é o que faz
+    o produto "pousar" na página em vez de flutuar seco, e depende de a foto
+    ter fundo transparente: o filtro segue o CONTORNO REAL do alfa da imagem.
+
+    `false` em todo o catálogo de elétricos por padrão do cliente: nenhuma das
+    fotos que ele tem hoje é um recorte "premium" com fundo removido pra valer
+    — mesmo quando o arquivo TEM canal alfa (caso da Urban Volt, alfa binário
+    0/255 sem nenhum gradiente de sombra), a imagem em si não foi tratada como
+    still de produto flutuando, então a sombra sintética do CSS ficaria
+    competindo com — ou substituindo — a sombra de estúdio que a foto real já
+    tem (ou deveria ter). Enquanto isso, o "fundo infinito" nasce sozinho: a
+    página é branca, o fundo da foto (opaco ou transparente) também é, então
+    a moldura retangular nunca aparece mesmo sem o filtro.
+
+    Ficha técnica: numa foto SEM sombra nenhuma própria (ex.: Urban Volt, alfa
+    limpo sem gradiente — conferido pixel a pixel), desligar isto também tira
+    a ÚNICA sombra que a foto teria — o produto fica sem nenhum apoio visual
+    no chão. Sinalizado ao cliente; ele decide se quer ajustar caso a caso.
+  */
+  stageShadow?: boolean;
 }
