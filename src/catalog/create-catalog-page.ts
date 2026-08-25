@@ -321,7 +321,7 @@ export function createCatalogPage<M extends ProductModel>(config: CatalogConfig<
       passa a rolar — a peça mais alta do site deixa de ser recortada. O
       desktop (≥1024px) continua com a tela travada, como aprovado.
     -->
-    <div ${mobileViewAttr} class="relative flex h-dvh flex-col overflow-hidden bg-white text-vullz-black max-lg:pl-[env(safe-area-inset-left)] max-lg:pr-[env(safe-area-inset-right)] max-lg:landscape:h-auto max-lg:landscape:min-h-dvh max-lg:landscape:overflow-visible">
+    <div ${mobileViewAttr} class="relative flex h-dvh flex-col overflow-hidden bg-white text-vullz-black font-catalog max-lg:pl-[env(safe-area-inset-left)] max-lg:pr-[env(safe-area-inset-right)] max-lg:landscape:h-auto max-lg:landscape:min-h-dvh max-lg:landscape:overflow-visible">
       <!--
         max-lg:pb-4 — o cabeçalho não tinha padding de baixo: a barra de
         modelos começava exatamente no pixel em que ele terminava e "ARO 29"

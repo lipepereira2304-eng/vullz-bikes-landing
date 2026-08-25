@@ -19,6 +19,17 @@
     -apple-system, BlinkMacSystemFont, "SF Pro Display", "Inter",
     "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 
+  /*
+    Só para dentro dos catálogos (bicicletas e elétricos) — pedido explícito de
+    manter a home fora disso por enquanto. Aplicada como classe (`font-catalog`,
+    gerada automaticamente pelo Tailwind a partir deste token) no contêiner raiz
+    do motor compartilhado em create-catalog-page.ts, nunca em `--font-sans` /
+    `html`, que é o que a home herda.
+  */
+  --font-catalog:
+    "TT Firs Neue", -apple-system, BlinkMacSystemFont, "SF Pro Display",
+    "Inter", "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
   /* ====================================================================
      LINGUAGEM DE MOVIMENTO
 
@@ -124,6 +135,29 @@
   */
   --shift-sm: 6px;
   --shift-md: 12px;
+}
+
+/*
+  TT Firs Neue (trial, uso gratuito — baixada pelo cliente no dafont) — os dois
+  pesos que ele mandou. `font-display: swap` evita texto invisível enquanto ela
+  carrega: os catálogos mostram a pilha de --font-catalog (sistema) até a fonte
+  chegar, depois trocam sem re-fluir o layout (mesma métrica aproximada de
+  largura das fontes de sistema já usadas no site).
+*/
+@font-face {
+  font-family: "TT Firs Neue";
+  src: url("../assets/fonts/tt-firs-neue-regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "TT Firs Neue";
+  src: url("../assets/fonts/tt-firs-neue-medium.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
 }
 
 @layer base {
