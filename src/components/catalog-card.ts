@@ -14,7 +14,19 @@ export interface CatalogCardOptions {
   revealStep: number;
   newTab?: boolean;
   linkLabel?: string;
+  /*
+    Quando presente, o card deixa de ser um único link cobrindo tudo e passa a
+    ter DOIS botões lado a lado por baixo do título: um pra visualizar (mesmo
+    `href`/comportamento de sempre) e um exclusivo pra baixar (atributo
+    `download`, que faz o navegador salvar o arquivo em vez de navegar até
+    ele). Pedido explícito só pro card do PDF — os outros cards continuam como
+    um card inteiro clicável.
+  */
+  download?: { href: string; label?: string };
 }
+
+const ACTION_BUTTON_CLASSES =
+  "group/btn inline-flex flex-1 items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/[0.04] px-5 py-3.5 text-sm font-semibold btn-motion hover:-translate-y-[var(--shift-sm)] hover:border-white/25 hover:bg-white/[0.08] active:translate-y-0 active:scale-[0.985] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vullz-yellow focus-visible:ring-offset-2 focus-visible:ring-offset-vullz-graphite";
 
 export function catalogCardMarkup({
   title,
@@ -23,8 +35,56 @@ export function catalogCardMarkup({
   revealStep,
   newTab = true,
   linkLabel = "Acessar catálogo",
+  download,
 }: CatalogCardOptions): string {
   const targetAttrs = newTab ? `target="_blank" rel="noopener noreferrer"` : "";
+
+  if (download) {
+    return /* html */ `
+      <div
+        data-reveal
+        style="transition-delay:calc(var(--stagger) * ${revealStep})"
+        class="flex w-full flex-col items-start justify-center gap-6 rounded-[28px] border border-white/10 bg-white/[0.04] p-10 text-left sm:p-12 sm:min-h-[220px]"
+      >
+        <h3 class="text-balance text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
+          ${title}${subtitle ? /* html */ `<span class="block text-lg sm:text-xl">${subtitle}</span>` : ""}
+        </h3>
+
+        <div class="flex w-full items-stretch gap-3">
+          <a href="${href}" ${targetAttrs} class="${ACTION_BUTTON_CLASSES} text-vullz-yellow">
+            ${linkLabel}
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              class="btn-motion group-hover/btn:translate-x-[var(--shift-sm)]"
+            >
+              <path d="M3.5 8H12.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+              <path d="M8.5 3.5L13 8L8.5 12.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+            </svg>
+          </a>
+
+          <a href="${download.href}" download class="${ACTION_BUTTON_CLASSES} text-white">
+            ${download.label ?? "Baixar"}
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 16 16"
+              fill="none"
+              xmlns="http://www.w3.org/2000/svg"
+              class="btn-motion group-hover/btn:translate-y-[var(--shift-sm)]"
+            >
+              <path d="M8 2.5V10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+              <path d="M4.5 7.5L8 11L11.5 7.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+              <path d="M2.5 13.5H13.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+            </svg>
+          </a>
+        </div>
+      </div>
+    `;
+  }
 
   return /* html */ `
     <a

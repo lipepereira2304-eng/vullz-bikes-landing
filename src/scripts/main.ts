@@ -84,7 +84,9 @@ if (app) {
             title: "Catálogo PDF",
             subtitle: "(Bicicletas)",
             href: CATALOGO_BICICLETAS,
+            linkLabel: "Visualizar",
             revealStep: 4,
+            download: { href: CATALOGO_BICICLETAS },
           })}
         </div>
 
