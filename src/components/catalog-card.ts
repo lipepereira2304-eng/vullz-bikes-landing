@@ -25,8 +25,15 @@ export interface CatalogCardOptions {
   download?: { href: string; label?: string };
 }
 
+/*
+  De propósito SEM `flex-1`/`w-full`: "Visualizar" e "Baixar" têm rótulos de
+  tamanhos bem diferentes, e forçar os dois a dividir o espaço em fatias
+  iguais (flex-1) faz o mais largo estourar pra fora do card — cada botão
+  fica do tamanho do próprio conteúdo, e é a LINHA (abaixo) que centraliza o
+  par como bloco.
+*/
 const ACTION_BUTTON_CLASSES =
-  "group/btn inline-flex flex-1 items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/[0.04] px-5 py-3.5 text-sm font-semibold btn-motion hover:-translate-y-[var(--shift-sm)] hover:border-white/25 hover:bg-white/[0.08] active:translate-y-0 active:scale-[0.985] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vullz-yellow focus-visible:ring-offset-2 focus-visible:ring-offset-vullz-graphite";
+  "group/btn inline-flex items-center justify-center gap-2 rounded-2xl border border-white/10 bg-white/[0.04] px-4 py-3 text-sm font-semibold btn-motion hover:-translate-y-[var(--shift-sm)] hover:border-white/25 hover:bg-white/[0.08] active:translate-y-0 active:scale-[0.985] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-vullz-yellow focus-visible:ring-offset-2 focus-visible:ring-offset-vullz-graphite";
 
 export function catalogCardMarkup({
   title,
@@ -44,13 +51,13 @@ export function catalogCardMarkup({
       <div
         data-reveal
         style="transition-delay:calc(var(--stagger) * ${revealStep})"
-        class="flex w-full flex-col items-start justify-center gap-6 rounded-[28px] border border-white/10 bg-white/[0.04] p-10 text-left sm:p-12 sm:min-h-[220px]"
+        class="flex w-full flex-col items-start justify-center gap-6 rounded-[28px] border border-white/10 bg-white/[0.04] p-10 text-left sm:min-h-[220px]"
       >
         <h3 class="text-balance text-3xl font-extrabold tracking-tight text-white sm:text-4xl">
           ${title}${subtitle ? /* html */ `<span class="block text-lg sm:text-xl">${subtitle}</span>` : ""}
         </h3>
 
-        <div class="flex w-full items-stretch gap-3">
+        <div class="flex w-full flex-wrap items-stretch justify-center gap-2">
           <a href="${href}" ${targetAttrs} class="${ACTION_BUTTON_CLASSES} text-vullz-yellow">
             ${linkLabel}
             <svg
