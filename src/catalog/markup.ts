@@ -122,17 +122,27 @@ export function specsPanelMarkup(
     — não precisa de classe daqui.
   */
   /*
-    Padding de cima e de baixo tratados em separado, e o de baixo ZERADO
-    explicitamente — não basta deixar de escrever uma classe pra ele: a base
+    Padding de cima e de baixo tratados em separado. O de baixo só é ZERADO
+    quando existe rodapé sticky (o botão "Mais informações", ver
+    specsContentMarkup) — é ELE que passa a dar esse respiro, então um
+    padding próprio do card ali seria respiro em dobro. Modelo sem `details`
+    (ex.: elétricos, que não têm o botão a pedido do cliente) não tem rodapé
+    nenhum pra assumir esse papel — sem essa condição, os cards de destaque
+    ficavam colados na borda de baixo do quadro. `hasFooter` decide isso uma
+    vez só aqui, e é a MESMA condição que specsContentMarkup usa pra
+    desenhar o botão (`details.length > 0`) — as duas não podem divergir.
+
+    Não basta deixar de escrever uma classe pra zerar o padding: a base
     (compartilhada com o desktop) já dá padding IGUAL nos dois lados, e uma
     classe mobile que nunca é escrita não apaga a base, só deixa de competir
-    com ela. O card não tem MAIS respiro de baixo próprio na folha mobile —
-    quem dá esse respiro agora é só o rodapé sticky (footerMobile, mais
-    abaixo), de propósito: ver o comentário lá para o motivo ("sticky" não
-    convivia bem com a técnica antiga de cancelar o padding por margem
-    negativa).
+    com ela — por isso o valor "sem rodapé" (`pb-7`/`pb-4`) é escrito
+    explícito, espelhando o padding de cima, e não só "ausência de pb-0".
   */
-  const fichaCardMobile = mobileSheet ? "max-lg:gap-3 max-lg:px-4 max-lg:pt-4 max-lg:pb-0" : "";
+  const hasFooter = Boolean(model.specs?.details && model.specs.details.length > 0);
+  const fichaCardMobile = mobileSheet
+    ? `max-lg:gap-3 max-lg:px-4 max-lg:pt-4 ${hasFooter ? "max-lg:pb-0" : "max-lg:pb-4"}`
+    : "";
+  const fichaCardBottom = hasFooter ? "lg:pb-0" : "lg:pb-7";
   const titleMobile = mobileSheet ? "max-lg:text-base" : "";
 
   return /* html */ `
@@ -176,7 +186,7 @@ export function specsPanelMarkup(
         quem cobre esse espaço agora, em QUALQUER largura — ver o comentário
         completo no próprio rodapé, mais abaixo.
       -->
-      <div class="flex min-h-0 flex-col gap-5 overflow-y-auto rounded-3xl border border-vullz-gray-200 bg-white px-6 py-5 shadow-[0_24px_60px_-32px_rgba(17,17,17,0.35)] lg:px-8 lg:pt-7 lg:pb-0 ${fichaCardMobile}">
+      <div class="flex min-h-0 flex-col gap-5 overflow-y-auto rounded-3xl border border-vullz-gray-200 bg-white px-6 py-5 shadow-[0_24px_60px_-32px_rgba(17,17,17,0.35)] lg:px-8 lg:pt-7 ${fichaCardBottom} ${fichaCardMobile}">
         <header class="flex flex-col gap-1">
           <h2 class="text-lg font-extrabold uppercase tracking-wide text-vullz-black ${titleMobile}">
             Ficha Técnica

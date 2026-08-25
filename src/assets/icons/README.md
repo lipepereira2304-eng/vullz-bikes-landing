@@ -55,6 +55,14 @@ redimensionada pra 256×256) em 25/08/2026. Nada reservado no momento.
 - **SVG é o ideal**: escala sem perder nitidez e pesa pouco. Se vier de PNG,
   exportar em pelo menos 84×84 px (3×) para não borrar em tela retina.
 - **Fundo transparente.**
+- **O DESENHO precisa preencher o canvas** — em torno de 80% da largura ou
+  altura (o que for maior), não só uma silhueta pequena centralizada num
+  quadro grande de espaço vazio. `object-contain` nunca estica o desenho além
+  do que o próprio arquivo já ocupa: uma margem generosa ao redor do desenho
+  faz o ícone renderizar visivelmente menor que os outros na mesma tela,
+  mesmo todos medindo 256×256 — foi exatamente o que aconteceu com os 5
+  ícones dos elétricos na primeira leva (preenchiam só ~50% do quadro) e
+  precisou de um recorte + reenquadramento à parte pra corrigir.
 - **Cor:** o padrão é o cinza `#737373` (o mesmo dos demais ícones). Se o
   arquivo vier preto (ou de outra cor), é recolorido para esse cinza no momento
   de entrar — a forma é preservada, só a cor muda. Ícones sobre fundo branco
