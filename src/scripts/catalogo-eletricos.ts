@@ -131,13 +131,21 @@ function colors(modelId: string, ids: (keyof typeof PALETTE)[]): ProductColor[] 
 }
 
 /*
-  Texto genérico pro quadro de descrição, igual pra todo modelo por enquanto
-  — o cliente ainda vai escrever a descrição própria de cada um (mesmo
-  padrão das bikes, campo `description` em ProductModel). Existir já com
-  algo plausível evita a ficha nascer com um buraco vazio acima dela.
+  Descrições próprias por modelo, texto do cliente (26/08/2026) — substituem
+  o placeholder genérico que existia antes de elas chegarem.
 */
-const GENERIC_DESCRIPTION =
-  "Desenvolvido para o dia a dia urbano, este elétrico Vullz une praticidade, economia e conforto em cada trajeto.";
+const DESCRIPTIONS = {
+  "urban-citycoco":
+    "A Urban CityCoco foi criada para quem busca uma nova forma de se locomover, unindo conforto, estilo e praticidade em um único modelo. Com um design marcante e uma presença que chama atenção por onde passa, ela transforma cada trajeto em uma experiência mais agradável. Ideal para o dia a dia, oferece uma condução confortável e uma proposta moderna de mobilidade, combinando personalidade, elegância e liberdade para acompanhar diferentes estilos de vida.",
+  "urban-drive":
+    "A Urban Drive foi desenvolvida para quem precisa de agilidade na rotina sem abrir mão do conforto. Compacta, prática e extremamente versátil, ela é perfeita para deslocamentos urbanos, tornando o trânsito mais simples e o dia a dia muito mais eficiente. Seu visual moderno transmite inovação, enquanto sua proposta prioriza economia, facilidade de condução e mobilidade inteligente. Seja para ir ao trabalho, estudar ou resolver compromissos, a Urban Drive oferece uma experiência leve, funcional e confiável, acompanhando o ritmo da cidade com praticidade e estilo.",
+  "urban-max":
+    "A Urban Max foi desenvolvida para oferecer uma experiência de mobilidade mais segura e funcional. Seu projeto com três rodas proporciona maior estabilidade durante a condução, enquanto o amplo assento com encosto garante mais conforto no dia a dia. O compartimento traseiro amplia a praticidade, permitindo transportar bolsas, pequenas compras e objetos pessoais com facilidade. Uma solução inteligente para quem valoriza mobilidade com mais conveniência em cada trajeto.",
+  "urban-plus":
+    "A Urban Plus combina estabilidade, praticidade e funcionalidade para tornar a mobilidade ainda mais conveniente. Seu projeto com três rodas oferece uma condução equilibrada, enquanto o assento traseiro acomoda uma segunda pessoa de forma confortável em pequenos deslocamentos. Além disso, conta com um compartimento sob o banco, ideal para guardar objetos pessoais e itens do dia a dia, e uma cesta dianteira que amplia a praticidade para transportar bolsas e pequenas compras. Uma solução versátil para quem busca mais comodidade em cada trajeto.",
+  "urban-volt-v50":
+    "A Urban Volt reúne praticidade e versatilidade em um modelo pensado para a rotina urbana. Sua cesta dianteira facilita o transporte de bolsas, mochilas, pequenas compras e outros objetos do dia a dia, enquanto o assento traseiro oferece espaço para um segundo passageiro em deslocamentos curtos. Compacta, funcional e fácil de conduzir, é uma excelente opção para quem busca uma forma inteligente de se locomover, tornando cada trajeto mais simples, organizado e conveniente.",
+} as const satisfies Record<string, string>;
 
 /*
   Ficha técnica dos elétricos: só o primeiro nível (6 destaques vira 5 aqui,
@@ -173,14 +181,14 @@ const MODELS: ProductModel[] = [
     id: "urban-citycoco",
     name: "Urban Citycoco",
     colors: colors("urban-citycoco", ["preto"]),
-    description: GENERIC_DESCRIPTION,
+    description: DESCRIPTIONS["urban-citycoco"],
     specs: { highlights: electricHighlights("Lítio", 1000, "20 a 30 km", "32 km/h", "200 kg") },
   },
   {
     id: "urban-drive",
     name: "Urban Drive",
     colors: colors("urban-drive", ["azul", "laranja", "verde"]),
-    description: GENERIC_DESCRIPTION,
+    description: DESCRIPTIONS["urban-drive"],
     // Potência, autonomia e carga são PROVISÓRIOS na planilha do cliente —
     // ver o comentário de electricHighlights.
     specs: { highlights: electricHighlights("Lítio", 800, "20 a 30 km", "32 km/h", "120 kg") },
@@ -189,14 +197,14 @@ const MODELS: ProductModel[] = [
     id: "urban-max",
     name: "Urban Max",
     colors: colors("urban-max", ["preto", "vermelho"]),
-    description: GENERIC_DESCRIPTION,
+    description: DESCRIPTIONS["urban-max"],
     specs: { highlights: electricHighlights("Chumbo", 1000, "20 a 30 km", "32 km/h", "180 kg") },
   },
   {
     id: "urban-plus",
     name: "Urban Plus",
     colors: colors("urban-plus", ["branco", "preto", "vermelho"]),
-    description: GENERIC_DESCRIPTION,
+    description: DESCRIPTIONS["urban-plus"],
     specs: { highlights: electricHighlights("Chumbo", 1000, "20 a 30 km", "32 km/h", "180 kg") },
   },
   // V-10 removido — é o mesmo produto que a Urban Citycoco, não um modelo à parte.
@@ -208,7 +216,7 @@ const MODELS: ProductModel[] = [
     id: "urban-volt-v50",
     name: "Urban Volt (V-50)",
     colors: colors("urban-volt-v50", ["preto", "vermelho"]),
-    description: GENERIC_DESCRIPTION,
+    description: DESCRIPTIONS["urban-volt-v50"],
     specs: { highlights: electricHighlights("Chumbo", 1000, "20 a 30 km", "32 km/h", "120 kg") },
   },
 ];

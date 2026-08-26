@@ -113,10 +113,8 @@ números como definitivos.
 cobre as 3 cores. `REF_PLACEHOLDER` (`xxx/xx`) continua existindo como rede de
 segurança pra qualquer cor futura que ainda não tenha código.
 
-**Descrição genérica:** o quadro acima da ficha técnica (campo `description`)
-usa o mesmo texto placeholder pros 5 modelos por enquanto — o cliente ainda
-vai escrever a descrição própria de cada um (`GENERIC_DESCRIPTION` em
-`catalogo-eletricos.ts`).
+**Descrição:** cada modelo tem seu próprio texto (campo `description`), do
+cliente (26/08/2026) — `DESCRIPTIONS` em `catalogo-eletricos.ts`.
 
 Ícones dos 5 cartões: ver `src/assets/icons/README.md`.
 
