@@ -8,8 +8,8 @@ import type { ProductColor, ProductModel, SpecHighlight } from "../catalog/types
 
   A diferença fica na configuração: aqui não existe agrupamento por aro — os
   modelos aparecem soltos, direto na lateral, sem gaveta de categoria nenhuma
-  (foi um pedido explícito) — e as cores ainda não têm código de referência
-  real (todas usam o placeholder `REF_PLACEHOLDER`, ver mais abaixo).
+  (foi um pedido explícito) — e os códigos de referência por cor vêm de REFS,
+  ver mais abaixo.
 
   FOTOS: src/assets/eletricos/<model-id>/<color-id>.jpg (ou .jpeg/.png/.webp),
   mesma convenção do catálogo das bikes. Enquanto não existe, aparece
@@ -89,13 +89,30 @@ function resolveColor(modelId: string, key: keyof typeof PALETTE): string {
 }
 
 /*
-  Nenhuma cor de elétrico tem código de referência real ainda — em vez de
-  omitir o campo (o que apagaria a REF. da ficha técnica e do rótulo abaixo
-  da foto), usa um placeholder visível, a pedido do cliente. Troca por um
-  código de verdade por cor assim que ele chegar; até lá, todo mundo mostra
-  o mesmo texto.
+  Placeholder visível pra qualquer cor que ainda não tenha código real — a
+  pedido do cliente, em vez de omitir o campo (o que apagaria a REF. da ficha
+  técnica e do rótulo abaixo da foto). Hoje só sobra como rede de segurança:
+  toda cor de todo modelo já tem código de verdade em REFS.
 */
 const REF_PLACEHOLDER = "xxx/xx";
+
+/*
+  Códigos de referência por modelo + cor, passados pelo cliente em
+  26/08/2026. A Urban Drive é uma exceção: as 3 cores (azul/laranja/verde)
+  usam o MESMO código (264) — não é engano, é um pedido explícito, esse
+  modelo tem um único SKU pras três.
+
+  "Urban Turbo Vermelho (38)" no material do cliente é a Urban Plus na cor
+  vermelha — nome interno do sistema dele pra essa cor específica, não um
+  modelo à parte. No site continua aparecendo como Urban Plus / Vermelho.
+*/
+const REFS: Partial<Record<string, Partial<Record<keyof typeof PALETTE, string>>>> = {
+  "urban-citycoco": { preto: "265" },
+  "urban-drive": { azul: "264", laranja: "264", verde: "264" },
+  "urban-max": { preto: "2", vermelho: "78" },
+  "urban-plus": { branco: "45", preto: "39", vermelho: "38" },
+  "urban-volt-v50": { preto: "42", vermelho: "43" },
+};
 
 /*
   Cada modelo tem sua própria lista de cores — diferente das bikes, aqui as
@@ -109,7 +126,7 @@ function colors(modelId: string, ids: (keyof typeof PALETTE)[]): ProductColor[] 
     id,
     name: PALETTE_NAMES[id],
     swatch: resolveColor(modelId, id),
-    ref: REF_PLACEHOLDER,
+    ref: REFS[modelId]?.[id] ?? REF_PLACEHOLDER,
   }));
 }
 

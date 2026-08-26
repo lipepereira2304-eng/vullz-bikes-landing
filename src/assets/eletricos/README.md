@@ -108,9 +108,10 @@ só bateria e velocidade são confirmados pelo cliente); ver o comentário de
 `electricHighlights` em `catalogo-eletricos.ts` antes de tratar esses
 números como definitivos.
 
-**REF. placeholder:** nenhuma cor de elétrico tem código de referência real
-ainda. Todas usam o texto fixo `xxx/xx` (constante `REF_PLACEHOLDER`) — troca
-por um código de verdade por cor assim que ele existir.
+**REF. por cor:** códigos reais recebidos do cliente em 26/08/2026, em `REFS`
+(`catalogo-eletricos.ts`). A Urban Drive é exceção — um único código (264)
+cobre as 3 cores. `REF_PLACEHOLDER` (`xxx/xx`) continua existindo como rede de
+segurança pra qualquer cor futura que ainda não tenha código.
 
 **Descrição genérica:** o quadro acima da ficha técnica (campo `description`)
 usa o mesmo texto placeholder pros 5 modelos por enquanto — o cliente ainda
