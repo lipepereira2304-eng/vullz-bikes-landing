@@ -73,7 +73,7 @@ export function catalogCardMarkup({
             </svg>
           </a>
 
-          <a href="${download.href}" download class="${ACTION_BUTTON_CLASSES} text-white">
+          <a href="${download.href}" download data-force-download class="${ACTION_BUTTON_CLASSES} text-vullz-yellow">
             ${download.label ?? "Baixar"}
             <svg
               width="16"

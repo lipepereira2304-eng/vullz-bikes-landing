@@ -106,3 +106,41 @@ if (app) {
 }
 
 initRevealOnScroll();
+
+/*
+  O atributo `download` puro (`<a href="..." download>`) não é confiável no
+  Safari (testado: confirmado no iOS) pra um PDF — ele ignora o pedido e abre
+  o arquivo no visualizador embutido, exatamente o mesmo resultado do botão
+  "Visualizar" ao lado, que era o bug relatado. Chrome (desktop e Android)
+  respeita o atributo normalmente; a maioria dos usuários do site é de
+  iPhone, então isso não dava pra deixar como limitação conhecida.
+
+  Buscar o arquivo via fetch e salvar a partir de um blob: força o
+  comportamento de download em vez de navegação em qualquer navegador atual
+  (o navegador nunca "abre" um blob, só pode salvá-lo) — contorno padrão pra
+  essa limitação do WebKit, sem depender do navegador respeitar o atributo.
+*/
+document.querySelectorAll<HTMLAnchorElement>("[data-force-download]").forEach((link) => {
+  link.addEventListener("click", (event) => {
+    event.preventDefault();
+    const filename = link.getAttribute("download") || link.href.split("/").pop() || "download";
+
+    fetch(link.href)
+      .then((response) => response.blob())
+      .then((blob) => {
+        const blobUrl = URL.createObjectURL(blob);
+        const tempLink = document.createElement("a");
+        tempLink.href = blobUrl;
+        tempLink.download = filename;
+        document.body.appendChild(tempLink);
+        tempLink.click();
+        tempLink.remove();
+        URL.revokeObjectURL(blobUrl);
+      })
+      .catch(() => {
+        // Sem rede pro fetch (raríssimo, mesma origem) — cai pra navegação
+        // normal em vez de deixar o clique sem nenhum efeito.
+        window.location.href = link.href;
+      });
+  });
+});
