@@ -155,10 +155,10 @@ const DESCRIPTIONS = {
   desenha o botão quando `details` existe (ver markup.ts) — aqui nenhum
   modelo declara `details`, então ele nunca aparece.
 
-  Valores da planilha Vullz_Ficha_Tecnica_Modelos.xlsx (25/08/2026). Urban
-  Drive tem 3 dos 5 campos marcados como PROVISÓRIOS na planilha original
-  (potência, autonomia e carga — só bateria e velocidade são confirmados);
-  troque assim que os valores reais chegarem.
+  Valores da planilha Vullz_Ficha_Tecnica_Modelos.xlsx (25/08/2026). Os 3
+  campos da Urban Drive que vieram marcados como provisórios na planilha
+  (potência, autonomia, carga) foram confirmados pelo cliente em 27/08/2026 —
+  os números abaixo já são definitivos.
 */
 function electricHighlights(
   bateria: string,
@@ -189,8 +189,6 @@ const MODELS: ProductModel[] = [
     name: "Urban Drive",
     colors: colors("urban-drive", ["azul", "laranja", "verde"]),
     description: DESCRIPTIONS["urban-drive"],
-    // Potência, autonomia e carga são PROVISÓRIOS na planilha do cliente —
-    // ver o comentário de electricHighlights.
     specs: { highlights: electricHighlights("Lítio", 800, "20 a 30 km", "32 km/h", "120 kg") },
   },
   {

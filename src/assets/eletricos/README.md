@@ -28,7 +28,7 @@ mostra "Em breve..." no lugar da imagem.
 | Urban Citycoco      | `src/assets/eletricos/urban-citycoco/`       | `preto`                  | completo                          |
 | Urban Drive         | `src/assets/eletricos/urban-drive/`          | `azul`, `laranja`, `verde` | completo (tons próprios — ver nota abaixo) |
 | Urban Max           | `src/assets/eletricos/urban-max/`            | `preto`, `vermelho`      | completo, fundo opaco             |
-| Urban Plus          | `src/assets/eletricos/urban-plus/`           | `branco`, `preto`, `vermelho` | completo (sombra do `preto` reconstruída — ver nota abaixo, **resultado ainda não aprovado**) |
+| Urban Plus          | `src/assets/eletricos/urban-plus/`           | `branco`, `preto`, `vermelho` | completo, todas com sombra real de estúdio |
 | Urban Volt (V-50)   | `src/assets/eletricos/urban-volt-v50/`       | `preto`, `vermelho`      | completo, fundo transparente (sem sombra própria — ver nota abaixo) |
 
 Arquivos esperados em cada pasta: `branco.webp`, `preto.webp`, `vermelho.webp`
@@ -76,19 +76,17 @@ liso até nos cantos onde teria chão): sem a sombra sintética E sem a sombra
 real, o produto fica sem nenhum apoio visual — "flutuando" de verdade. Vale
 conferir visualmente antes de publicar.
 
-**Urban Plus `preto` — sombra reconstruída manualmente, REPROVADA pelo
-cliente (25/08/2026), ajuste pendente.** As fotos `branco` e `vermelho`
-vieram com um pedaço retangular do chão de estúdio (com sombra) ainda colado
-no recorte; a `preto` recebeu um recorte mais limpo, sem sobra de chão
-nenhuma — e por isso, sem sombra. Como as três fotos não são pixel-alinhadas
-entre si (escala/enquadramento variam um pouco de uma sessão de captura pra
-outra), copiar a sombra das irmãs direto por cima da preta ficaria deslocado;
-a sombra foi reconstruída do zero como uma sombra de contato sintética,
-ancorada nos pontos reais de onde as rodas TOCAM O CHÃO nessa própria foto.
-O cliente avaliou o resultado publicado como ruim e pediu pra deixar pra
-depois — **não repetir essa técnica em outro modelo sem revisar antes**. Se
-um dia a Urban Plus ganhar fotos novas com recorte consistente entre as três
-cores, o problema todo deixa de existir.
+**Urban Plus `preto` — RESOLVIDO (27/08/2026).** Havia uma tentativa de
+sombra sintética reconstruída manualmente (a foto original vinha com recorte
+limpo demais, sem sobra de chão) que o cliente reprovou em 25/08/2026. Ele
+enviou uma foto nova, já com sombra real de estúdio, substituída em
+27/08/2026 — as três cores agora têm sombra própria, nenhuma sintética. A
+foto nova está numa resolução maior que `branco`/`vermelho` (3000×2201 vs
+1800×1320) mas mesma proporção; como o motor renderiza com `object-contain`
+(nunca por dimensão exata em pixel), isso não afeta o enquadramento.
+**Lição pra próxima vez que uma cor vier sem sombra própria:** não tentar
+reconstruir sombra sintética sem revisar com o cliente antes — pedir a foto
+correta é mais confiável.
 
 ## Ficha técnica (25/08/2026)
 
@@ -102,11 +100,10 @@ só `highlights`, os cartões.
 
 Os 5 cartões (Tipo de Bateria, Potência do Motor, Autonomia, Velocidade
 Máxima, Capacidade de Carga) vêm da planilha `Vullz_Ficha_Tecnica_Modelos.xlsx`
-que o cliente enviou, na mesma ordem das colunas dela. **3 campos da Urban
-Drive são PROVISÓRIOS na planilha original** (potência, autonomia e carga —
-só bateria e velocidade são confirmados pelo cliente); ver o comentário de
-`electricHighlights` em `catalogo-eletricos.ts` antes de tratar esses
-números como definitivos.
+que o cliente enviou, na mesma ordem das colunas dela. Os 3 campos da Urban
+Drive que vieram marcados como provisórios na planilha original (potência,
+autonomia e carga — só bateria e velocidade eram confirmados) foram
+validados pelo cliente em 27/08/2026; todos os números hoje são definitivos.
 
 **REF. por cor:** códigos reais recebidos do cliente em 26/08/2026, em `REFS`
 (`catalogo-eletricos.ts`). A Urban Drive é exceção — um único código (264)
