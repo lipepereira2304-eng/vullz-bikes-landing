@@ -33,10 +33,6 @@ if (app) {
     <div class="relative isolate flex min-h-dvh flex-col overflow-hidden bg-vullz-graphite max-lg:pb-[env(safe-area-inset-bottom)] max-lg:pl-[env(safe-area-inset-left)] max-lg:pr-[env(safe-area-inset-right)] max-lg:pt-[env(safe-area-inset-top)]">
       ${fluidBackgroundMarkup()}
 
-      <div class="relative z-10 bg-emerald-500 py-3 text-center text-sm font-semibold text-white sm:text-base">
-        Vullz Bikes está rodando com sucesso!
-      </div>
-
       <header class="relative z-10 flex justify-center pt-10 sm:pt-14" data-reveal>
         <img
           src="${vullzLogo}"
