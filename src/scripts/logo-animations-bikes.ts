@@ -267,9 +267,204 @@ const DOBLE: LogoAnimation = {
   },
 };
 
+/* ------------------------------------------------------------------------ */
+/* Pulse — "Juntas": a palavra chega tombada e cada letra se equilibra       */
+/* ------------------------------------------------------------------------ */
+
+/*
+  Bike infantil: a ideia (do cliente) é a criança aprendendo a se equilibrar.
+  A faixa (o chão) chega primeiro; depois a palavra inteira entra pela direita
+  como uma fileira rígida — ninguém cruza ninguém — e cada letra gira a partir
+  da PRÓPRIA base, passa do ponto e balança cada vez menos até ficar reta.
+*/
+const PULSE_PIVOTS: Record<string, { cx: number; base: number; x0: number }> = {
+  "letra-p": { cx: 22.55, base: 35.16, x0: 17.34 },
+  "letra-u": { cx: 40.24, base: 33.33, x0: 34.99 },
+  "letra-l": { cx: 58.97, base: 31.71, x0: 53.72 },
+  "letra-s": { cx: 77.16, base: 30.08, x0: 71.95 },
+  "letra-e": { cx: 94.74, base: 28.46, x0: 89.51 },
+  barra: { cx: 32.33, base: 97.36, x0: 0.25 },
+};
+
+function balance(ctx: LogoAnimationContext, name: string, delay: number, tilt: number, duration: number, travel?: number): void {
+  const el = ctx.layer(name);
+  const p = PULSE_PIVOTS[name];
+  if (!el || !p) return;
+  el.style.transformOrigin = `${p.cx}% ${p.base}%`;
+  // começa fora da logo, à direita; com `travel` fixo todas andam a mesma distância
+  const fromX = travel ?? 104 - p.x0;
+  ctx.animate(
+    el,
+    [
+      { transform: `translateX(${fromX}%) rotate(${tilt}deg)`, opacity: 0, easing: "cubic-bezier(0.25, 0.8, 0.35, 1)" },
+      { opacity: 1, offset: 0.1 },
+      { transform: `translateX(0%) rotate(${-0.38 * tilt}deg)`, offset: 0.45, easing: "ease-in-out" },
+      { transform: `translateX(0%) rotate(${0.2 * tilt}deg)`, offset: 0.63, easing: "ease-in-out" },
+      { transform: `translateX(0%) rotate(${-0.09 * tilt}deg)`, offset: 0.79, easing: "ease-in-out" },
+      { transform: `translateX(0%) rotate(${0.035 * tilt}deg)`, offset: 0.9, easing: "ease-in-out" },
+      { transform: "translateX(0%) rotate(0deg)", opacity: 1 },
+    ],
+    { duration, delay, easing: "linear" }
+  );
+}
+
+const PULSE: LogoAnimation = {
+  width: 3155,
+  height: 492,
+  layers: fullLayers("pulse", ["barra", "letra-p", "letra-u", "letra-l", "letra-s", "letra-e"]),
+  play(ctx) {
+    balance(ctx, "barra", 0, 9, 900);
+    const tilts: Record<string, number> = { p: 26, u: 32, l: 24, s: 30, e: 28 };
+    ["p", "u", "l", "s", "e"].forEach((c, k) => balance(ctx, `letra-${c}`, 220 + k * 45, tilts[c], 1000, 85));
+  },
+};
+
+/* ------------------------------------------------------------------------ */
+/* Majestic — caligrafia escrita, faixa esticada, detalhes desabrocham       */
+/* ------------------------------------------------------------------------ */
+
+const MAJESTIC_BOX = {
+  palavra: { x0: 32.5, x1: 79.65 },
+  plumas: { x0: 6.89, x1: 12.82, y1: 35.03 },
+  folhas: { x0: 33.98, x1: 39.16, y1: 63.57 },
+  wordCenter: 56.07,
+};
+
+const MAJESTIC: LogoAnimation = {
+  width: 3105,
+  height: 431,
+  layers: fullLayers("majestic", ["faixa", "palavra", "folhas", "plumas"]),
+  play(ctx) {
+    /*
+      1) Caligrafia: a palavra (com o contorno azul colado nela) é revelada da
+      esquerda pra direita por uma máscara de ponta suave. As posições da
+      máscara são calculadas pra borda andar só sobre a palavra — não sobre o
+      canvas inteiro (máscara 260% maior, transição preto→transparente entre
+      47% e 50% dela).
+    */
+    const word = ctx.layer("palavra");
+    if (word) {
+      const gradient = "linear-gradient(to right, #000 47%, transparent 50%)";
+      word.style.setProperty("mask-image", gradient);
+      word.style.setProperty("-webkit-mask-image", gradient);
+      word.style.setProperty("mask-size", "260% 100%");
+      word.style.setProperty("-webkit-mask-size", "260% 100%");
+      word.style.setProperty("mask-repeat", "no-repeat");
+      word.style.setProperty("-webkit-mask-repeat", "no-repeat");
+      const edgeAt = (x: number) => `${((1.3 - x) / 1.6) * 100}% 0%`; // borda transparente em x
+      const doneAt = (x: number) => `${((1.222 - x) / 1.6) * 100}% 0%`; // parte opaca já passou de x
+      const from = edgeAt(MAJESTIC_BOX.palavra.x0 / 100 - 0.02);
+      const to = doneAt(MAJESTIC_BOX.palavra.x1 / 100 + 0.04);
+      ctx.animate(
+        word,
+        [
+          { maskPosition: from, webkitMaskPosition: from, opacity: 0 } as Keyframe,
+          { opacity: 1, offset: 0.06 },
+          { maskPosition: to, webkitMaskPosition: to, opacity: 1 } as Keyframe,
+        ],
+        { duration: 900, easing: "cubic-bezier(0.45, 0.05, 0.4, 1)" }
+      );
+    }
+    // 2) a faixa se estica a partir da palavra, como tecido sendo puxado
+    const ribbon = ctx.layer("faixa");
+    if (ribbon) ribbon.style.transformOrigin = `${MAJESTIC_BOX.wordCenter}% 50%`;
+    ctx.animate(
+      ribbon,
+      [
+        { transform: "scale(0.28, 0.92)", opacity: 0, easing: "cubic-bezier(0.3, 0.7, 0.3, 1)" },
+        { opacity: 1, offset: 0.15 },
+        { transform: "scale(1.025, 1)", offset: 0.68, easing: "ease-in-out" },
+        { transform: "scale(0.995, 1)", offset: 0.85, easing: "ease-in-out" },
+        { transform: "scale(1, 1)", opacity: 1 },
+      ],
+      { duration: 720, delay: 620, easing: "linear" }
+    );
+    // 3) detalhes delicados no fim: folhinhas e plumas desabrocham da base
+    const bloom = (name: "folhas" | "plumas", delay: number, rotate: number): void => {
+      const el = ctx.layer(name);
+      const b = MAJESTIC_BOX[name];
+      if (el) el.style.transformOrigin = `${(b.x0 + b.x1) / 2}% ${b.y1}%`;
+      ctx.animate(el, [{ opacity: 0, transform: `scale(0.5) rotate(${rotate}deg)` }, { opacity: 1, transform: "none" }], {
+        duration: 380,
+        delay,
+        easing: EASE_OUT,
+      });
+    };
+    bloom("folhas", 1100, 0);
+    bloom("plumas", 1120, -14);
+  },
+};
+
+/* ------------------------------------------------------------------------ */
+/* Pro Kids — "Manobra": adesivo surge, P R O quicam, KIDS faz um 360 de BMX */
+/* ------------------------------------------------------------------------ */
+
+const PROKIDS_BOX: Record<string, { cx: number; cy: number; y1: number }> = {
+  "letra-p": { cx: 13.96, cy: 51.3, y1: 85.64 },
+  "letra-r": { cx: 31.03, cy: 51.36, y1: 85.15 },
+  "letra-o": { cx: 48.15, cy: 50.37, y1: 84.65 },
+  kids: { cx: 79.31, cy: 40.04, y1: 64.11 },
+};
+
+const PROKIDS: LogoAnimation = {
+  width: 2736,
+  height: 808,
+  layers: fullLayers("pro-kids", ["borda", "fundo", "letra-p", "letra-r", "letra-o", "kids"]),
+  play(ctx) {
+    // o "adesivo" (borda e fundo) surge primeiro
+    for (const name of ["borda", "fundo"]) {
+      const el = ctx.layer(name);
+      if (el) el.style.transformOrigin = "50% 50%";
+      ctx.animate(
+        el,
+        [{ opacity: 0, transform: "scale(0.6)" }, { opacity: 1, transform: "scale(1.05)", offset: 0.6, easing: "ease-in-out" }, { opacity: 1, transform: "scale(1)" }],
+        { duration: 420, easing: EASE_OUT }
+      );
+    }
+    // P, R, O caem um a um e quicam como bola (achatam ao tocar o chão)
+    ["p", "r", "o"].forEach((c, i) => {
+      const name = `letra-${c}`;
+      const el = ctx.layer(name);
+      const b = PROKIDS_BOX[name];
+      if (el) el.style.transformOrigin = `${b.cx}% ${b.y1}%`;
+      ctx.animate(
+        el,
+        [
+          { transform: "translateY(-140%) scale(1, 1)", opacity: 0, easing: GRAVITY },
+          { opacity: 1, offset: 0.12 },
+          { transform: "translateY(0) scale(1.08, 0.88)", offset: 0.45, easing: EASE_OUT },
+          { transform: "translateY(-16%) scale(0.97, 1.04)", offset: 0.62, easing: GRAVITY },
+          { transform: "translateY(0) scale(1.03, 0.96)", offset: 0.78, easing: EASE_OUT },
+          { transform: "translateY(-4%) scale(1, 1)", offset: 0.88, easing: GRAVITY },
+          { transform: "translateY(0) scale(1, 1)", opacity: 1 },
+        ],
+        { duration: 640, delay: 220 + i * 110, easing: "linear" }
+      );
+    });
+    // KIDS: salta em arco de baixo, dá um giro completo no ar e aterrissa quicando
+    const kids = ctx.layer("kids");
+    if (kids) kids.style.transformOrigin = `${PROKIDS_BOX.kids.cx}% ${PROKIDS_BOX.kids.cy}%`;
+    ctx.animate(
+      kids,
+      [
+        { transform: "translate(10%, 75%) rotate(0deg) scale(0.8)", opacity: 0, easing: "cubic-bezier(0.2, 0.6, 0.4, 1)" },
+        { opacity: 1, offset: 0.14 },
+        { transform: "translate(4%, -40%) rotate(-200deg) scale(1)", offset: 0.48, easing: "cubic-bezier(0.5, 0, 0.8, 0.6)" },
+        { transform: "translate(0%, 0%) rotate(-360deg) scale(1.08, 0.9)", offset: 0.76, easing: EASE_OUT },
+        { transform: "translate(0%, -6%) rotate(-360deg) scale(1, 1)", offset: 0.88, easing: GRAVITY },
+        { transform: "translate(0%, 0%) rotate(-360deg) scale(1, 1)", opacity: 1 },
+      ],
+      { duration: 820, delay: 680, easing: "linear" }
+    );
+  },
+};
+
 export const BIKE_LOGO_ANIMATIONS: Record<string, LogoAnimation> = {
   oregon: OREGON,
   slim: SLIM,
   street: STREET,
   doble: DOBLE,
+  pulse: PULSE,
+  majestic: MAJESTIC,
+  "pro-kids": PROKIDS,
 };
