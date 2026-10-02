@@ -1,5 +1,6 @@
 import { initRevealOnScroll } from "../scripts/animations";
-import { preloadAll } from "./assets";
+import { findDetails, preloadAll } from "./assets";
+import { createDetailGallery, detailThumbsMarkup } from "./detail-gallery";
 import {
   colorLabelMarkup,
   colorSwatchMarkup,
@@ -64,6 +65,7 @@ export function createCatalogPage<M extends ProductModel>(config: CatalogConfig<
     emptyMessage,
     grouping,
     icons = {},
+    details = {},
     mobileModelBrowser = false,
     stageShadow: catalogStageShadow = true,
   } = config;
@@ -401,6 +403,16 @@ export function createCatalogPage<M extends ProductModel>(config: CatalogConfig<
           ${
             activeModel && activeColor
               ? /* html */ `
+                <!--
+                  Miniaturas dos closes da cor ativa (ver detail-gallery.ts).
+                  O invólucro é "display: contents" de propósito: sem closes
+                  ele fica vazio e não gera caixa nenhuma — nem o gap do
+                  flex aparece — então a cor sem detalhes fica idêntica a
+                  antes. É também o ponto que swapColor reescreve.
+                -->
+                <div data-role="detail-thumbs-slot" class="contents">
+                  ${detailThumbsMarkup(findDetails(details, activeModel.id, activeColor.id))}
+                </div>
                 <span id="color-label" class="max-w-full text-center text-xs text-vullz-gray-500">
                   ${colorLabelMarkup(activeColor)}
                 </span>
@@ -485,6 +497,9 @@ export function createCatalogPage<M extends ProductModel>(config: CatalogConfig<
     */
     const subtitle = document.querySelector("[data-role='specs-subtitle']");
     if (subtitle) subtitle.textContent = `${model.name}${color.ref ? ` — REF. ${color.ref}` : ""}`;
+
+    const thumbsSlot = document.querySelector("[data-role='detail-thumbs-slot']");
+    if (thumbsSlot) thumbsSlot.innerHTML = detailThumbsMarkup(findDetails(details, model.id, color.id));
 
     paint(model, color, "color");
   }
@@ -748,9 +763,25 @@ export function createCatalogPage<M extends ProductModel>(config: CatalogConfig<
     Delegação de evento num único listener: sobrevive a cada re-render (que
     troca o innerHTML inteiro), sem precisar re-anexar listener em botão nenhum.
   */
+  const detailGallery = createDetailGallery();
+
   function initInteractions(): void {
     document.addEventListener("click", (event) => {
       const target = event.target as HTMLElement;
+
+      const detailButton = target.closest<HTMLElement>("[data-detail]");
+      if (detailButton) {
+        const model = models.find((m) => m.id === state.modelId);
+        const color = model?.colors.find((c) => c.id === state.colorId) ?? model?.colors[0];
+        if (!model || !color) return;
+        detailGallery.open(
+          findDetails(details, model.id, color.id),
+          Number(detailButton.dataset.detail),
+          `${model.name} — ${color.name}, detalhe`,
+          detailButton
+        );
+        return;
+      }
 
       /*
         O "Voltar" do cabeçalho volta um passo de cada vez, na ordem inversa

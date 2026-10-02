@@ -58,6 +58,30 @@ export function findSpecIcon(icons: AssetMap, iconId: string): string | undefine
 }
 
 /*
+  Fotos de DETALHE de uma cor (closes: guidão, quadro, traseira...), em
+  <pasta-do-catálogo>/<model-id>/detalhes/<color-id>-<n>.{jpg,jpeg,png,webp}.
+  Mesma ideia das fotos principais — larga o arquivo com o nome certo e ele
+  aparece — só que numa subpasta, pra não se misturar com o glob das fotos
+  principais (que só olha um nível abaixo do modelo).
+
+  Devolve na ordem do número do arquivo (-1, -2, -3), não na ordem em que o
+  glob listou. Lista vazia = essa cor não tem detalhes, e a galeria nem aparece.
+*/
+export function findDetails(details: AssetMap, modelId: string, colorId: string): string[] {
+  const pattern = new RegExp(`^${colorId}-(\\d+)$`);
+  const found: { n: number; url: string }[] = [];
+
+  for (const path in details) {
+    const segments = path.split("/");
+    if (segments[segments.length - 3] !== modelId) continue;
+    const match = fileNameOf(path).replace(PHOTO_EXTENSION, "").match(pattern);
+    if (match) found.push({ n: Number(match[1]), url: details[path] });
+  }
+
+  return found.sort((a, b) => a.n - b.n).map((d) => d.url);
+}
+
+/*
   Sem isto, o navegador só baixa a foto de um modelo/cor na primeira vez que ela
   aparece na tela — daí aquele delayzinho perceptível na primeira troca (depois
   fica em cache e é instantâneo). Disparando o download de todas em segundo

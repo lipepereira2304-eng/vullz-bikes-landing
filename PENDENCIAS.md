@@ -224,6 +224,16 @@ testar Saira Condensed; foi revertido.
 
 ## ✅ Concluído (histórico)
 
+### Galeria de detalhes por cor (2026-10-02)
+- Cada cor pode ter 3 closes em `src/assets/<catálogo>/<modelo>/detalhes/<cor>-<n>.webp`
+  (ver README das bikes). Foto principal continua estática no palco.
+- Com closes: 3 miniaturas pequenas (44px, pílula de vidro) embaixo da foto;
+  clicar abre um vidro na página inteira (fundo desfocado), com setas, as
+  mesmas miniaturas, Esc/clique fora para fechar e arrastar no celular.
+- Sem rótulos nas fotos, a pedido. Código em `src/catalog/detail-gallery.ts`.
+- Só a Pro Kids azul tem closes por enquanto — os demais modelos/cores ficam
+  idênticos a antes até ganharem os arquivos.
+
 - Ficha técnica em dois atos (bike desliza → painel entra), com curva de
   movimento ajustada e posição da bike calibrada.
 - Cards de destaque (grid 3×2) com fade escalonado; "Mais informações" recolhe

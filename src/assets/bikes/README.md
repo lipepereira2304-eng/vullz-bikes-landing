@@ -10,6 +10,24 @@ caminho automaticamente — não precisa avisar, nem mexer em código.
 src/assets/bikes/<id-do-modelo>/<id-da-cor>.jpg
 ```
 
+## Fotos de detalhe (closes)
+
+Além da foto principal, cada cor pode ter **3 closes** (guidão, quadro,
+traseira...) numa subpasta `detalhes/` do modelo, numerados:
+
+```
+src/assets/bikes/<id-do-modelo>/detalhes/<id-da-cor>-1.webp
+src/assets/bikes/<id-do-modelo>/detalhes/<id-da-cor>-2.webp
+src/assets/bikes/<id-do-modelo>/detalhes/<id-da-cor>-3.webp
+```
+
+A ordem das miniaturas segue o número do arquivo. Diferente da foto principal,
+os closes **não** precisam de fundo transparente (são fotografias com borda e
+aparecem num cartão arredondado): proporção ~1,41 (ex.: 1600×1132), WebP q~86.
+Cor sem closes fica só com a foto principal, sem miniaturas.
+
+Já configurado: `pro-kids/detalhes/azul-1..3.webp`.
+
 ## Oregon (já configurado)
 
 Pasta: `src/assets/bikes/oregon/`

@@ -35,6 +35,17 @@ const logos = import.meta.glob<string>("../assets/bikes/*/logo.{svg,png,webp}", 
 });
 
 /*
+  DETALHES: os closes de cada cor, numa subpasta do modelo —
+  src/assets/bikes/<model-id>/detalhes/<color-id>-1.webp, -2, -3. Mesma
+  convenção das fotos: largar o arquivo basta. Cor sem closes fica só com a
+  foto principal, sem miniaturas. Ver findDetails (src/catalog/assets.ts).
+*/
+const details = import.meta.glob<string>("../assets/bikes/*/detalhes/*.{jpg,jpeg,png,webp}", {
+  eager: true,
+  import: "default",
+});
+
+/*
   ÍCONES dos destaques da ficha técnica: qualquer arquivo em src/assets/icons/
   é encontrado pelo NOME (sem extensão), que é o que o campo `icon` de cada
   destaque guarda. Mesma convenção das fotos — largar o arquivo na pasta basta,
@@ -341,6 +352,7 @@ createCatalogPage<BikeModel>({
   models: MODELS,
   photos,
   logos,
+  details,
   icons,
   emptyMessage: "Escolha um modelo ao lado para ver a bike.",
   grouping: {

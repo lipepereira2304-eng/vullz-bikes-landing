@@ -107,6 +107,12 @@ export interface CatalogConfig<M extends ProductModel = ProductModel> {
   models: M[];
   photos: AssetMap;
   logos: AssetMap;
+  /*
+    Fotos de detalhe por cor (ver findDetails em assets.ts). Opcional: sem
+    elas — ou numa cor que ainda não tem nenhuma — a foto principal fica
+    sozinha, sem miniaturas, exatamente como antes da galeria existir.
+  */
+  details?: AssetMap;
   /* Ícones dos destaques da ficha técnica. Opcional: sem ele os cartões
      aparecem com o espaço do ícone reservado e vazio. */
   icons?: AssetMap;

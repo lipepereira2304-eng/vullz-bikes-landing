@@ -901,3 +901,228 @@
     }
   }
 }
+
+/*
+  ============================================================================
+  GALERIA DE DETALHES (ver src/catalog/detail-gallery.ts)
+  ============================================================================
+  Miniaturas pequenas embaixo da foto principal + um "vidro" que cobre a
+  página inteira com os closes. Vidro (liquid glass, à la Apple) só nos
+  CONTROLES e no fundo da camada aberta — nunca na foto principal, que segue
+  flutuando no branco puro.
+*/
+
+/*
+  Superfície de vidro: translúcida, desfoca e satura o que passa por trás, com
+  um filete de luz em cima e uma sombra curta embaixo. Sobre branco liso ela é
+  quase invisível de propósito — o efeito aparece quando há foto atrás.
+*/
+@utility glass-surface {
+  background: rgb(255 255 255 / 0.42);
+  -webkit-backdrop-filter: blur(16px) saturate(180%);
+  backdrop-filter: blur(16px) saturate(180%);
+  border: 1px solid rgb(255 255 255 / 0.75);
+  box-shadow:
+    inset 0 1px 0 rgb(255 255 255 / 0.9),
+    inset 0 -1px 0 rgb(0 0 0 / 0.04),
+    0 10px 30px -12px rgb(17 17 17 / 0.28);
+  color: var(--color-vullz-black);
+}
+
+@layer components {
+  /* ---- miniaturas (na página e dentro do vidro) ---- */
+  .detail-thumbs {
+    display: flex;
+    flex-shrink: 0;
+    gap: 6px;
+    padding: 5px;
+    border-radius: 16px;
+  }
+
+  /* 44px: o mínimo de toque de iOS/Android, e ainda assim pequena. */
+  .detail-thumb {
+    position: relative;
+    width: 44px;
+    height: 44px;
+    overflow: hidden;
+    border-radius: 11px;
+    background: var(--color-vullz-white);
+    opacity: 0.6;
+    transition:
+      opacity var(--duration-base) var(--ease-out),
+      scale var(--duration-fast) var(--ease-out);
+  }
+
+  /* Contorno num pseudo-elemento por cima da foto: num `border` a própria
+     imagem cobriria o anel nos cantos arredondados. */
+  .detail-thumb::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    box-shadow: inset 0 0 0 1px rgb(17 17 17 / 0.08);
+    transition: box-shadow var(--duration-base) var(--ease-out);
+  }
+
+  .detail-thumb img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .detail-thumb:hover,
+  .detail-thumb[aria-current="true"] {
+    opacity: 1;
+  }
+
+  .detail-thumb[aria-current="true"]::after {
+    box-shadow: inset 0 0 0 1.5px var(--color-vullz-black);
+  }
+
+  .detail-thumb:active {
+    scale: 0.94;
+  }
+
+  /* Somem no ato 1 da ficha, junto com o rótulo da cor e o botão (mesma
+     regra e mesma duração de `#color-label` mais acima). */
+  [data-role="detail-thumbs"] {
+    transition: opacity var(--duration-layout) var(--ease-layout);
+  }
+
+  [data-specs="open"] [data-role="detail-thumbs"] {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  /* ---- o vidro na página inteira ---- */
+  [data-role="detail-gallery"] {
+    position: fixed;
+    inset: 0;
+    z-index: 100;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 22px;
+    padding: max(16px, env(safe-area-inset-top)) max(16px, env(safe-area-inset-right))
+      max(16px, env(safe-area-inset-bottom)) max(16px, env(safe-area-inset-left));
+    background: rgb(255 255 255 / 0.55);
+    -webkit-backdrop-filter: blur(28px) saturate(170%);
+    backdrop-filter: blur(28px) saturate(170%);
+    opacity: 0;
+    visibility: hidden;
+    transition:
+      opacity var(--duration-slow) var(--ease-glide),
+      visibility 0s linear var(--duration-slow);
+  }
+
+  [data-role="detail-gallery"][data-open="true"] {
+    opacity: 1;
+    visibility: visible;
+    transition:
+      opacity var(--duration-slow) var(--ease-glide),
+      visibility 0s;
+  }
+
+  /* A página atrás não rola enquanto o vidro está aberto. */
+  html[data-gallery-open] {
+    overflow: hidden;
+  }
+
+  /*
+    Tamanho do close: menor que a tela de propósito (pedido do cliente) — no
+    máximo 820px de largura, e sempre sobrando altura para as miniaturas e um
+    respiro em volta. 1.41 é a proporção das fotos de detalhe (2000×1415).
+  */
+  .detail-gallery-view {
+    position: relative;
+    width: min(100%, 820px, calc((100dvh - 260px) * 1.41));
+    aspect-ratio: 1.41;
+    touch-action: pan-y;
+    scale: 0.96;
+    transition: scale var(--duration-entrance) var(--ease-glide);
+  }
+
+  [data-role="detail-gallery"][data-open="true"] .detail-gallery-view {
+    scale: 1;
+  }
+
+  /* Uma camada por foto, empilhadas — crossfade como o do palco (stage.ts). */
+  .detail-gallery-layer {
+    position: absolute;
+    inset: 0;
+    opacity: 0;
+    scale: 1.03;
+    transition:
+      opacity var(--duration-slow) var(--ease-glide),
+      scale var(--duration-entrance) var(--ease-glide);
+  }
+
+  .detail-gallery-layer[data-active="true"] {
+    opacity: 1;
+    scale: 1;
+  }
+
+  /* O close é fotografia com borda: vive num cartão de cantos arredondados. */
+  .detail-gallery-layer img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    border-radius: 24px;
+    box-shadow:
+      0 40px 80px -36px rgb(17 17 17 / 0.4),
+      0 0 0 1px rgb(17 17 17 / 0.05);
+  }
+
+  .detail-gallery-arrow,
+  .detail-gallery-close {
+    display: grid;
+    place-items: center;
+    border-radius: 999px;
+    transition: scale var(--duration-fast) var(--ease-out);
+  }
+
+  .detail-gallery-arrow:active,
+  .detail-gallery-close:active {
+    scale: 0.94;
+  }
+
+  .detail-gallery-arrow {
+    position: absolute;
+    top: 50%;
+    z-index: 1;
+    width: 44px;
+    height: 44px;
+    margin-top: -22px;
+  }
+
+  /* Por cima da borda do cartão quando não há folga (celular)... */
+  .detail-gallery-arrow[data-side="prev"] {
+    left: 10px;
+  }
+  .detail-gallery-arrow[data-side="next"] {
+    right: 10px;
+  }
+
+  /* ...e do lado de fora, sem cobrir a foto, quando sobra espaço. */
+  .detail-gallery-view[data-roomy="true"] .detail-gallery-arrow[data-side="prev"] {
+    left: -72px;
+  }
+  .detail-gallery-view[data-roomy="true"] .detail-gallery-arrow[data-side="next"] {
+    right: -72px;
+  }
+
+  .detail-gallery-close {
+    position: absolute;
+    top: max(18px, env(safe-area-inset-top));
+    right: max(18px, env(safe-area-inset-right));
+    width: 44px;
+    height: 44px;
+  }
+
+  @media (width < 40rem) {
+    .detail-gallery-layer img {
+      border-radius: 16px;
+    }
+  }
+}
