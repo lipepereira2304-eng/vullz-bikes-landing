@@ -254,9 +254,11 @@ testar Saira Condensed; foi revertido.
 - Pulse ("Juntas": palavra chega tombada pela direita e cada letra se
   equilibra), Majestic (caligrafia escrita + faixa esticada + plumas/folhas)
   e Pro Kids ("Manobra": P R O quicam, KIDS faz um 360 de BMX) também no ar.
-- Falta: Love Kids — camadas já em `love-kids/logo-anim/`; proposta em
-  avaliação: balões + corações maiores saindo das bordas (corações são SVG
-  gerados no código, somem no fim). A animação da Street usa
+- Love Kids no ar também ("L2"): blocos e letras com pulinho de gelatina +
+  chuvinha de coraçõezinhos (SVG gerados no código, nas cores da logo, que
+  somem no fim). Com isso as 8 logos de bicicleta estão animadas.
+- Próximo passo combinado: uma rodada de refinamento geral de todas
+  (cliente quer revisar a Doble em especial). A animação da Street usa
   `mask-position` animado; navegador que não animar isso cai num fade simples
   (a logo termina igual) — conferir no iPhone.
 

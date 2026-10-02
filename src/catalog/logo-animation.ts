@@ -33,7 +33,7 @@ export interface LogoAnimationContext {
   /** Envolve a logo inteira — é o que treme nos impactos (Doble). */
   shaker: HTMLElement;
   /** element.animate com o padrão do site: segura o fim e usa a curva de entrada. */
-  animate(el: HTMLElement | undefined, keyframes: Keyframe[], options: KeyframeAnimationOptions): void;
+  animate(el: Element | undefined, keyframes: Keyframe[], options: KeyframeAnimationOptions): void;
 }
 
 export interface LogoAnimation {

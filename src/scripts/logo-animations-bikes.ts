@@ -459,6 +459,92 @@ const PROKIDS: LogoAnimation = {
   },
 };
 
+/* ------------------------------------------------------------------------ */
+/* Love Kids — gelatina + chuvinha de coraçõezinhos                          */
+/* ------------------------------------------------------------------------ */
+
+const LOVEKIDS_BOX: Record<string, { cx: number; y1: number }> = {
+  "bloco-love": { cx: 21.22, y1: 99.88 },
+  "bloco-kids": { cx: 71.22, y1: 95.69 },
+  "letra-l": { cx: 5.57, y1: 89.0 },
+  "letra-o": { cx: 15.42, y1: 89.35 },
+  "letra-v": { cx: 27.49, y1: 89.83 },
+  "letra-e": { cx: 37.47, y1: 90.19 },
+  "letra-k": { cx: 57.11, y1: 80.5 },
+  "letra-i": { cx: 66.42, y1: 78.59 },
+  "letra-d": { cx: 75.82, y1: 84.33 },
+  "letra-s": { cx: 90.84, y1: 80.74 },
+};
+
+/** Pulinho de gelatina: estica, encolhe e assenta, a partir da base da peça. */
+function jelly(ctx: LogoAnimationContext, name: string, delay: number, duration: number, from: number): void {
+  const el = ctx.layer(name);
+  const b = LOVEKIDS_BOX[name];
+  if (el && b) el.style.transformOrigin = `${b.cx}% ${b.y1}%`;
+  ctx.animate(
+    el,
+    [
+      { opacity: 0, transform: `scale(${from})`, easing: "cubic-bezier(0.3, 0.7, 0.4, 1)" },
+      { opacity: 1, transform: "scale(1.14, 0.88)", offset: 0.4, easing: "ease-in-out" },
+      { transform: "scale(0.93, 1.08)", offset: 0.6, easing: "ease-in-out" },
+      { transform: "scale(1.03, 0.97)", offset: 0.8, easing: "ease-in-out" },
+      { opacity: 1, transform: "scale(1, 1)" },
+    ],
+    { duration, delay, easing: "linear" }
+  );
+}
+
+/*
+  Coraçõezinhos: não fazem parte da logo — são desenhados aqui (SVG), nas duas
+  cores dela, saem de trás das letras, sobem e se dissolvem; no fim, fica só a
+  logo. Posições fixas (não aleatórias): a animação é sempre a mesma.
+  [x%, y%, tamanho em % da largura, cor]
+*/
+const HEART_PATH =
+  "M12 21s-7.5-4.6-10-9.2C.3 8.4 2.2 4 6.3 4c2.4 0 3.9 1.3 5.7 3.3C13.8 5.3 15.3 4 17.7 4 21.8 4 23.7 8.4 22 11.8 19.5 16.4 12 21 12 21z";
+const HEART_SPOTS: [number, number, number, string][] = [
+  [12, 55, 4.2, "#ec268f"], [24, 30, 3.2, "#5ec8d0"], [33, 62, 5, "#ec268f"], [45, 22, 3.6, "#ec268f"],
+  [52, 58, 4.4, "#5ec8d0"], [61, 26, 3.4, "#ec268f"], [68, 64, 5.2, "#ec268f"], [77, 30, 3.8, "#5ec8d0"],
+  [86, 58, 4.6, "#ec268f"], [93, 34, 3.2, "#ec268f"], [40, 45, 3, "#5ec8d0"], [73, 48, 3, "#ec268f"],
+];
+
+function heartShower(ctx: LogoAnimationContext, at: number): void {
+  HEART_SPOTS.forEach(([x, y, size, color], i) => {
+    const heart = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+    heart.setAttribute("viewBox", "0 0 24 24");
+    heart.setAttribute("aria-hidden", "true");
+    heart.style.cssText = `position:absolute;left:${x}%;top:${y}%;width:${size}%;height:auto;aspect-ratio:1;translate:-50% -50%;pointer-events:none;overflow:visible`;
+    heart.innerHTML = `<path d="${HEART_PATH}" fill="${color}"/>`;
+    ctx.shaker.appendChild(heart);
+    const rotate = (i % 2 ? 1 : -1) * (10 + ((i * 7) % 15));
+    ctx.animate(
+      heart,
+      [
+        { opacity: 0, transform: "translateY(0) scale(0.3) rotate(0deg)" },
+        { opacity: 1, transform: `translateY(-60%) scale(1) rotate(${rotate * 0.4}deg)`, offset: 0.3 },
+        { opacity: 0, transform: `translateY(-260%) scale(0.85) rotate(${rotate}deg)` },
+      ],
+      { duration: 560 + ((i * 37) % 160), delay: at + ((i * 23) % 180), easing: EASE_OUT }
+    );
+  });
+}
+
+const LOVEKIDS: LogoAnimation = {
+  width: 3061,
+  height: 836,
+  layers: fullLayers("love-kids", [
+    "bloco-love", "bloco-kids",
+    "letra-l", "letra-o", "letra-v", "letra-e", "letra-k", "letra-i", "letra-d", "letra-s",
+  ]),
+  play(ctx) {
+    jelly(ctx, "bloco-love", 0, 480, 0.6);
+    jelly(ctx, "bloco-kids", 120, 480, 0.6);
+    ["l", "o", "v", "e", "k", "i", "d", "s"].forEach((c, k) => jelly(ctx, `letra-${c}`, 200 + k * 80, 520, 0.35));
+    // quando a última letra assenta, a chuvinha de corações
+    heartShower(ctx, 860);
+  },
+};
+
 export const BIKE_LOGO_ANIMATIONS: Record<string, LogoAnimation> = {
   oregon: OREGON,
   slim: SLIM,
@@ -467,4 +553,5 @@ export const BIKE_LOGO_ANIMATIONS: Record<string, LogoAnimation> = {
   pulse: PULSE,
   majestic: MAJESTIC,
   "pro-kids": PROKIDS,
+  "love-kids": LOVEKIDS,
 };
