@@ -120,13 +120,70 @@ initRevealOnScroll();
   (o navegador nunca "abre" um blob, só pode salvá-lo) — contorno padrão pra
   essa limitação do WebKit, sem depender do navegador respeitar o atributo.
 */
+/*
+  Quanto tempo o "Pronto ✓" fica no botão antes de ele voltar a "Baixar". Longo
+  o bastante pra ser lido, curto o bastante pra não parecer travado.
+*/
+const DOWNLOAD_DONE_MS = 1600;
+
+type DownloadState = "idle" | "loading" | "done";
+
+/*
+  Lê a resposta em pedaços (em vez de `response.blob()` de uma vez) só pra
+  poder contar os bytes que já chegaram e mostrar o andamento — o arquivo tem
+  ~20 MB, e no celular isso leva segundos. Sem `Content-Length` (ou sem
+  suporte a stream) não há como saber a porcentagem: aí `onProgress` recebe
+  null e o botão fica só no estado de "baixando", sem número.
+*/
+async function fetchWithProgress(url: string, onProgress: (fraction: number | null) => void): Promise<Blob> {
+  const response = await fetch(url);
+  if (!response.ok) throw new Error(`HTTP ${response.status}`);
+
+  const total = Number(response.headers.get("Content-Length")) || 0;
+  if (!response.body || !total) {
+    onProgress(null);
+    return response.blob();
+  }
+
+  const reader = response.body.getReader();
+  const chunks: Uint8Array<ArrayBuffer>[] = [];
+  let received = 0;
+  for (;;) {
+    const { done, value } = await reader.read();
+    if (done) break;
+    chunks.push(value);
+    received += value.length;
+    onProgress(Math.min(received / total, 1));
+  }
+  return new Blob(chunks, { type: response.headers.get("Content-Type") ?? "application/octet-stream" });
+}
+
 document.querySelectorAll<HTMLAnchorElement>("[data-force-download]").forEach((link) => {
+  const percent = link.querySelector<HTMLElement>("[data-role='download-percent']");
+  const status = link.querySelector<HTMLElement>("[data-role='download-status']");
+
+  const setState = (state: DownloadState): void => {
+    link.dataset.state = state;
+    link.setAttribute("aria-busy", String(state === "loading"));
+  };
+
+  const setProgress = (fraction: number | null): void => {
+    // Sem total conhecido: faixa a meio caminho e reticências no lugar do número.
+    link.style.setProperty("--progress", String(fraction ?? 0.5));
+    if (percent) percent.textContent = fraction === null ? "…" : `${Math.round(fraction * 100)}%`;
+  };
+
   link.addEventListener("click", (event) => {
     event.preventDefault();
-    const filename = link.getAttribute("download") || link.href.split("/").pop() || "download";
+    // Um segundo toque durante o download não dispara outro de 20 MB.
+    if (link.dataset.state === "loading") return;
 
-    fetch(link.href)
-      .then((response) => response.blob())
+    const filename = link.getAttribute("download") || link.href.split("/").pop() || "download";
+    setProgress(0);
+    setState("loading");
+    if (status) status.textContent = "Baixando o catálogo…";
+
+    fetchWithProgress(link.href, setProgress)
       .then((blob) => {
         const blobUrl = URL.createObjectURL(blob);
         const tempLink = document.createElement("a");
@@ -135,11 +192,22 @@ document.querySelectorAll<HTMLAnchorElement>("[data-force-download]").forEach((l
         document.body.appendChild(tempLink);
         tempLink.click();
         tempLink.remove();
-        URL.revokeObjectURL(blobUrl);
+        // Revogar no mesmo instante do clique às vezes corta o salvamento no
+        // Safari — um respiro curto deixa o navegador terminar de usar o blob.
+        window.setTimeout(() => URL.revokeObjectURL(blobUrl), 1000);
+
+        setProgress(1);
+        setState("done");
+        if (status) status.textContent = "Download concluído.";
+        window.setTimeout(() => {
+          setState("idle");
+          link.style.removeProperty("--progress");
+        }, DOWNLOAD_DONE_MS);
       })
       .catch(() => {
         // Sem rede pro fetch (raríssimo, mesma origem) — cai pra navegação
         // normal em vez de deixar o clique sem nenhum efeito.
+        setState("idle");
         window.location.href = link.href;
       });
   });

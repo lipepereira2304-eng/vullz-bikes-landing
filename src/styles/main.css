@@ -1149,3 +1149,67 @@
     }
   }
 }
+
+/*
+  ============================================================================
+  BOTÃO "BAIXAR" COM PROGRESSO (ver catalog-card.ts e main.ts)
+  ============================================================================
+*/
+@layer components {
+  /*
+    Faixa de progresso: cresce da esquerda pra direita por `scale` (compositor,
+    sem recalcular layout a cada pedaço do arquivo que chega). `linear` e curta
+    de propósito: não é um gesto com começo e fim, é um valor acompanhando a
+    rede — qualquer curva faria a faixa "frear" a cada atualização.
+  */
+  .download-fill {
+    position: absolute;
+    inset: 0;
+    pointer-events: none;
+    background: rgb(245 197 24 / 0.16);
+    transform-origin: left center;
+    scale: var(--progress, 0) 1;
+    transition:
+      scale var(--duration-fast) linear,
+      opacity var(--duration-base) var(--ease-out);
+  }
+
+  [data-force-download][data-state="idle"] .download-fill {
+    opacity: 0;
+  }
+
+  /* Rótulos/ícones empilhados na mesma célula: a largura é sempre a do maior. */
+  .download-stack {
+    position: relative;
+    display: inline-grid;
+  }
+
+  .download-stack > * {
+    grid-area: 1 / 1;
+    justify-self: center;
+    align-self: center;
+    visibility: hidden;
+  }
+
+  [data-state="idle"] .download-stack > [data-when~="idle"],
+  [data-state="loading"] .download-stack > [data-when~="loading"],
+  [data-state="done"] .download-stack > [data-when~="done"] {
+    visibility: visible;
+  }
+
+  [data-force-download][data-state="loading"] {
+    cursor: progress;
+  }
+
+  /* O ✓ chega com um pequeno "pop" — é o fim de uma espera, merece o sinal. */
+  [data-state="done"] .download-stack > svg[data-when~="done"] {
+    animation: download-done var(--duration-slow) var(--ease-glide) both;
+  }
+
+  @keyframes download-done {
+    from {
+      opacity: 0;
+      scale: 0.6;
+    }
+  }
+}

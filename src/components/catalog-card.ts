@@ -73,20 +73,52 @@ export function catalogCardMarkup({
             </svg>
           </a>
 
-          <a href="${download.href}" download data-force-download class="${ACTION_BUTTON_CLASSES} text-vullz-yellow">
-            ${download.label ?? "Baixar"}
-            <svg
-              width="16"
-              height="16"
-              viewBox="0 0 16 16"
-              fill="none"
-              xmlns="http://www.w3.org/2000/svg"
-              class="btn-motion group-hover/btn:translate-y-[var(--shift-sm)]"
-            >
-              <path d="M8 2.5V10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-              <path d="M4.5 7.5L8 11L11.5 7.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
-              <path d="M2.5 13.5H13.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
-            </svg>
+          <!--
+            O PDF tem ~20 MB: no celular, entre o toque e o arquivo salvo
+            passam vários segundos, e antes nada na tela mudava nesse meio
+            tempo — parecia que o botão não funcionava. Agora o próprio botão
+            mostra o andamento (ver o handler de [data-force-download] em
+            main.ts): uma faixa preenche da esquerda pra direita conforme o
+            arquivo chega, com a porcentagem no lugar do rótulo, e no fim
+            "Pronto" com um ✓ por um instante.
+
+            Os três rótulos (e os dois ícones) ficam EMPILHADOS na mesma
+            célula de grid, só um visível por vez: a largura do botão é a do
+            maior deles e nunca muda entre estados — senão o "Visualizar" ao
+            lado seria empurrado a cada porcentagem nova.
+          -->
+          <a
+            href="${download.href}"
+            download
+            data-force-download
+            data-state="idle"
+            class="${ACTION_BUTTON_CLASSES} relative overflow-hidden text-vullz-yellow"
+          >
+            <span data-role="download-fill" aria-hidden="true" class="download-fill"></span>
+            <span class="download-stack">
+              <span data-when="idle">${download.label ?? "Baixar"}</span>
+              <span data-when="loading" data-role="download-percent" class="tabular-nums">0%</span>
+              <span data-when="done">Pronto</span>
+            </span>
+            <span class="download-stack">
+              <svg
+                data-when="idle loading"
+                width="16"
+                height="16"
+                viewBox="0 0 16 16"
+                fill="none"
+                xmlns="http://www.w3.org/2000/svg"
+                class="btn-motion group-hover/btn:translate-y-[var(--shift-sm)]"
+              >
+                <path d="M8 2.5V10.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+                <path d="M4.5 7.5L8 11L11.5 7.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" />
+                <path d="M2.5 13.5H13.5" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" />
+              </svg>
+              <svg data-when="done" width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M3 8.5L6.5 12L13 4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" />
+              </svg>
+            </span>
+            <span data-role="download-status" class="sr-only" aria-live="polite"></span>
           </a>
         </div>
       </div>
