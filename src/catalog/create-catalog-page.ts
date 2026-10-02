@@ -1,6 +1,7 @@
 import { initRevealOnScroll } from "../scripts/animations";
 import { findDetails, preloadAll } from "./assets";
 import { createDetailGallery, detailThumbsMarkup, playThumbsWave } from "./detail-gallery";
+import { logoAnimationMarkup, playLogoAnimation } from "./logo-animation";
 import {
   colorLabelMarkup,
   colorSwatchMarkup,
@@ -66,6 +67,7 @@ export function createCatalogPage<M extends ProductModel>(config: CatalogConfig<
     grouping,
     icons = {},
     details = {},
+    logoAnimations = {},
     mobileModelBrowser = false,
     stageShadow: catalogStageShadow = true,
   } = config;
@@ -112,6 +114,10 @@ export function createCatalogPage<M extends ProductModel>(config: CatalogConfig<
     verdade (entrada lenta) ou só um re-render incidental (entrada rápida).
   */
   let lastPaintedModelId: string | null = null;
+
+  /* Modelos cuja logo já tocou a animação completa nesta visita (some ao recarregar). */
+  const playedLogos = new Set<string>();
+  const prefersReducedMotion = (): boolean => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   function paint(model: M, color: ProductColor, kind: StageTransition): void {
     const container = document.querySelector<HTMLElement>("#stage-inner");
@@ -194,6 +200,17 @@ export function createCatalogPage<M extends ProductModel>(config: CatalogConfig<
     const activeColor = activeModel
       ? activeModel.colors.find((c) => c.id === state.colorId) ?? activeModel.colors[0]
       : null;
+
+    /*
+      Logo animada: só na troca DE MODELO, só na primeira vez que esse modelo
+      aparece nesta visita, e nunca pra quem pediu menos movimento — nesses
+      casos fica a logo em imagem com a entrada discreta de sempre.
+    */
+    const isModelChange = activeModel !== null && activeModel.id !== lastPaintedModelId;
+    const logoAnimation =
+      activeModel && isModelChange && !playedLogos.has(activeModel.id) && !prefersReducedMotion()
+        ? logoAnimations[activeModel.id]
+        : undefined;
 
     /*
       Sem modelo escolhido: convite central, sem cores (não faz sentido mostrar
@@ -399,7 +416,7 @@ export function createCatalogPage<M extends ProductModel>(config: CatalogConfig<
           data-role="stage-section"
           class="flex min-w-0 flex-1 flex-col items-center justify-center gap-4 overflow-hidden"
         >
-          ${stageWrapperMarkup(logos, activeModel, stageContent, mobileModelBrowser, activeModel?.id !== lastPaintedModelId)}
+          ${stageWrapperMarkup(logos, activeModel, stageContent, mobileModelBrowser, isModelChange && !logoAnimation, logoAnimation && activeModel ? logoAnimationMarkup(logoAnimation, activeModel.name) : undefined)}
           ${
             activeModel && activeColor
               ? /* html */ `
@@ -467,6 +484,11 @@ export function createCatalogPage<M extends ProductModel>(config: CatalogConfig<
 
     if (activeModel && activeColor) {
       paint(activeModel, activeColor, activeModel.id === lastPaintedModelId ? "color" : "model");
+      if (logoAnimation) {
+        playedLogos.add(activeModel.id);
+        const logoEl = document.querySelector<HTMLElement>("[data-role='model-logo']");
+        if (logoEl) playLogoAnimation(logoEl, logoAnimation);
+      }
       playThumbsWave(`${activeModel.id}:${activeColor.id}`);
       lastPaintedModelId = activeModel.id;
       revealActiveInNav(`[data-model="${activeModel.id}"]`);
@@ -865,5 +887,7 @@ export function createCatalogPage<M extends ProductModel>(config: CatalogConfig<
 
   // Depois que a página e seus recursos críticos (CSS, JS, logo) já carregaram
   // — pra não competir com eles por banda — começa a baixar todas as fotos.
-  window.addEventListener("load", () => preloadAll(photos, logos));
+  window.addEventListener("load", () =>
+    preloadAll(photos, logos, Object.fromEntries(Object.values(logoAnimations).flatMap((a) => a.layers.map((l) => [l.url, l.url]))))
+  );
 }

@@ -239,6 +239,22 @@ testar Saira Condensed; foi revertido.
 - No vidro, a foto acompanha o dedo/mouse ao arrastar (trilha lado a lado),
   com elástico nas pontas; setas e miniaturas deslizam até a foto.
 
+### Logos animadas — Oregon, Slim, Street, Doble (2026-10-02)
+- Toca só na 1ª vez que o modelo aparece em cada visita (~1,5s); depois, e
+  pra quem pede menos movimento, fica a logo em imagem de sempre.
+- Logos só existem em .webp: foram recortadas em camadas
+  (`src/assets/bikes/<modelo>/logo-anim/`) que recompõem a original pixel a
+  pixel. Motor: `src/catalog/logo-animation.ts`; coreografias:
+  `src/scripts/logo-animations-bikes.ts`.
+- Oregon: letras se espalham do centro + asas abrem. Slim: faixas cruzam +
+  palavra se espalha + pingo do "i". Street: carimbo + grafite escrito a
+  spray; a logo PARADA também mudou (borda de spray no lugar do recorte
+  retangular, e recentralizada no "STREET"). Doble: queda pesada com tremor
+  (D2, do centro pra fora) — cliente quer refinar mais no final.
+- Faltam: Pulse, Majestic, Pro Kids, Love Kids. A animação da Street usa
+  `mask-position` animado; navegador que não animar isso cai num fade simples
+  (a logo termina igual) — conferir no iPhone.
+
 ### Logo do modelo entra junto com a foto (2026-10-02)
 - Na troca de modelo, a logo entra com a mesma duração/curva/deslocamento da
   foto (`.model-logo-enter`). Troca de cor continua com a dissolução discreta

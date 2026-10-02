@@ -1285,3 +1285,35 @@
     }
   }
 }
+
+/*
+  ============================================================================
+  LOGO ANIMADA (ver src/catalog/logo-animation.ts)
+  ============================================================================
+  Ocupa exatamente o espaço do <img object-contain> que substitui; a caixa
+  (tamanho medido em JS) fica centralizada, e as camadas se posicionam em %
+  dela — mesmo canvas da logo original.
+*/
+@layer components {
+  .logo-anim {
+    position: absolute;
+    inset: 0;
+  }
+
+  .logo-anim-box {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    translate: -50% -50%;
+  }
+
+  .logo-anim-shaker {
+    position: absolute;
+    inset: 0;
+  }
+
+  .logo-anim img {
+    position: absolute;
+    max-width: none;
+  }
+}

@@ -5,6 +5,8 @@
   como configuração (ver CatalogGrouping), não como campo fixo do modelo.
 */
 
+import type { LogoAnimation } from "./logo-animation";
+
 /** Uma cor disponível de um modelo. */
 export interface ProductColor {
   id: string;
@@ -113,6 +115,11 @@ export interface CatalogConfig<M extends ProductModel = ProductModel> {
     sozinha, sem miniaturas, exatamente como antes da galeria existir.
   */
   details?: AssetMap;
+  /*
+    Logos animadas, por id de modelo (ver logo-animation.ts). Opcional e por
+    modelo: quem não está aqui fica com a logo em imagem de sempre.
+  */
+  logoAnimations?: Record<string, LogoAnimation>;
   /* Ícones dos destaques da ficha técnica. Opcional: sem ele os cartões
      aparecem com o espaço do ícone reservado e vazio. */
   icons?: AssetMap;

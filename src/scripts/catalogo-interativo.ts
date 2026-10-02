@@ -1,5 +1,6 @@
 import "../styles/main.css";
 import { createCatalogPage } from "../catalog/create-catalog-page";
+import { BIKE_LOGO_ANIMATIONS } from "./logo-animations-bikes";
 import type { ProductColor, ProductModel } from "../catalog/types";
 
 /*
@@ -353,6 +354,7 @@ createCatalogPage<BikeModel>({
   photos,
   logos,
   details,
+  logoAnimations: BIKE_LOGO_ANIMATIONS,
   icons,
   emptyMessage: "Escolha um modelo ao lado para ver a bike.",
   grouping: {

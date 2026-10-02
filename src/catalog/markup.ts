@@ -488,7 +488,8 @@ export function modelNameMarkup(
   logos: AssetMap,
   model: ProductModel,
   mobileSheet: boolean,
-  animate: boolean
+  animate: boolean,
+  animatedLogo?: string
 ): string {
   const logo = findLogo(logos, model.id);
   // Entra junto com a foto na troca de MODELO (ver `.model-logo-enter` em main.css).
@@ -513,7 +514,7 @@ export function modelNameMarkup(
         data-role="model-logo"
         class="absolute left-1/2 top-0 z-10 h-11 w-full max-w-xl -translate-x-1/2 sm:h-14 lg:h-[77px] ${mobileShift} ${enter}"
       >
-        <img src="${logo}" alt="${model.name}" class="h-full w-full object-contain" />
+        ${animatedLogo ?? /* html */ `<img src="${logo}" alt="${model.name}" class="h-full w-full object-contain" />`}
       </div>
     `;
   }
@@ -551,11 +552,12 @@ export function stageWrapperMarkup(
   activeModel: ProductModel | null,
   stageContent: string,
   mobileSheet: boolean,
-  animateLogo: boolean
+  animateLogo: boolean,
+  animatedLogo?: string
 ): string {
   return /* html */ `
     <div data-role="stage-wrapper" class="relative flex min-h-0 w-full flex-1 items-center justify-center overflow-hidden pt-4 max-lg:landscape:min-h-[240px]">
-      ${activeModel ? modelNameMarkup(logos, activeModel, mobileSheet, animateLogo) : ""}
+      ${activeModel ? modelNameMarkup(logos, activeModel, mobileSheet, animateLogo, animatedLogo) : ""}
       ${stageContent}
     </div>
   `;
