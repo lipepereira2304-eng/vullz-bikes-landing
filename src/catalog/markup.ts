@@ -484,8 +484,15 @@ export function stageMarkup(
   `flex-col`, então um item normal ficaria lado a lado com a foto (linha), não
   acima dela.
 */
-export function modelNameMarkup(logos: AssetMap, model: ProductModel, mobileSheet: boolean): string {
+export function modelNameMarkup(
+  logos: AssetMap,
+  model: ProductModel,
+  mobileSheet: boolean,
+  animate: boolean
+): string {
   const logo = findLogo(logos, model.id);
+  // Entra junto com a foto na troca de MODELO (ver `.model-logo-enter` em main.css).
+  const enter = animate ? "model-logo-enter" : "";
 
   /*
     `mobileSheet` (= `mobileModelBrowser`, só bicicletas por enquanto):
@@ -504,7 +511,7 @@ export function modelNameMarkup(logos: AssetMap, model: ProductModel, mobileShee
     return /* html */ `
       <div
         data-role="model-logo"
-        class="absolute left-1/2 top-0 z-10 h-11 w-full max-w-xl -translate-x-1/2 sm:h-14 lg:h-[77px] ${mobileShift}"
+        class="absolute left-1/2 top-0 z-10 h-11 w-full max-w-xl -translate-x-1/2 sm:h-14 lg:h-[77px] ${mobileShift} ${enter}"
       >
         <img src="${logo}" alt="${model.name}" class="h-full w-full object-contain" />
       </div>
@@ -512,7 +519,7 @@ export function modelNameMarkup(logos: AssetMap, model: ProductModel, mobileShee
   }
 
   return /* html */ `
-    <h1 class="absolute left-1/2 top-0 z-10 w-full max-w-xl -translate-x-1/2 text-center text-2xl font-extrabold uppercase tracking-wide text-vullz-black ${mobileShift}">
+    <h1 class="absolute left-1/2 top-0 z-10 w-full max-w-xl -translate-x-1/2 text-center text-2xl font-extrabold uppercase tracking-wide text-vullz-black ${mobileShift} ${enter}">
       ${model.name}
     </h1>
   `;
@@ -543,11 +550,12 @@ export function stageWrapperMarkup(
   logos: AssetMap,
   activeModel: ProductModel | null,
   stageContent: string,
-  mobileSheet: boolean
+  mobileSheet: boolean,
+  animateLogo: boolean
 ): string {
   return /* html */ `
     <div data-role="stage-wrapper" class="relative flex min-h-0 w-full flex-1 items-center justify-center overflow-hidden pt-4 max-lg:landscape:min-h-[240px]">
-      ${activeModel ? modelNameMarkup(logos, activeModel, mobileSheet) : ""}
+      ${activeModel ? modelNameMarkup(logos, activeModel, mobileSheet, animateLogo) : ""}
       ${stageContent}
     </div>
   `;

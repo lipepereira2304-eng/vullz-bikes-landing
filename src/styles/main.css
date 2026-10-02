@@ -1006,13 +1006,39 @@
     animation-delay: calc(var(--duration-entrance) + var(--stagger) * 1.5 * var(--i));
   }
 
-  /* Somem no ato 1 da ficha, junto com o rótulo da cor e o botão (mesma
+  /*
+    Espaço SEMPRE reservado pras miniaturas, tenha a cor closes ou não (aí
+    entra o "Em breve..."): sem isto, trocar entre uma cor com e outra sem
+    fazia a bike mudar de tamanho. A altura é a da pílula (44px de miniatura
+    + 5px de respiro em cima e embaixo).
+  */
+  .detail-slot {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    height: 54px;
+  }
+
+  /* Troca de conteúdo do espaço (miniaturas ↔ "Em breve...") com um fade
+     curto — a mesma discrição da troca de cor da foto, que acontece junto. */
+  .detail-slot > * {
+    animation: detail-slot-in var(--duration-base) var(--ease-out) both;
+  }
+
+  @keyframes detail-slot-in {
+    from {
+      opacity: 0;
+    }
+  }
+
+  /* Some no ato 1 da ficha, junto com o rótulo da cor e o botão (mesma
      regra e mesma duração de `#color-label` mais acima). */
-  [data-role="detail-thumbs"] {
+  [data-role="detail-thumbs-slot"] {
     transition: opacity var(--duration-layout) var(--ease-layout);
   }
 
-  [data-specs="open"] [data-role="detail-thumbs"] {
+  [data-specs="open"] [data-role="detail-thumbs-slot"] {
     opacity: 0;
     pointer-events: none;
   }
@@ -1070,24 +1096,41 @@
     scale: 1;
   }
 
-  /* Uma camada por foto, empilhadas — crossfade como o do palco (stage.ts). */
-  .detail-gallery-layer {
+  /*
+    Trilha com as fotos lado a lado (ver detail-gallery.ts). O recorte é só
+    na HORIZONTAL (`overflow-x: clip`): esconde as fotos vizinhas sem cortar a
+    sombra que o cartão projeta pra baixo.
+  */
+  .detail-gallery-clip {
     position: absolute;
     inset: 0;
-    opacity: 0;
-    scale: 1.03;
-    transition:
-      opacity var(--duration-slow) var(--ease-glide),
-      scale var(--duration-entrance) var(--ease-glide);
+    overflow-x: clip;
   }
 
-  .detail-gallery-layer[data-active="true"] {
-    opacity: 1;
-    scale: 1;
+  .detail-gallery-track {
+    display: flex;
+    height: 100%;
+    column-gap: 16px;
+    cursor: grab;
+  }
+
+  .detail-gallery-track:active {
+    cursor: grabbing;
+  }
+
+  /* Ao soltar o dedo (ou pelas setas), desliza com a curva de entrada do site.
+     Durante o arraste a transição é desligada — a trilha segue o dedo cru. */
+  .detail-gallery-track[data-animate="true"] {
+    transition: transform var(--duration-layout) var(--ease-glide);
+  }
+
+  .detail-gallery-slide {
+    flex: 0 0 100%;
+    height: 100%;
   }
 
   /* O close é fotografia com borda: vive num cartão de cantos arredondados. */
-  .detail-gallery-layer img {
+  .detail-gallery-slide img {
     width: 100%;
     height: 100%;
     object-fit: cover;
@@ -1144,7 +1187,7 @@
   }
 
   @media (width < 40rem) {
-    .detail-gallery-layer img {
+    .detail-gallery-slide img {
       border-radius: 16px;
     }
   }
@@ -1210,6 +1253,35 @@
     from {
       opacity: 0;
       scale: 0.6;
+    }
+  }
+}
+
+/*
+  ============================================================================
+  ENTRADA DA LOGO DO MODELO
+  ============================================================================
+  A foto do produto entra com `stage-fade-model` (opacidade + subida curta,
+  `--duration-entrance`) a cada troca de modelo, mas a logo trocava seco — por
+  um instante a logo nova aparecia sobre a bike antiga. Agora as duas chegam
+  juntas: mesma duração, mesma curva, mesmo deslocamento.
+
+  `transform` (e não `translate`) de propósito: a logo já usa a propriedade
+  `translate` pra se centralizar (classes do Tailwind) — animar `transform`
+  soma ao posicionamento em vez de sobrescrevê-lo.
+
+  Só na troca de MODELO (ver create-catalog-page.ts): trocar de cor não mexe
+  na logo, que é a mesma.
+*/
+@layer components {
+  .model-logo-enter {
+    animation: model-logo-in var(--duration-entrance) var(--ease-glide) both;
+  }
+
+  @keyframes model-logo-in {
+    from {
+      opacity: 0;
+      transform: translateY(var(--shift-md));
     }
   }
 }

@@ -233,8 +233,20 @@ testar Saira Condensed; foi revertido.
 - Sem rótulos nas fotos, a pedido. Código em `src/catalog/detail-gallery.ts`.
 - Convite ao clique ("onda"): ao aparecer, as 3 miniaturas sobem e acendem
   em sequência, uma vez por modelo+cor por visita, depois da entrada da bike.
-- Só a Pro Kids azul tem closes por enquanto — os demais modelos/cores ficam
-  idênticos a antes até ganharem os arquivos.
+- Só a Pro Kids azul tem closes por enquanto. O espaço das miniaturas é
+  sempre reservado: cor sem closes mostra "Em breve..." no lugar (a bike não
+  muda de tamanho ao trocar de cor). Vale também para os elétricos.
+- No vidro, a foto acompanha o dedo/mouse ao arrastar (trilha lado a lado),
+  com elástico nas pontas; setas e miniaturas deslizam até a foto.
+
+### Logo do modelo entra junto com a foto (2026-10-02)
+- Na troca de modelo, a logo entra com a mesma duração/curva/deslocamento da
+  foto (`.model-logo-enter`). Troca de cor continua com a dissolução discreta
+  de sempre, sem mexer na logo.
+
+### Botão "Baixar" do PDF com progresso (2026-10-02)
+- Faixa + porcentagem real dentro do botão, "Pronto ✓" no fim. PDF tem
+  ~20 MB — vale considerar comprimir.
 
 - Ficha técnica em dois atos (bike desliza → painel entra), com curva de
   movimento ajustada e posição da bike calibrada.

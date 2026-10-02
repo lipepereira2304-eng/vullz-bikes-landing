@@ -399,18 +399,18 @@ export function createCatalogPage<M extends ProductModel>(config: CatalogConfig<
           data-role="stage-section"
           class="flex min-w-0 flex-1 flex-col items-center justify-center gap-4 overflow-hidden"
         >
-          ${stageWrapperMarkup(logos, activeModel, stageContent, mobileModelBrowser)}
+          ${stageWrapperMarkup(logos, activeModel, stageContent, mobileModelBrowser, activeModel?.id !== lastPaintedModelId)}
           ${
             activeModel && activeColor
               ? /* html */ `
                 <!--
                   Miniaturas dos closes da cor ativa (ver detail-gallery.ts).
-                  O invólucro é "display: contents" de propósito: sem closes
-                  ele fica vazio e não gera caixa nenhuma — nem o gap do
-                  flex aparece — então a cor sem detalhes fica idêntica a
-                  antes. É também o ponto que swapColor reescreve.
+                  Espaço sempre reservado (altura fixa, ver .detail-slot em
+                  main.css): cor sem closes mostra "Em breve..." no lugar, e a
+                  bike não muda de tamanho ao trocar de cor. É também o ponto
+                  que swapColor reescreve.
                 -->
-                <div data-role="detail-thumbs-slot" class="contents">
+                <div data-role="detail-thumbs-slot" class="detail-slot">
                   ${detailThumbsMarkup(findDetails(details, activeModel.id, activeColor.id))}
                 </div>
                 <span id="color-label" class="max-w-full text-center text-xs text-vullz-gray-500">
