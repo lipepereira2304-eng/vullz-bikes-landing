@@ -231,6 +231,8 @@ testar Saira Condensed; foi revertido.
   clicar abre um vidro na página inteira (fundo desfocado), com setas, as
   mesmas miniaturas, Esc/clique fora para fechar e arrastar no celular.
 - Sem rótulos nas fotos, a pedido. Código em `src/catalog/detail-gallery.ts`.
+- Convite ao clique ("onda"): ao aparecer, as 3 miniaturas sobem e acendem
+  em sequência, uma vez por modelo+cor por visita, depois da entrada da bike.
 - Só a Pro Kids azul tem closes por enquanto — os demais modelos/cores ficam
   idênticos a antes até ganharem os arquivos.
 

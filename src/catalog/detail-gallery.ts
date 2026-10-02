@@ -54,6 +54,7 @@ function thumbButtonsMarkup(urls: string[], active: number, attr: string): strin
           ${attr}="${i}"
           aria-label="Ver detalhe ${i + 1} de ${urls.length}"
           ${i === active ? `aria-current="true"` : ""}
+          style="--i:${i}"
           class="detail-thumb"
         >
           <img src="${url}" alt="" draggable="false" />
@@ -74,6 +75,33 @@ export function detailThumbsMarkup(urls: string[]): string {
       ${thumbButtonsMarkup(urls, -1, "data-detail")}
     </div>
   `;
+}
+
+/*
+  A "onda": as miniaturas sobem levemente e acendem, uma depois da outra, UMA
+  vez — só pra chamar o olho e sugerir que dá pra clicar nelas. Nada diz isso
+  por texto (sem rótulos, a pedido), então o movimento é o convite.
+
+  Uma vez por modelo+cor em cada visita: repetir a cada troca de cor viraria
+  enfeite, e o que era convite passa a ser ruído. O registro vive em memória
+  (some ao recarregar), de propósito — quem volta outro dia ganha o convite
+  de novo.
+
+  O tempo de espera antes de começar e o desenho do movimento moram em
+  main.css (`detail-wave`); aqui só se liga o atributo e se limpa no fim.
+*/
+const waved = new Set<string>();
+
+export function playThumbsWave(key: string): void {
+  if (waved.has(key)) return;
+  const container = document.querySelector<HTMLElement>("[data-role='detail-thumbs']");
+  if (!container) return;
+  waved.add(key);
+
+  container.dataset.wave = "true";
+  const thumbs = container.querySelectorAll<HTMLElement>(".detail-thumb");
+  const last = thumbs[thumbs.length - 1];
+  last?.addEventListener("animationend", () => delete container.dataset.wave, { once: true });
 }
 
 export interface DetailGallery {

@@ -1,6 +1,6 @@
 import { initRevealOnScroll } from "../scripts/animations";
 import { findDetails, preloadAll } from "./assets";
-import { createDetailGallery, detailThumbsMarkup } from "./detail-gallery";
+import { createDetailGallery, detailThumbsMarkup, playThumbsWave } from "./detail-gallery";
 import {
   colorLabelMarkup,
   colorSwatchMarkup,
@@ -467,6 +467,7 @@ export function createCatalogPage<M extends ProductModel>(config: CatalogConfig<
 
     if (activeModel && activeColor) {
       paint(activeModel, activeColor, activeModel.id === lastPaintedModelId ? "color" : "model");
+      playThumbsWave(`${activeModel.id}:${activeColor.id}`);
       lastPaintedModelId = activeModel.id;
       revealActiveInNav(`[data-model="${activeModel.id}"]`);
     } else {
@@ -500,6 +501,7 @@ export function createCatalogPage<M extends ProductModel>(config: CatalogConfig<
 
     const thumbsSlot = document.querySelector("[data-role='detail-thumbs-slot']");
     if (thumbsSlot) thumbsSlot.innerHTML = detailThumbsMarkup(findDetails(details, model.id, color.id));
+    playThumbsWave(`${model.id}:${color.id}`);
 
     paint(model, color, "color");
   }

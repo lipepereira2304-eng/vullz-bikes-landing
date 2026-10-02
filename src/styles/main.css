@@ -983,6 +983,29 @@
     scale: 0.94;
   }
 
+  /*
+    A onda (ver playThumbsWave em detail-gallery.ts): cada miniatura sobe e
+    acende, uma depois da outra, e volta ao lugar. Espera a entrada da bike
+    (`--duration-entrance`, o mesmo tempo do crossfade de modelo) antes de
+    começar — duas coisas se mexendo juntas dividiriam a atenção, e o convite
+    se perderia na entrada do produto.
+
+    `both`: sem ele, durante a espera a miniatura ficaria no estado de repouso
+    e pularia pro primeiro quadro só quando o atraso acabasse — aqui os dois
+    coincidem (translate 0), mas fica explícito que nada deve piscar.
+  */
+  @keyframes detail-wave {
+    40% {
+      translate: 0 calc(var(--shift-sm) * -1.5);
+      opacity: 1;
+    }
+  }
+
+  [data-wave] .detail-thumb {
+    animation: detail-wave var(--duration-layout) var(--ease-inout) both;
+    animation-delay: calc(var(--duration-entrance) + var(--stagger) * 1.5 * var(--i));
+  }
+
   /* Somem no ato 1 da ficha, junto com o rótulo da cor e o botão (mesma
      regra e mesma duração de `#color-label` mais acima). */
   [data-role="detail-thumbs"] {
