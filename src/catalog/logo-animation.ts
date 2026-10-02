@@ -8,10 +8,9 @@
   (conferido na geração). Animar a logo é animar essas camadas; parada, ela é
   idêntica à imagem de sempre.
 
-  Quando toca: só na PRIMEIRA vez que o modelo aparece em cada visita
-  (decidido em create-catalog-page.ts). Nas outras, e pra quem pediu menos
-  movimento no sistema, a logo é a imagem simples com a entrada discreta de
-  sempre (`.model-logo-enter`).
+  Quando toca: TODA vez que um modelo é selecionado (decidido em
+  create-catalog-page.ts). Pra quem pediu menos movimento no sistema, a logo é
+  a imagem simples com a entrada discreta de sempre (`.model-logo-enter`).
 
   Tudo por Web Animations API (element.animate): toca uma vez, segura o
   quadro final (`fill: "both"`) e não deixa nenhuma classe/estado pra limpar.

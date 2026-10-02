@@ -115,8 +115,6 @@ export function createCatalogPage<M extends ProductModel>(config: CatalogConfig<
   */
   let lastPaintedModelId: string | null = null;
 
-  /* Modelos cuja logo já tocou a animação completa nesta visita (some ao recarregar). */
-  const playedLogos = new Set<string>();
   const prefersReducedMotion = (): boolean => window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 
   function paint(model: M, color: ProductColor, kind: StageTransition): void {
@@ -202,15 +200,14 @@ export function createCatalogPage<M extends ProductModel>(config: CatalogConfig<
       : null;
 
     /*
-      Logo animada: só na troca DE MODELO, só na primeira vez que esse modelo
-      aparece nesta visita, e nunca pra quem pediu menos movimento — nesses
-      casos fica a logo em imagem com a entrada discreta de sempre.
+      Logo animada: toca SEMPRE que um modelo é selecionado (pedido do
+      cliente — antes era só na 1ª vez da visita). Só não toca num re-render
+      do mesmo modelo, nem pra quem pediu menos movimento: aí fica a logo em
+      imagem com a entrada discreta de sempre.
     */
     const isModelChange = activeModel !== null && activeModel.id !== lastPaintedModelId;
     const logoAnimation =
-      activeModel && isModelChange && !playedLogos.has(activeModel.id) && !prefersReducedMotion()
-        ? logoAnimations[activeModel.id]
-        : undefined;
+      activeModel && isModelChange && !prefersReducedMotion() ? logoAnimations[activeModel.id] : undefined;
 
     /*
       Sem modelo escolhido: convite central, sem cores (não faz sentido mostrar
@@ -485,7 +482,6 @@ export function createCatalogPage<M extends ProductModel>(config: CatalogConfig<
     if (activeModel && activeColor) {
       paint(activeModel, activeColor, activeModel.id === lastPaintedModelId ? "color" : "model");
       if (logoAnimation) {
-        playedLogos.add(activeModel.id);
         const logoEl = document.querySelector<HTMLElement>("[data-role='model-logo']");
         if (logoEl) playLogoAnimation(logoEl, logoAnimation);
       }

@@ -240,8 +240,9 @@ testar Saira Condensed; foi revertido.
   com elástico nas pontas; setas e miniaturas deslizam até a foto.
 
 ### Logos animadas — Oregon, Slim, Street, Doble (2026-10-02)
-- Toca só na 1ª vez que o modelo aparece em cada visita (~1,5s); depois, e
-  pra quem pede menos movimento, fica a logo em imagem de sempre.
+- Toca TODA vez que um modelo é selecionado (~1,5s) — pedido do cliente em
+  2026-10-02 (antes era só na 1ª vez da visita). Pra quem pede menos
+  movimento, fica a logo em imagem de sempre.
 - Logos só existem em .webp: foram recortadas em camadas
   (`src/assets/bikes/<modelo>/logo-anim/`) que recompõem a original pixel a
   pixel. Motor: `src/catalog/logo-animation.ts`; coreografias:
