@@ -26,7 +26,7 @@ os closes **não** precisam de fundo transparente (são fotografias com borda e
 aparecem num cartão arredondado): proporção ~1,41 (ex.: 1600×1132), WebP q~86.
 Cor sem closes fica só com a foto principal, sem miniaturas.
 
-Já configurado: `pro-kids/detalhes/azul-1..3.webp`.
+Já configurado: `pro-kids/detalhes/azul-1..3.webp` e `pro-kids/detalhes/vermelho-1..3.webp`.
 
 ## Oregon (já configurado)
 

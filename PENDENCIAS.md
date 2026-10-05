@@ -233,7 +233,7 @@ testar Saira Condensed; foi revertido.
 - Sem rótulos nas fotos, a pedido. Código em `src/catalog/detail-gallery.ts`.
 - Convite ao clique ("onda"): ao aparecer, as 3 miniaturas sobem e acendem
   em sequência, uma vez por modelo+cor por visita, depois da entrada da bike.
-- Só a Pro Kids azul tem closes por enquanto. O espaço das miniaturas é
+- Só a Pro Kids (azul e vermelha) tem closes por enquanto. O espaço das miniaturas é
   sempre reservado: cor sem closes mostra "Em breve..." no lugar (a bike não
   muda de tamanho ao trocar de cor). Vale também para os elétricos.
 - No vidro, a foto acompanha o dedo/mouse ao arrastar (trilha lado a lado),
