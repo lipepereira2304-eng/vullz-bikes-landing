@@ -1032,6 +1032,84 @@
     }
   }
 
+  /*
+    BIKE EM 3D (viewer-3d.ts). O visualizador cobre o palco por cima da foto;
+    a foto só some quando o modelo acaba de carregar (.stage-3d), e o 3D entra
+    com a mesma dissolução da troca de cor — sem tela vazia no meio.
+  */
+  .viewer3d {
+    position: absolute;
+    inset: 0;
+    z-index: 5;
+  }
+
+  .viewer3d model-viewer {
+    width: 100%;
+    height: 100%;
+    background: transparent;
+    opacity: 0;
+    transition: opacity var(--duration-entrance) var(--ease-out);
+    --poster-color: transparent;
+    --progress-bar-height: 0px;
+  }
+
+  .viewer3d.is-ready model-viewer {
+    opacity: 1;
+  }
+
+  #stage-inner.stage-3d > :not(.viewer3d) {
+    opacity: 0 !important;
+    transition: opacity var(--duration-entrance) var(--ease-out);
+  }
+
+  /* Carregando: um fio fino embaixo do palco, sem cobrir a foto. */
+  .viewer3d-progress {
+    position: absolute;
+    left: 50%;
+    bottom: 6px;
+    width: min(160px, 40%);
+    height: 2px;
+    translate: -50% 0;
+    border-radius: 2px;
+    background: rgba(17, 17, 17, 0.1);
+    overflow: hidden;
+    opacity: 0;
+    transition: opacity var(--duration-base) var(--ease-out);
+  }
+
+  .viewer3d.is-loading .viewer3d-progress {
+    opacity: 1;
+  }
+
+  .viewer3d-progress i {
+    display: block;
+    height: 100%;
+    background: var(--color-vullz-black, #111);
+    transform-origin: 0 50%;
+    transform: scaleX(0);
+    transition: transform var(--duration-base) linear;
+  }
+
+  /* "Arraste para girar": aparece com o 3D e some no primeiro toque. */
+  .viewer3d-hint {
+    position: absolute;
+    left: 50%;
+    bottom: 4px;
+    translate: -50% 0;
+    margin: 0;
+    font-size: 11px;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--color-vullz-gray-500, #6b6b6b);
+    pointer-events: none;
+    opacity: 0;
+    transition: opacity var(--duration-base) var(--ease-out);
+  }
+
+  .viewer3d.is-ready:not(.touched) .viewer3d-hint {
+    opacity: 1;
+  }
+
   /* Some no ato 1 da ficha, junto com o rótulo da cor e o botão (mesma
      regra e mesma duração de `#color-label` mais acima). */
   [data-role="detail-thumbs-slot"] {

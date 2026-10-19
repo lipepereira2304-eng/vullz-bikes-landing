@@ -116,6 +116,12 @@ export interface CatalogConfig<M extends ProductModel = ProductModel> {
   */
   details?: AssetMap;
   /*
+    Modelos 3D por cor (.glb para o 3D na página, .usdz para a RA do iPhone/
+    iPad) — ver viewer-3d.ts. Opcional: sem arquivo para a cor, os botões
+    "3D"/"No seu ambiente" simplesmente não aparecem.
+  */
+  models3d?: AssetMap;
+  /*
     Logos animadas, por id de modelo (ver logo-animation.ts). Opcional e por
     modelo: quem não está aqui fica com a logo em imagem de sempre.
   */

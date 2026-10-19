@@ -29,6 +29,27 @@ Cor sem closes fica só com a foto principal, sem miniaturas.
 Já configurado: `pro-kids/detalhes/azul-1..3.webp`, `pro-kids/detalhes/vermelho-1..3.webp`,
 `love-kids/detalhes/rosa-1..3.webp` e `love-kids/detalhes/branco-1..3.webp`.
 
+## Modelos 3D e realidade aumentada
+
+Cada cor pode ter a bike em 3D numa subpasta `3d/` do modelo:
+
+```
+src/assets/bikes/<id-do-modelo>/3d/<id-da-cor>.glb    → 3D na página (computador, celular, iPad)
+src/assets/bikes/<id-do-modelo>/3d/<id-da-cor>.usdz   → "No seu ambiente" no iPhone/iPad
+```
+
+Com o `.glb` na pasta, aparece o botão **3D** ao lado de "Ficha Técnica"; no
+celular/iPad aparece também **No seu ambiente** (iPhone/iPad usam o `.usdz`;
+Android abre o próprio `.glb`). Cor sem arquivo fica só com a foto, sem botões.
+
+Os arquivos saem dos `.blend` finais pelo script
+`vullz-galeria-teste/modelos-3d/tools/exportar_todos.sh` (fora deste repositório),
+que alivia a geometria, junta as peças por material, apoia a bike no chão e
+mantém o tamanho real em metros. Meta de peso: `.glb` até ~4 MB, `.usdz` até ~15 MB.
+
+Já configurado: `love-kids/3d/rosa`, `love-kids/3d/branco`, `pro-kids/3d/azul`,
+`pro-kids/3d/vermelho` (.glb + .usdz).
+
 ## Oregon (já configurado)
 
 Pasta: `src/assets/bikes/oregon/`

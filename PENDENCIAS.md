@@ -349,3 +349,17 @@ testar Saira Condensed; foi revertido.
   nenhuma mudança visual ou de comportamento.
 - Conteúdo (fotos, logos, descrições, ficha técnica real) continua faltando —
   ver a seção de decisões abertas.
+
+### Bikes em 3D e realidade aumentada (2026-10-19)
+- Botão "3D" ao lado da Ficha Técnica: a foto vira a bike em 3D no mesmo lugar,
+  gira em todas as direções (arrastar), roda do mouse/pinça aproxima, troca de
+  cor mantém o ângulo. "Ver foto" volta. Esc também fecha.
+- Celular/iPad: botão extra "No seu ambiente" (RA em tamanho real; iPhone/iPad
+  pelo Quick Look com .usdz, Android pelo Scene Viewer com o .glb).
+- Por enquanto: Love Kids (rosa, branca) e Pro Kids (azul, vermelha). Modelos 3D
+  feitos com o Codex; arquivos e script de exportação descritos em
+  src/assets/bikes/README.md.
+- O visualizador (model-viewer, ~1 MB) só é baixado no primeiro toque em "3D".
+- A testar no aparelho real: RA no iPhone/iPad e no Android (não dá para simular
+  no computador).
+

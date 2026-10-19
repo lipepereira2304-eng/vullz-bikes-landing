@@ -47,6 +47,17 @@ const details = import.meta.glob<string>("../assets/bikes/*/detalhes/*.{jpg,jpeg
 });
 
 /*
+  3D: src/assets/bikes/<model-id>/3d/<color-id>.glb (+ .usdz para a RA do
+  iPhone/iPad). Mesma convenção — largar o arquivo basta. `?url`: só o
+  endereço; o arquivo só é baixado quando a pessoa toca em "3D" (ou na RA).
+*/
+const models3d = import.meta.glob<string>("../assets/bikes/*/3d/*.{glb,usdz}", {
+  eager: true,
+  query: "?url",
+  import: "default",
+});
+
+/*
   ÍCONES dos destaques da ficha técnica: qualquer arquivo em src/assets/icons/
   é encontrado pelo NOME (sem extensão), que é o que o campo `icon` de cada
   destaque guarda. Mesma convenção das fotos — largar o arquivo na pasta basta,
@@ -354,6 +365,7 @@ createCatalogPage<BikeModel>({
   photos,
   logos,
   details,
+  models3d,
   logoAnimations: BIKE_LOGO_ANIMATIONS,
   icons,
   emptyMessage: "Escolha um modelo ao lado para ver a bike.",

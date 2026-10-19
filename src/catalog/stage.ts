@@ -46,8 +46,10 @@ export function paintStage(container: HTMLElement, innerHtml: string, kind: Stag
   layer.innerHTML = innerHtml;
   container.appendChild(layer);
 
+  // O 3D (viewer-3d.ts) mora no mesmo palco, por cima das fotos: a troca de
+  // cor troca a foto embaixo dele, mas nunca pode levar o 3D junto.
   const previousLayers = Array.from(container.children).filter(
-    (el): el is HTMLElement => el !== layer
+    (el): el is HTMLElement => el !== layer && !el.classList.contains("viewer3d")
   );
 
   // Força o navegador a "commitar" o opacity:0 antes de animar — senão ele

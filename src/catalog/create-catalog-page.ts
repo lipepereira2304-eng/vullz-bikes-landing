@@ -17,6 +17,7 @@ import {
 } from "./markup";
 import { paintStage, type StageTransition } from "./stage";
 import type { CatalogConfig, ProductColor, ProductModel } from "./types";
+import { detectAr, find3d, mountViewer3d, openAr, view3dButtonsMarkup, type Viewer3d } from "./viewer-3d";
 
 /*
   Motor das páginas de catálogo interativo. As duas páginas (bicicletas e
@@ -67,6 +68,7 @@ export function createCatalogPage<M extends ProductModel>(config: CatalogConfig<
     grouping,
     icons = {},
     details = {},
+    models3d = {},
     logoAnimations = {},
     mobileModelBrowser = false,
     stageShadow: catalogStageShadow = true,
@@ -98,6 +100,13 @@ export function createCatalogPage<M extends ProductModel>(config: CatalogConfig<
     reapareceria do zero a cada clique, já que render() reconstrói o innerHTML.
   */
   let isFirstRender = true;
+
+  /*
+    Bike em 3D (ver viewer-3d.ts). `viewer` existe só enquanto o 3D está aberto
+    no palco. A RA é detectada uma vez: o aparelho não muda no meio da visita.
+  */
+  let viewer: Viewer3d | null = null;
+  const arMode = detectAr();
 
   function revealAttrs(revealStep: number): string {
     return isFirstRender
@@ -430,7 +439,17 @@ export function createCatalogPage<M extends ProductModel>(config: CatalogConfig<
                 <span id="color-label" class="max-w-full text-center text-xs text-vullz-gray-500">
                   ${colorLabelMarkup(activeColor)}
                 </span>
-                ${specsButtonMarkup()}
+                <!--
+                  Ações sobre a peça: ficha técnica + 3D (+ RA nos aparelhos
+                  que têm). O slot do 3D é reescrito por swapColor, porque nem
+                  toda cor tem modelo 3D.
+                -->
+                <div class="mt-1 flex flex-wrap items-center justify-center gap-2">
+                  ${specsButtonMarkup().replace("mt-1 ", "")}
+                  <span data-role="view3d-slot" class="contents">
+                    ${view3dButtonsMarkup(find3d(models3d, activeModel.id, activeColor.id), arMode, false)}
+                  </span>
+                </div>
               `
               : ""
           }
@@ -471,6 +490,7 @@ export function createCatalogPage<M extends ProductModel>(config: CatalogConfig<
     */
     specsOpen = false;
     specsRun++;
+    viewer = null;
     detailsOpen = false;
     detailsRun++;
 
@@ -521,7 +541,43 @@ export function createCatalogPage<M extends ProductModel>(config: CatalogConfig<
     if (thumbsSlot) thumbsSlot.innerHTML = detailThumbsMarkup(findDetails(details, model.id, color.id));
     playThumbsWave(`${model.id}:${color.id}`);
 
+    const model3d = find3d(models3d, model.id, color.id);
+    if (viewer && model3d) viewer.setModel(model3d);
+    else if (viewer) close3d();
+    renderView3dButtons(model, color);
+
     paint(model, color, "color");
+  }
+
+  function renderView3dButtons(model: M, color: ProductColor): void {
+    const slot = document.querySelector("[data-role='view3d-slot']");
+    if (slot) slot.innerHTML = view3dButtonsMarkup(find3d(models3d, model.id, color.id), arMode, viewer !== null);
+  }
+
+  /*
+    Abrir o 3D monta o visualizador por cima da foto; a foto só esmaece quando
+    o modelo termina de carregar (classe .stage-3d), então nunca há tela vazia.
+    Fechar devolve a foto na hora.
+  */
+  function open3d(): void {
+    const model = models.find((m) => m.id === state.modelId);
+    const color = model?.colors.find((c) => c.id === state.colorId) ?? model?.colors[0];
+    const stage = document.querySelector<HTMLElement>("#stage-inner");
+    if (!model || !color || !stage || viewer) return;
+    const model3d = find3d(models3d, model.id, color.id);
+    if (!model3d) return;
+    viewer = mountViewer3d(stage, model3d, `${model.name} em 3D`, () => stage.classList.add("stage-3d"));
+    renderView3dButtons(model, color);
+  }
+
+  function close3d(): void {
+    if (!viewer) return;
+    viewer.destroy();
+    viewer = null;
+    document.querySelector("#stage-inner")?.classList.remove("stage-3d");
+    const model = models.find((m) => m.id === state.modelId);
+    const color = model?.colors.find((c) => c.id === state.colorId) ?? model?.colors[0];
+    if (model && color) renderView3dButtons(model, color);
   }
 
   /*
@@ -624,6 +680,7 @@ export function createCatalogPage<M extends ProductModel>(config: CatalogConfig<
 
   async function setSpecsOpen(open: boolean): Promise<void> {
     if (open === specsOpen) return;
+    if (open) close3d();
     specsOpen = open;
     const run = ++specsRun;
 
@@ -835,6 +892,20 @@ export function createCatalogPage<M extends ProductModel>(config: CatalogConfig<
         return;
       }
 
+      if (target.closest("[data-role='view-3d']")) {
+        if (viewer) close3d();
+        else open3d();
+        return;
+      }
+
+      if (target.closest("[data-role='view-ar']")) {
+        const model = models.find((m) => m.id === state.modelId);
+        const color = model?.colors.find((c) => c.id === state.colorId) ?? model?.colors[0];
+        const model3d = model && color ? find3d(models3d, model.id, color.id) : undefined;
+        if (model && model3d) openAr(arMode, model3d, `${model.name} Vullz`);
+        return;
+      }
+
       if (target.closest("[data-role='specs-toggle']")) {
         void setSpecsOpen(true);
         return;
@@ -875,6 +946,7 @@ export function createCatalogPage<M extends ProductModel>(config: CatalogConfig<
     */
     document.addEventListener("keydown", (event) => {
       if (event.key === "Escape" && specsOpen) void setSpecsOpen(false);
+      else if (event.key === "Escape" && viewer) close3d();
     });
   }
 
