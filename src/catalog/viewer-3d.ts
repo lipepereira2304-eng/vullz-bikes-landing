@@ -6,6 +6,7 @@ import type { AssetMap } from "./types";
   ARQUIVOS: mesma convenção de nome das fotos — por cor, numa subpasta `3d/`:
     src/assets/bikes/<model-id>/3d/<color-id>.glb   → 3D na página (todas as telas)
     src/assets/bikes/<model-id>/3d/<color-id>.usdz  → RA no iPhone/iPad (Quick Look)
+    src/assets/bikes/<model-id>/3d/<color-id>.android.glb → RA no Android (Scene Viewer)
   Larga os dois arquivos com o nome certo e os botões aparecem sozinhos para
   aquela cor. Cor sem .glb fica só com a foto, sem botão nenhum (nada de
   "Em breve" aqui: não é falta de conteúdo, é um extra).
@@ -22,25 +23,31 @@ import type { AssetMap } from "./types";
 export interface Model3d {
   glb: string;
   usdz?: string;
+  /* o .glb da página usa compressão (Draco) e imagens WebP, que o Scene Viewer
+     do Google não garante abrir: o Android ganha um .glb "puro" só para a RA */
+  androidGlb?: string;
 }
 
 export function find3d(models3d: AssetMap, modelId: string, colorId: string): Model3d | undefined {
   let glb: string | undefined;
   let usdz: string | undefined;
+  let androidGlb: string | undefined;
   for (const path in models3d) {
     const s = path.split("/");
     if (s[s.length - 3] !== modelId || s[s.length - 2] !== "3d") continue;
     const file = s[s.length - 1];
     if (file === `${colorId}.glb`) glb = models3d[path];
     if (file === `${colorId}.usdz`) usdz = models3d[path];
+    if (file === `${colorId}.android.glb`) androidGlb = models3d[path];
   }
-  return glb ? { glb, usdz } : undefined;
+  return glb ? { glb, usdz, androidGlb } : undefined;
 }
 
 /*
   Qual RA o aparelho sabe abrir. iPhone/iPad respondem a <a rel="ar"> (Quick
   Look, nativo do sistema — inclusive o iPad que se apresenta como Mac); Android
-  abre o Scene Viewer do Google com o próprio .glb. Computador: nenhuma, e o
+  abre o Scene Viewer do Google (com o .android.glb, ou o .glb da página
+  se a cor ainda não tiver o dele). Computador: nenhuma, e o
   botão nem aparece.
 */
 export type ArMode = "quick-look" | "scene-viewer" | null;
@@ -69,7 +76,7 @@ export function openAr(mode: ArMode, model: Model3d, title: string): void {
     return;
   }
   if (mode === "scene-viewer") {
-    const file = new URL(model.glb, location.href).href;
+    const file = new URL(model.androidGlb ?? model.glb, location.href).href;
     const params = `file=${encodeURIComponent(file)}&mode=ar_preferred&resizable=false&title=${encodeURIComponent(title)}`;
     location.href =
       `intent://arvr.google.com/scene-viewer/1.0?${params}` +
