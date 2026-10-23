@@ -1,0 +1,1588 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8" />
+<script type="importmap">{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/" } }</script>
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Vullz Bikes | Bicicletas e elétricos</title>
+<meta name="description" content="Vullz Bikes: bicicletas e elétricos para o seu estilo, o seu ritmo e o seu caminho. Conheça a linha de produção e os catálogos interativos." />
+<meta name="theme-color" content="#000000" />
+<link rel="canonical" href="/" />
+<meta property="og:type" content="website" /><meta property="og:site_name" content="Vullz Bikes" /><meta property="og:title" content="Vullz Bikes" />
+<meta property="og:description" content="Seu estilo. Seu ritmo. Seu caminho." /><meta property="og:url" content="https://vullzbikes.com.br/" />
+<meta property="og:image" content="https://vullzbikes.com.br/og-image.png" /><meta property="og:locale" content="pt_BR" />
+<link rel="icon" href="/favicon.ico" sizes="32x32" /><link rel="icon" type="image/svg+xml" href="/favicon.svg?v=2" />
+<link rel="apple-touch-icon" href="/apple-touch-icon.png?v=2" /><link rel="manifest" href="/manifest.webmanifest" />
+<style>
+  @font-face { font-family: "TT Firs Neue"; src: url(fonts/tt-firs-neue-regular.woff2) format("woff2"); font-weight: 400; font-display: block; }
+  @font-face { font-family: "TT Firs Neue"; src: url(fonts/tt-firs-neue-medium.woff2) format("woff2"); font-weight: 500 800; font-display: block; }
+
+  :root {
+    --ink: #0a0a0b;
+    --ink-2: #141416;
+    --paper: #ffffff;
+    --frost: #f5f5f7;
+    --line-dark: rgba(255,255,255,.1);
+    --line-light: rgba(10,10,11,.08);
+    --mute-dark: rgba(255,255,255,.62);
+    --mute-light: #6e6e73;
+    --quiet-light: #8a8a8f;     /* menor cinza que ainda passa 3:1 (texto grande) no branco */
+    --yellow: #f5c518;
+    --glide: cubic-bezier(0.16, 1, 0.3, 1);   /* chegada confiante (expo-out) */
+    --out: cubic-bezier(0.33, 1, 0.68, 1);
+    --font: "TT Firs Neue", -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+  }
+  * { box-sizing: border-box; }
+  html { background: var(--paper); scrollbar-width: thin; scrollbar-color: rgba(10,10,11,.28) transparent; }
+  body { margin: 0; background: var(--paper); color: var(--ink); font-family: var(--font); -webkit-font-smoothing: antialiased; overflow-x: hidden; }
+  a { color: inherit; text-decoration: none; }
+  button { font: inherit; color: inherit; background: none; border: 0; padding: 0; cursor: pointer; }
+  img { display: block; user-select: none; -webkit-user-drag: none; }
+
+  /* superfícies do navegador também são design */
+  ::selection { background: var(--yellow); color: var(--ink); }
+  :focus-visible { outline: 2px solid var(--yellow); outline-offset: 3px; border-radius: 12px; }
+  ::-webkit-scrollbar { width: 10px; }
+  ::-webkit-scrollbar-thumb { background: rgba(10,10,11,.22); border-radius: 99px; border: 3px solid transparent; background-clip: padding-box; }
+
+  /* resposta no TOQUE (pointer-down), não ao soltar */
+  .btn:active, .chip:active, .sw:active, .nav .cta:active { transform: scale(.97); transition-duration: 100ms; }
+
+  /* ================================================================
+     NAV — material translúcido; tinta segue a seção sob ela
+     ================================================================ */
+  .nav { position: fixed; inset: 0 0 auto; z-index: 40; height: 64px; display: flex; align-items: center; justify-content: space-between; padding: 0 40px;
+    background: rgba(10,10,11,.6); backdrop-filter: saturate(180%) blur(20px); -webkit-backdrop-filter: saturate(180%) blur(20px); color: #fff;
+    transition: background-color 500ms var(--glide), color 500ms var(--glide), opacity 500ms var(--out), transform 600ms var(--glide); }
+  /* borda de rolagem em vez de linha dura: some quando não há conteúdo por baixo */
+  .nav::after { content: ""; position: absolute; left: 0; right: 0; bottom: -1px; height: 1px; background: var(--line-dark); opacity: var(--edge, 0); transition: opacity 300ms var(--out); }
+  .nav .brand { position: relative; height: 26px; width: 51px; }
+  .nav .brand img { position: absolute; inset: 0; height: 100%; width: auto; transition: opacity 500ms var(--glide); }
+  .nav .brand .on-light { opacity: 0; }
+  .nav ul { display: flex; gap: 36px; list-style: none; margin: 0; padding: 0; font-size: 13px; letter-spacing: .01em; }
+  .nav ul a { opacity: .78; transition: opacity 150ms var(--out); }
+  .nav ul a:hover { opacity: 1; }
+  .nav .cta { font-size: 13px; font-weight: 500; padding: 9px 16px; border-radius: 999px; background: #fff; color: var(--ink); transition: background-color 500ms var(--glide), color 500ms var(--glide), transform 150ms var(--out); }
+  .nav.light { background: rgba(255,255,255,.72); color: var(--ink); }
+  .nav.light::after { background: var(--line-light); }
+  .nav.light .brand .on-dark { opacity: 0; }
+  .nav.light .brand .on-light { opacity: 1; }
+  .nav.light .cta { background: var(--ink); color: #fff; }
+
+  /* ================================================================
+     0 · ABERTURA — close da Oregon preta; uma luz desce sozinha pelo cano,
+     sobre o VULLZ; os catálogos ficam no espaço preto de cima, à esquerda
+     ================================================================ */
+  .abertura { position: relative; height: 100vh; height: 100svh; min-height: 560px; overflow: hidden; background: #000; color: #fff; isolation: isolate; }
+  .abertura .foto, .abertura .reflexo { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .abertura .foto { object-fit: cover; object-position: 50% 50%; }
+  /* o reflexo usa o mesmo enquadramento da foto (viewBox da foto + "slice" = object-fit: cover) */
+  .abertura .reflexo { mix-blend-mode: screen; pointer-events: none; }
+  /* um ponto de luz pequeno desce bem devagar pela faixa onde a luz bate no cano (sobre o VULLZ);
+     chega ao fim, apaga e recomeça do topo */
+  .abertura .ponto { animation: desce 18s linear infinite; }
+  /* cintila: os raios crescem e encolhem e giram um pouco, como o sol batendo no metal */
+  .abertura .estrela { transform-origin: 0 0; animation: cintila 2.6s ease-in-out infinite; }
+  @keyframes cintila {
+    0%, 100% { transform: scale(.9) rotate(-3deg); opacity: .85; }
+    50% { transform: scale(1.06) rotate(3deg); opacity: 1; }
+  }
+  @keyframes desce {
+    0% { transform: translateX(0); opacity: 0; }
+    7% { opacity: 1; }
+    92% { opacity: 1; }
+    100% { transform: translateX(935px); opacity: 0; }
+  }
+  /* frase e catálogos no preto à esquerda; os botões terminam um pouco em cima do pneu (o logo fica na faixa) */
+  /* posição medida na própria foto (1600×940, cover): --u = 1 pixel da foto na tela.
+     O preto livre fica à esquerda da suspensão (x < ~440) e acima do pneu, que sobe em arco até y ~490 perto da suspensão */
+  .abertura { container-type: size; --u: max(100cqw / 1600, 100cqh / 940); --fx: calc(50cqw - 800 * var(--u)); --fy: calc(50cqh - 470 * var(--u)); }
+  .abertura .marca { position: absolute; z-index: 2; left: max(24px, calc(var(--fx) + 70 * var(--u))); top: 96px;   /* perto da faixa de cima */
+    width: calc(var(--fx) + 410 * var(--u) - max(24px, calc(var(--fx) + 70 * var(--u)))); }
+  .abertura .marca h1 span { display: block; }   /* uma frase por linha */
+  .abertura .marca h1 { margin: 0; font-size: clamp(20px, calc(31 * var(--u)), 34px); font-weight: 500; line-height: 1.15; letter-spacing: -.02em; text-wrap: balance; }
+  .abertura .marca p { margin: 16px 0 0; max-width: 19ch; font-size: clamp(15px, 1.2vw, 19px); line-height: 1.25; letter-spacing: -.015em; color: rgba(255,255,255,.82); text-wrap: balance;
+    animation: abSurge 1s var(--glide) .8s backwards; }
+  /* os dois catálogos interativos logo abaixo da frase */
+  .abertura .marca .options { display: grid; grid-template-columns: min(290px, 100%); gap: 12px; margin-top: 16px; }
+  /* botões no laranja do logo da Vullz */
+  .abertura .marca .opt { padding: 16px 20px; border-radius: 18px; background: #f2a412; color: #0a0a0b; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
+  .abertura .marca .opt .t { font-size: 21px; font-weight: 600; }
+  .abertura .marca .opt .go { width: 36px; height: 36px; right: 14px; margin-top: -18px; background: #0a0a0b; color: #fff; }
+  .abertura .marca a.opt:hover { background: #ffb522; box-shadow: none; }
+  .abertura .marca a.opt:hover .go { background: #0a0a0b; color: #fff; }
+  .abertura .marca p.convite { margin-top: 26px; font-size: clamp(13px, .95vw, 15px); color: rgba(255,255,255,.6); animation-delay: .9s; }
+  .abertura .marca .opt:nth-child(1) { animation-delay: 1s; }
+  .abertura .marca .opt:nth-child(2) { animation-delay: 1.12s; }
+  @media (max-width: 760px) {
+    .abertura .marca { left: 20px; right: 20px; width: auto; top: 88px; bottom: auto; }
+    /* no celular não sobra preto ao lado da bike: a foto desce e o texto fica numa faixa preta em cima */
+    .abertura .foto, .abertura .reflexo { top: 40%; height: 60%; }
+    .abertura .foto { -webkit-mask-image: linear-gradient(transparent, #000 22%); mask-image: linear-gradient(transparent, #000 22%); }
+    .abertura .marca h1 { font-size: 22px; }
+    .abertura .marca p { margin-top: 12px; font-size: 15px; }
+    .abertura .marca .options { grid-template-columns: 220px; gap: 8px; margin-top: 10px; }
+    .abertura .marca p.convite { margin-top: 18px; font-size: 13px; }
+    .abertura .marca .opt { padding: 11px 44px 11px 12px; }
+    .abertura .marca .opt .s { font-size: 11px; white-space: nowrap; }
+  }
+  @media (prefers-reduced-motion: reduce) { .abertura .marca p { animation: none; } }
+  /* variante ?abertura=3d (js/abertura3d.js): a bike em 3D no lugar da foto, câmera girando */
+  .abertura .ab3d-cena { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; transition: opacity 1.4s var(--out); }
+  .abertura.ab3d .foto, .abertura.ab3d .reflexo { display: none; }
+  .abertura.ab3d-pronto .ab3d-cena { opacity: 1; }
+  .abertura .opt { padding: 13px 16px; border-radius: 16px; gap: 2px; }
+  .abertura .opt .t { font-size: 18px; }
+  .abertura .opt .s { font-size: 12px; }
+  .abertura .opt .go { width: 30px; height: 30px; right: 12px; margin-top: -15px; }
+  .abertura .opt .go svg { width: 13px; height: 13px; }
+  .abertura .pdf-actions { margin-top: 8px; }
+  .abertura .mini { height: 30px; padding: 0 12px; font-size: 12px; }
+  /* cartões de vidro escuro: somem no preto da foto, sem caixa branca */
+  .abertura .opt { background: rgba(255,255,255,.06); color: #fff; box-shadow: inset 0 0 0 1px rgba(255,255,255,.12);
+    backdrop-filter: blur(18px) saturate(140%); -webkit-backdrop-filter: blur(18px) saturate(140%); }
+  .abertura a.opt:hover { box-shadow: inset 0 0 0 1px rgba(255,255,255,.28); }
+  .abertura .opt .s { color: rgba(255,255,255,.6); }
+  .abertura .opt .go { background: #fff; color: var(--ink); }
+  .abertura a.opt:hover .go { background: var(--yellow); }
+  .abertura .mini { border-color: rgba(255,255,255,.22); color: #fff; }
+  .abertura .mini:hover { border-color: #fff; }
+  .abertura .foto { animation: abFoto 1.6s var(--out) both; }
+  .abertura .reflexo { animation: abSurge 1.2s var(--out) 1.4s both; }
+  .abertura h1 { animation: abSurge 1s var(--glide) .55s backwards; }
+  body:has(.abertura) .nav { animation: abMenu .9s var(--out) 1.1s backwards; }
+  @keyframes abMenu { from { opacity: 0; } to { opacity: 1; } }
+  .abertura .opt { animation: abSurge 1s var(--glide) backwards; }   /* backwards: depois de entrar, o toque (scale) volta a funcionar */
+  .abertura .opt:nth-child(1) { animation-delay: .75s; }
+  .abertura .opt:nth-child(2) { animation-delay: .87s; }
+  .abertura .opt:nth-child(3) { animation-delay: .99s; }
+  @keyframes abFoto { from { opacity: 0; transform: scale(1.04); } to { opacity: 1; transform: none; } }
+  @keyframes abSurge { from { opacity: 0; transform: translateY(14px); } to { opacity: 1; transform: none; } }
+  @media (prefers-reduced-motion: reduce) { .abertura .foto, .abertura .reflexo, .abertura h1, .abertura .opt, body:has(.abertura) .nav { animation: none; } }
+  @media (prefers-reduced-motion: reduce) { .abertura .ponto, .abertura .estrela { animation: none; } .abertura .ponto { opacity: 0; } }
+  @media (max-width: 760px) {
+  }
+  /* tema escuro: o topo da bike 3D emenda no preto da abertura */
+  /* (section.hero: vence as regras claras originais, que vêm depois no arquivo) */
+  section.hero { color: #fff; }
+  section.hero .stage { background: #000; }
+  section.hero .tour { background: rgba(28,28,30,.6); color: #fff; box-shadow: inset 0 0 0 1px rgba(255,255,255,.1), 0 24px 50px -26px rgba(0,0,0,.7); }
+  section.hero .tour .model, section.hero .picker .model { color: rgba(255,255,255,.55); }
+  section.hero .tour .ring, section.hero .sw::after { border-color: #fff; }
+  section.hero .sw i { box-shadow: inset 0 0 0 1px rgba(255,255,255,.2); }
+  section.hero .scrollcue { border-color: rgba(255,255,255,.3); }
+  section.hero .scrollcue::after { background: #fff; }
+  /* a seção da bike 3D com troca de cores saiu do site (2026-10-23): a abertura emenda na linha de produção */
+  section.hero { display: none; }
+  /* os catálogos agora ficam na abertura: o topo da bike 3D mostra só a bike e as cores */
+  .hero .copy { display: none; }
+
+  /* ================================================================
+     1 · HERO — o momento autoral: a bike chega, você escolhe a cor,
+     e a rolagem aproxima a câmera até o quadro
+     ================================================================ */
+  /* altura real é calculada no script (zoom + uma faixa de 220px por cor);
+     este valor só vale até o script rodar */
+  .hero { position: relative; height: 360vh; }
+  .hero .stage { position: sticky; top: 0; height: 100vh; overflow: hidden; isolation: isolate; background: #fff; }
+
+  /* fundo branco puro, igual ao da foto: a bike assenta sem borda nenhuma.
+     Sem will-change de propósito: com ele o navegador congela um bitmap e só
+     o amplia no zoom (fica borrado). */
+  .hero .bike-wrap { position: absolute; left: 64%; top: 50%; width: min(60vw, 1060px); aspect-ratio: 3344 / 1994; translate: -50% -50%; }
+  .hero .bike { position: absolute; inset: 0; }
+  .hero .bike img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; opacity: 0; transition: opacity 260ms var(--out); }
+  .hero .bike img.on { opacity: 1; }
+  /* no passeio a cor VIRA (não vai sendo pintada): dissolve curto ao cruzar cada faixa */
+  .hero .bike.tour-on img { transition: opacity 180ms var(--out); }
+
+  /* bike em 3D (js/hero3d.js): desenhada exatamente onde a foto está; a foto sai quando o 3D está pronto */
+  .hero .hero3d { position: absolute; inset: 0; width: 100%; height: 100%; pointer-events: none; opacity: 0; }
+  .hero.has3d .hero3d { opacity: 1; }
+  .hero .bike { display: none; }   /* a foto não aparece mais: só serve de medida para a câmera (#bikeWrap) */
+
+  /* o "quadrinho" do passeio de cores, sobre a bike já no zoom */
+  .tour { position: absolute; right: 56px; top: 50%; translate: 0 -50%; width: 296px; padding: 24px 24px 22px; border-radius: 24px; opacity: 0; pointer-events: none;
+    background: rgba(255,255,255,.78); backdrop-filter: blur(22px) saturate(180%); -webkit-backdrop-filter: blur(22px) saturate(180%);
+    box-shadow: 0 0 0 1px rgba(10,10,11,.07), 0 24px 50px -26px rgba(10,10,11,.35); }
+  .tour.live { pointer-events: auto; }
+  .tour .model { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--mute-light); }
+  .tour .names { position: relative; height: 30px; margin-top: 8px; }
+  .tour .names span { position: absolute; left: 0; top: 0; font-size: 24px; font-weight: 500; letter-spacing: -.02em; white-space: nowrap; opacity: 0; transform: translateY(8px); transition: opacity 200ms var(--out), transform 300ms var(--glide); }
+  .tour .names span.on { opacity: 1; transform: none; }
+  .tour .sws { position: relative; display: flex; gap: 10px; margin-top: 18px; }
+  .tour .ring { position: absolute; left: 0; top: 0; width: 30px; height: 30px; border-radius: 99px; border: 1.5px solid var(--ink); pointer-events: none; transition: transform 320ms var(--glide); }
+
+  .hero .copy { position: absolute; left: 56px; top: 50%; translate: 0 -50%; width: min(340px, 26vw); }
+  .hero h1 { margin: 0; font-weight: 500; font-size: clamp(36px, 3.2vw, 50px); line-height: 1; letter-spacing: -.035em; text-wrap: balance; }
+  .hero .options { display: grid; gap: 12px; margin-top: 28px; }
+  .opt { position: relative; display: flex; flex-direction: column; gap: 4px; padding: 20px 22px; border-radius: 22px; background: #fff;
+    box-shadow: 0 0 0 1px rgba(10,10,11,.08), 0 14px 30px -22px rgba(10,10,11,.3);
+    transition: box-shadow 400ms var(--glide), transform 150ms var(--out); }
+  .opt .t { font-size: 24px; font-weight: 500; letter-spacing: -.02em; line-height: 1.1; }
+  .opt .s { font-size: 14px; color: var(--mute-light); }
+  a.opt:hover { box-shadow: 0 0 0 1px rgba(10,10,11,.1), 0 24px 44px -20px rgba(10,10,11,.32); }
+  a.opt:active { transform: scale(.98); transition-duration: 100ms; }
+  .opt .go { position: absolute; right: 18px; top: 50%; margin-top: -20px; width: 40px; height: 40px; border-radius: 99px; display: grid; place-items: center; background: var(--ink); color: #fff; transition: background-color 200ms var(--out), color 200ms var(--out); }
+  .opt .go svg { transition: transform 300ms var(--glide); }
+  a.opt:hover .go { background: var(--yellow); color: var(--ink); }
+  a.opt:hover .go svg { transform: translateX(2px); }
+  .opt .pdf-actions { display: flex; gap: 6px; margin-top: 12px; }
+  .mini { position: relative; display: inline-flex; align-items: center; gap: 6px; height: 36px; padding: 0 14px; border-radius: 99px; font-size: 13px; font-weight: 500; white-space: nowrap;
+    border: 1px solid rgba(10,10,11,.14); transition: border-color 200ms var(--out), transform 150ms var(--out); }
+  .mini:hover { border-color: var(--ink); }
+  .mini:active { transform: scale(.97); transition-duration: 100ms; }
+  .mini.dl .fill { background: rgba(245,197,24,.45); }
+
+  .btn { position: relative; display: inline-flex; align-items: center; gap: 10px; height: 52px; padding: 0 26px; border-radius: 999px; font-size: 15px; font-weight: 500; white-space: nowrap; flex-shrink: 0; overflow: hidden; isolation: isolate; transition: transform 150ms var(--out); }
+  .btn svg { transition: transform 300ms var(--glide); }
+  .btn:hover svg { transform: translateX(4px); }
+  .btn.primary { background: var(--yellow); color: var(--ink); }
+  .btn.primary::before { content: ""; position: absolute; inset: 0; z-index: -1; background: var(--ink); transform: translateY(101%); transition: transform 400ms var(--glide); border-radius: inherit; }
+  .btn.primary:hover { color: #fff; transition: color 250ms var(--out), transform 150ms var(--out); }
+  .btn.primary:hover::before { transform: none; }
+  .btn.ghost { border: 1px solid rgba(10,10,11,.16); }
+  .btn.ghost:hover { border-color: rgba(10,10,11,.5); }
+  .btn.dark { background: var(--ink); color: #fff; }
+
+  .hero .picker { position: absolute; right: 56px; bottom: 64px; text-align: right; }
+  .hero .picker .model { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--mute-light); }
+  .hero .picker .cname { margin-top: 6px; font-size: 22px; letter-spacing: -.01em; height: 28px; overflow: hidden; }
+  .hero .picker .cname span { display: block; transition: transform 500ms var(--glide), opacity 400ms var(--glide); }
+  .hero .swatches { display: flex; gap: 10px; margin-top: 16px; justify-content: flex-end; }
+  .hero .sw { position: relative; width: 30px; height: 30px; border-radius: 99px; transition: transform 150ms var(--out); }
+  .hero .sw i { position: absolute; inset: 4px; border-radius: 99px; box-shadow: inset 0 0 0 1px rgba(10,10,11,.12); }
+  .hero .sw::after { content: ""; position: absolute; inset: 0; border-radius: 99px; border: 1.5px solid var(--ink); opacity: 0; transform: scale(.7); transition: opacity 300ms var(--glide), transform 400ms var(--glide); }
+  .hero .sw[aria-pressed="true"]::after { opacity: 1; transform: none; }
+
+
+  .hero .scrollcue { position: absolute; left: 50%; bottom: 26px; translate: -50% 0; width: 22px; height: 34px; border: 1.5px solid rgba(10,10,11,.25); border-radius: 99px; }
+  .hero .scrollcue::after { content: ""; position: absolute; left: 50%; top: 7px; width: 3px; height: 7px; margin-left: -1.5px; border-radius: 9px; background: var(--ink); animation: cue 1.8s var(--glide) infinite; }
+  @keyframes cue { 0% { transform: translateY(0); opacity: 1; } 70% { transform: translateY(10px); opacity: 0; } 100% { opacity: 0; } }
+
+  /* ================================================================
+     2 · LINHA — rola com a página OU arrasta com mouse/dedo
+     ================================================================ */
+  .lineup { position: relative; background: var(--frost); }
+  .lineup .pin { position: sticky; top: 0; height: 100vh; overflow: hidden; display: flex; flex-direction: column; }
+  .lineup .head { display: flex; justify-content: space-between; align-items: flex-end; gap: 40px; padding: 112px 56px 0; }
+  .lineup .head h2 { margin: 0; font-weight: 500; font-size: clamp(44px, 5.2vw, 84px); letter-spacing: -.04em; line-height: .95; }
+  .lineup .head h2 em { font-style: normal; color: var(--quiet-light); }
+  .lineup .head p { margin: 0 0 10px; font-size: 17px; color: var(--mute-light); max-width: 320px; line-height: 1.5; text-align: right; }
+  .lineup .track { flex: 1; display: flex; align-items: center; padding: 0 0 0 56px; cursor: grab; touch-action: pan-y; }
+  .lineup .track.dragging { cursor: grabbing; }
+  .lineup .track.dragging .card { pointer-events: none; }
+  .card { position: relative; flex: 0 0 auto; width: 38vw; max-width: 640px; height: 58vh; margin-right: 1.6vw; border-radius: 32px; background: #fff; box-shadow: 0 0 0 1px rgba(10,10,11,.04);
+    display: flex; flex-direction: column; padding: 34px 36px 30px; overflow: hidden; user-select: none; transition: box-shadow 500ms var(--glide); }
+  .card:hover { box-shadow: 0 30px 60px -30px rgba(10,10,11,.22), 0 0 0 1px rgba(10,10,11,.05); }
+  .card .top { display: flex; justify-content: space-between; align-items: flex-start; }
+  .card .mlogo { height: clamp(30px, 3vw, 48px); width: auto; max-width: 70%; object-fit: contain; object-position: left center; }
+  .card .aro { font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--mute-light); padding-top: 6px; white-space: nowrap; }
+  .card .ph { flex: 1; min-height: 0; display: flex; align-items: center; justify-content: center; }
+  .card .ph img { width: 100%; height: 100%; object-fit: contain; filter: drop-shadow(0 18px 22px rgba(17,17,17,.14)); transition: transform 700ms var(--glide); }
+  .card:hover .ph img { transform: translateX(10px) scale(1.03); }
+  .card .bottom { display: flex; justify-content: space-between; align-items: center; font-size: 15px; }
+  .card .bottom span:first-child { color: var(--mute-light); }
+  .card .go { width: 44px; height: 44px; border-radius: 99px; display: grid; place-items: center; background: var(--ink); color: #fff; transition: transform 400ms var(--glide), background-color 200ms var(--out), color 200ms var(--out); }
+  .card:hover .go { background: var(--yellow); color: var(--ink); transform: rotate(-45deg); }
+  .card.end { background: var(--ink); color: #fff; justify-content: space-between; }
+  .card.end h3 { margin: 0; font-size: clamp(36px, 3.6vw, 60px); font-weight: 500; letter-spacing: -.04em; line-height: .98; }
+  .card.end p { margin: 14px 0 0; color: var(--mute-dark); font-size: 17px; line-height: 1.5; max-width: 340px; }
+  .card.end .btn.primary:hover { color: var(--ink); }
+  .card.end .btn.primary::before { background: #fff; }
+  .lineup .rail { display: flex; align-items: center; gap: 22px; padding: 0 56px 40px; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--mute-light); }
+  .lineup .rail button { font-size: inherit; letter-spacing: inherit; text-transform: inherit; color: inherit; transition: color 300ms var(--glide); }
+  .lineup .rail button:hover { color: var(--ink); }
+  .lineup .rail button.on { color: var(--ink); }
+  .lineup .rail .bar { flex: 1; height: 2px; background: #e2e2e4; border-radius: 9px; overflow: hidden; }
+  .lineup .rail .bar i { display: block; height: 100%; width: 100%; background: var(--ink); transform-origin: 0 50%; transform: scaleX(0); }
+  .lineup .hint { display: inline-flex; align-items: center; gap: 8px; text-transform: none; letter-spacing: 0; font-size: 13px; color: var(--mute-light); }
+
+  /* ================================================================
+     3 · ELÉTRICOS — texto fixo, produto troca com um "foco" de lente
+     ================================================================ */
+  .ev { position: relative; background: var(--paper); height: 420vh; }
+  .ev .pin { position: sticky; top: 0; height: 100vh; display: grid; grid-template-columns: 0.9fr 1.1fr; align-items: center; padding: 64px 56px 0; }
+  .ev h2 { margin: 0; font-weight: 500; font-size: clamp(48px, 5.4vw, 88px); letter-spacing: -.04em; line-height: .94; }
+  .ev .sub { margin: 18px 0 0; font-size: 17px; line-height: 1.5; color: var(--mute-light); max-width: 380px; }
+  .ev ol { list-style: none; margin: 40px 0 0; padding: 0; }
+  .ev li { border-top: 1px solid var(--line-light); }
+  .ev li button { display: block; width: 100%; text-align: left; padding: 14px 0; font-size: 24px; letter-spacing: -.02em; color: var(--quiet-light); transition: color 400ms var(--glide), transform 500ms var(--glide); }
+  .ev li button:hover { color: var(--mute-light); }
+  .ev li.on button { color: var(--ink); transform: translateX(10px); }
+  .ev .more { margin-top: 36px; }
+  .ev .visual { position: relative; height: 78vh; }
+  /* troca de produto como uma lente que refoca: some desfocando, chega focando */
+  .ev .visual img { position: absolute; inset: 0; width: 100%; height: 100%; object-fit: contain; opacity: 0; filter: blur(14px); transform: scale(.98); transition: opacity 600ms var(--glide), filter 600ms var(--glide), transform 800ms var(--glide); }
+  .ev .visual img.on { opacity: 1; filter: blur(0); transform: none; }
+
+  /* ================================================================
+     4 · FRASE — as palavras acendem conforme a rolagem
+     ================================================================ */
+  .statement { position: relative; height: 220vh; background: var(--ink); color: #fff; }
+  .statement .pin { position: sticky; top: 0; height: 100vh; display: grid; place-items: center; padding: 0 9vw; }
+  .statement p { margin: 0; font-weight: 500; font-size: clamp(40px, 5vw, 80px); letter-spacing: -.04em; line-height: 1.04; text-align: center; max-width: 1280px; text-wrap: balance; }
+  .statement p span { color: rgba(255,255,255,.2); transition: color 250ms linear; }
+  .statement p span.lit { color: #fff; }
+  .statement p span.y.lit { color: var(--yellow); }
+
+  /* ================================================================
+     5 · HUB — o que a home sempre precisou resolver
+     ================================================================ */
+  .hub { background: var(--ink); color: #fff; padding: 40px 56px 0; }
+  .hub .grid { display: grid; grid-template-columns: 1.25fr 1fr; gap: 18px; }
+  .tile { position: relative; border-radius: 32px; background: var(--ink-2); border: 1px solid var(--line-dark); padding: 40px; overflow: hidden; isolation: isolate; transition: border-color 400ms var(--glide); }
+  .tile:hover { border-color: rgba(255,255,255,.2); }
+  .tile h3 { margin: 0; font-size: clamp(32px, 3vw, 46px); font-weight: 500; letter-spacing: -.04em; line-height: 1; }
+  .tile p { margin: 14px 0 0; color: var(--mute-dark); font-size: 16px; line-height: 1.5; max-width: 380px; }
+  .tile .row { display: flex; gap: 10px; margin-top: 28px; flex-wrap: wrap; }
+  .tile.pdf { grid-row: span 2; min-height: 520px; display: flex; flex-direction: column; justify-content: space-between; }
+  .tile.pdf .book { position: absolute; right: -40px; bottom: -60px; width: 340px; height: 440px; perspective: 1200px; z-index: -1; }
+  .tile.pdf .page { position: absolute; inset: 0; border-radius: 14px; background: #f6f6f4; box-shadow: 0 30px 60px -20px rgba(0,0,0,.6); transform-origin: 0 50%; transition: transform 800ms var(--glide); overflow: hidden; }
+  .tile.pdf .page:nth-child(1) { transform: rotateY(-24deg) rotateZ(-6deg) translateX(40px); background: #e9e9e6; }
+  .tile.pdf .page:nth-child(2) { transform: rotateY(-24deg) rotateZ(-3deg) translateX(20px); background: #f0f0ed; }
+  .tile.pdf .page:nth-child(3) { transform: rotateY(-24deg); }
+  .tile.pdf:hover .page:nth-child(1) { transform: rotateY(-28deg) rotateZ(-12deg) translateX(-30px) translateY(-10px); }
+  .tile.pdf:hover .page:nth-child(2) { transform: rotateY(-26deg) rotateZ(-6deg) translateX(-6px); }
+  .tile.pdf:hover .page:nth-child(3) { transform: rotateY(-20deg) rotateZ(2deg) translateX(10px); }
+  .tile.pdf .page img { position: absolute; left: 8%; bottom: 14%; width: 84%; }
+  .tile.pdf .page .plogo { position: absolute; left: 10%; top: 9%; width: 22%; }
+  .tile.pdf .page .ptitle { position: absolute; left: 10%; top: 22%; color: var(--ink); font-size: 34px; font-weight: 500; letter-spacing: -.04em; line-height: .95; }
+  .tile.pdf .page .ptitle small { display: block; margin-top: 8px; font-size: 11px; letter-spacing: .14em; color: #6e6e73; }
+  .tile.link { display: flex; justify-content: space-between; align-items: flex-end; gap: 24px; }
+  .tile .chip { display: inline-flex; align-items: center; gap: 10px; height: 48px; padding: 0 20px; border-radius: 999px; border: 1px solid rgba(255,255,255,.16); font-size: 15px; transition: border-color 200ms var(--out), background-color 200ms var(--out), transform 150ms var(--out); }
+  .tile .chip:hover { border-color: rgba(255,255,255,.45); background: rgba(255,255,255,.04); }
+  .tile .chip svg { width: 18px; height: 18px; }
+  .dl { position: relative; overflow: hidden; isolation: isolate; }
+  .dl .fill { position: absolute; inset: 0; z-index: -1; background: rgba(245,197,24,.2); transform-origin: 0 50%; transform: scaleX(var(--p, 0)); }
+  .dl .stack { display: grid; }
+  .dl .stack > * { grid-area: 1 / 1; text-align: center; transition: opacity 200ms var(--out), transform 300ms var(--glide); }
+  .dl:not([data-state="idle"]) [data-when="idle"], .dl:not([data-state="loading"]) [data-when="loading"], .dl:not([data-state="done"]) [data-when="done"] { opacity: 0; transform: translateY(6px); }
+  .dl .tabular { font-variant-numeric: tabular-nums; }
+
+  footer { display: flex; justify-content: space-between; align-items: center; padding: 64px 56px 40px; color: rgba(255,255,255,.5); font-size: 12px; background: var(--ink); }
+  footer img { height: 22px; opacity: .6; }
+
+  /* ================================================================
+     MENOS MOVIMENTO — alternativa pensada, não "desligar tudo"
+     ================================================================ */
+  @media (prefers-reduced-motion: reduce) {
+    .hero { height: 100vh; }
+    .tour { display: none; }
+    .hero .scrollcue { display: none; }
+    .lineup { height: auto !important; }
+    .lineup .pin { position: static; height: auto; padding-bottom: 40px; }
+    .lineup .track { overflow-x: auto; scroll-snap-type: x mandatory; padding: 40px 56px; cursor: auto; transform: none !important; }
+    .lineup .card { scroll-snap-align: start; height: 62vh; }
+    .lineup .rail { display: none; }
+    .ev .visual img { filter: none; transform: none; }
+    .ev li button, .ev li.on button { transform: none; }
+    .card:hover .ph img, .btn:hover svg { transform: none; }
+  }
+
+  /* passagem para o estúdio escuro da linha de produção e de volta */
+  .lp-fade { height: 45vh; }
+  .lp-fade-in { background: linear-gradient(to bottom, #000, #060607); height: 12vh; }   /* topo já é preto: só um respiro */
+  .lp-fade-out { background: linear-gradient(to bottom, #060607, var(--frost)); }
+  /* variante ?fundo=branco: linha inteira no branco */
+  #linhaHost[data-theme="light"] { background: #fff; }
+  .lp-fade-in:has(+ #linhaHost[data-theme="light"]) { background: var(--paper); height: 10vh; }
+  #linhaHost[data-theme="light"] + .lp-fade-out { background: linear-gradient(to bottom, #f1f1f3, var(--frost)); }
+  #linhaHost { background: #060607; }
+  .nav { opacity: calc(1 - var(--lp-bo, 0)); }
+  /* menu no celular: só a marca e o botão (os links ficam nas seções) */
+  @media (max-width: 760px) {
+    .nav { padding: 0 16px; }
+    /* celular: o menu é o acesso aos catálogos, então os dois links ficam; o "Fale com a gente" sai daqui (está no fim da página) */
+    .nav ul { display: flex; gap: 20px; font-size: 14px; }
+    .nav ul a { opacity: 1; }
+    .nav .cta { display: none; }
+  }
+</style>
+</head>
+<body>
+
+<nav class="nav light" id="nav" aria-label="Principal">
+  <a class="brand" href="/" aria-label="Vullz — início">
+    <img class="on-dark" src="img/home2/logo-branco.png" alt="" />
+    <img class="on-light" src="img/home2/logo-escuro.webp" alt="" />
+  </a>
+  <!-- os catálogos: aros/modelos (bicicletas) e modelos por nome (elétricos), na mesma aba -->
+  <ul>
+    <li><a href="/catalogo-interativo.html">Bicicletas</a></li>
+    <li><a href="/catalogo-eletricos.html">Elétricos</a></li>
+  </ul>
+  <a class="cta" href="#hub">Fale com a gente</a>
+</nav>
+
+<!-- ============================ 0 · ABERTURA ============================ -->
+<section class="abertura" id="abertura" data-theme="dark">
+  <img class="foto" src="img/home2/abertura/oregon-close-1920.webp"
+    srcset="img/home2/abertura/oregon-close-1080.webp 1080w, img/home2/abertura/oregon-close-1920.webp 1920w, img/home2/abertura/oregon-close-3200.webp 3200w"
+    sizes="100vw" alt="Oregon preta com azul e dourado: o VULLZ dourado no cano" fetchpriority="high" />
+  <div class="marca">
+    <h1><span>Seu estilo.</span> <span>Seu ritmo.</span> <span>Seu caminho.</span></h1>
+    <p class="lema">Sempre em movimento.</p>
+    <p class="convite">Conheça nossos modelos:</p>
+    <div class="options">
+      <a class="opt" href="/catalogo-interativo.html">
+        <span class="t">Bicicletas</span><span class="go"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3.5 8H12.5M8.5 3.5L13 8L8.5 12.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      </a>
+      <a class="opt" href="/catalogo-eletricos.html">
+        <span class="t">Elétricos</span><span class="go"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3.5 8H12.5M8.5 3.5L13 8L8.5 12.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+      </a>
+    </div>
+  </div>
+  <svg class="reflexo" viewBox="0 0 1600 940" preserveAspectRatio="xMidYMid slice" aria-hidden="true">
+    <defs>
+      <filter id="abHalo" x="-300%" y="-300%" width="700%" height="700%"><feGaussianBlur stdDeviation="10" /></filter>
+      <filter id="abRaio" x="-80%" y="-300%" width="260%" height="700%"><feGaussianBlur stdDeviation="3.2" /></filter>
+      <filter id="abMiolo" x="-300%" y="-300%" width="700%" height="700%"><feGaussianBlur stdDeviation="3.5" /></filter>
+    </defs>
+    <!-- a faixa de luz do cano: de (775,160) até (1290,940) na foto, a 56,6° -->
+    <g transform="translate(775 160) rotate(56.6)">
+      <g class="ponto">
+        <!-- desfaz a inclinação do cano: os raios ficam retos na tela, como um reflexo de sol na lente -->
+        <g transform="rotate(-56.6)">
+          <g class="estrela">
+            <!-- brilho cheio no centro (camadas de halo) e raios curtos e macios -->
+            <circle r="34" fill="#ffd6a0" opacity=".35" filter="url(#abHalo)" />
+            <circle r="18" fill="#ffe8c8" opacity=".75" filter="url(#abHalo)" />
+            <ellipse rx="46" ry="4" fill="#fff4e2" opacity=".42" filter="url(#abRaio)" />
+            <ellipse rx="4" ry="30" fill="#fff4e2" opacity=".32" filter="url(#abRaio)" />
+            <circle r="10" fill="#fffaf2" filter="url(#abMiolo)" />
+            <circle r="4.5" fill="#ffffff" />
+          </g>
+        </g>
+      </g>
+    </g>
+  </svg>
+</section>
+
+<!-- ============================ 1 · HERO ============================ -->
+<section class="hero" id="hero" data-theme="dark">
+  <div class="stage" id="stage">
+    <div class="bike-wrap" id="bikeWrap"><div class="bike" id="bike"></div></div>
+
+    <!-- O motivo do site existir: as 3 portas para os catálogos, logo na abertura -->
+    <div class="copy" id="copy">
+      <h1>Catálogos digitais</h1>
+      <div class="options">
+        <a class="opt" href="/catalogo-interativo.html">
+          <span class="t">Bicicletas</span><span class="s">Catálogo interativo</span>
+          <span class="go"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3.5 8H12.5M8.5 3.5L13 8L8.5 12.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        </a>
+        <a class="opt" href="/catalogo-eletricos.html">
+          <span class="t">Elétricos</span><span class="s">Catálogo interativo</span>
+          <span class="go"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3.5 8H12.5M8.5 3.5L13 8L8.5 12.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+        </a>
+        <div class="opt pdf">
+          <span class="t">Catálogo PDF</span><span class="s">Bicicletas · 20 MB</span>
+          <div class="pdf-actions">
+            <a class="mini" href="/catalogos/catalogo-bicicletas-2026.pdf" target="_blank" rel="noopener">Visualizar</a>
+            <a class="mini dl" href="#" data-state="idle">
+              <span class="fill"></span>
+              <span class="stack"><span data-when="idle">Baixar</span><span data-when="loading" class="tabular" data-role="pct">0%</span><span data-when="done">Pronto</span></span>
+              <span class="stack"><span data-when="idle"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 2.5V10.5M4.5 7.5L8 11L11.5 7.5M2.5 13.5H13.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span data-when="loading"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 2.5V10.5M4.5 7.5L8 11L11.5 7.5M2.5 13.5H13.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span><span data-when="done"><svg width="14" height="14" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8.5L6.5 12L13 4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span></span>
+            </a>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="picker" id="picker">
+      <div class="model">Oregon · Aro 29</div>
+      <div class="cname" id="cname" aria-live="polite"><span>Laranja Neon</span></div>
+      <div class="swatches" id="swatches" role="group" aria-label="Cor da Oregon"></div>
+    </div>
+    <div class="tour" id="tour" aria-label="Cores da Oregon">
+      <div class="model">Oregon · Aro 29</div>
+      <div class="names" id="tourNames" aria-live="polite"></div>
+      <div class="sws" id="tourSws"><span class="ring" id="tourRing"></span></div>
+    </div>
+    <div class="scrollcue" id="scrollcue" aria-hidden="true"></div>
+  </div>
+</section>
+
+<!-- ============ 1b · LINHA DE PRODUÇÃO (gerada de linha-producao/linha.html) ============ -->
+<div class="lp-fade lp-fade-in" data-theme="dark" aria-hidden="true"></div>
+<div id="linhaHost" data-theme="dark"></div>
+<div class="lp-fade lp-fade-out" data-theme="dark" aria-hidden="true"></div>
+<template id="linhaTpl"><style>
+
+  /* Estúdio escuro preso na tela. A esteira anda, PARA em cada estação, a peça faz
+     o seu momento e a esteira segue. Rolagem curta: ~28 cliques de roda no total. */
+  :host {
+    color-scheme: dark;
+    --studio: #060607;
+    --fg: #f4f4f5;
+    --mute: #9a9ba2;
+    --yellow: #f5c518;
+    --out: cubic-bezier(0.33, 1, 0.68, 1);
+    --font: "TT Firs Neue", -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+  }
+  * { box-sizing: border-box; }
+  img { display: block; user-select: none; -webkit-user-drag: none; }
+
+  .lp { position: relative; }
+  .pin { position: sticky; top: 0; height: 100vh; height: 100dvh; overflow: hidden; background: radial-gradient(120% 90% at 50% 40%, #121215 0%, var(--studio) 60%); }
+  .belt { position: absolute; left: 0; right: 0; bottom: 12%; height: 6px; background: repeating-linear-gradient(90deg, rgba(255,255,255,.06) 0 22px, transparent 22px 44px); background-position-x: var(--belt, 0px); }
+  .track { position: absolute; inset: 0; display: flex; will-change: transform; }
+  .station { flex: 0 0 100vw; height: 100%; position: relative; overflow: visible; }
+
+  /* ---------- a peça e suas camadas de luz (montadas pelo JS) ---------- */
+  .part { position: absolute; left: var(--x, 50%); top: var(--y, 50%); width: var(--size); aspect-ratio: var(--ar, 1); translate: -50% -50%; transform-origin: 50% 50%; }
+  .part > * { position: absolute; inset: 0; }
+  .part img { width: 100%; height: 100%; object-fit: contain; }
+  .halo { inset: -30% !important; background: radial-gradient(closest-side at calc(20% + var(--L) * 60%) 45%, rgba(255,255,255,.10), rgba(255,255,255,.03) 55%, transparent); pointer-events: none; }
+  .band { -webkit-mask-image: linear-gradient(105deg, transparent calc(var(--L) * 140% - 40%), #000 calc(var(--L) * 140% - 20%), transparent calc(var(--L) * 140%));
+          mask-image: linear-gradient(105deg, transparent calc(var(--L) * 140% - 40%), #000 calc(var(--L) * 140% - 20%), transparent calc(var(--L) * 140%)); }
+  .sheen { mix-blend-mode: screen; opacity: .85; }
+  .sheen img { filter: grayscale(1) brightness(2.1) contrast(1.35); }
+  /* peças pintadas: reflexo mais contido para não lavar a cor */
+  .painted .sheen { opacity: .32; }
+  .rim { mix-blend-mode: screen; opacity: .9;
+         -webkit-mask-image: linear-gradient(105deg, transparent calc(var(--L) * 140% - 70%), #000 calc(var(--L) * 140% - 25%), transparent calc(var(--L) * 140% + 15%));
+         mask-image: linear-gradient(105deg, transparent calc(var(--L) * 140% - 70%), #000 calc(var(--L) * 140% - 25%), transparent calc(var(--L) * 140% + 15%)); }
+  .floor { top: 100% !important; bottom: auto !important; height: 60%; transform: scaleY(-1); transform-origin: top; opacity: .16;
+    -webkit-mask-image: linear-gradient(to top, rgba(0,0,0,.9), transparent 70%); mask-image: linear-gradient(to top, rgba(0,0,0,.9), transparent 70%); overflow: hidden; }
+  .floor img { height: auto; }
+
+  /* ---------- texto ---------- */
+  .copy { position: absolute; top: 50%; translate: 0 -50%; width: min(380px, 32vw); opacity: var(--t, 0); transform: translateY(calc((1 - var(--t, 0)) * 18px)); }
+  .copy.top { top: max(9%, 92px); translate: 0 0; }   /* abaixo do menu fixo da home */
+  .copy.center { left: 50%; translate: -50% 0; text-align: center; width: min(560px, 80vw); }
+  .n { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--mute); }
+  .copy h2 { margin: 12px 0 0; font-size: clamp(32px, 3.2vw, 52px); font-weight: 500; letter-spacing: -.035em; line-height: 1.03; text-wrap: balance; }
+  .copy p { margin: 14px 0 0; font-size: 17px; line-height: 1.55; color: var(--mute); text-wrap: pretty; }
+  .stat { margin-top: 20px; display: flex; align-items: baseline; gap: 8px; }
+  .center .stat { justify-content: center; }
+  .stat b { font-size: 44px; font-weight: 500; letter-spacing: -.03em; font-variant-numeric: tabular-nums; }
+  .stat span { font-size: 14px; color: var(--mute); }
+  .draft { display: inline-block; margin-top: 16px; font-size: 11px; letter-spacing: .08em; text-transform: uppercase; color: #f5d35a; background: rgba(245,197,24,.12); padding: 4px 8px; border-radius: 6px; }
+
+  /* 1 · pneus entrelaçados como os anéis da Audi: no cruzamento de cima o liso passa por cima, no de baixo por baixo.
+     Centros a 0,66 do diâmetro um do outro; a borda de baixo corta os dois exatamente ao meio */
+  #st1 { --S: min(60vw, 120vh); }
+  #tLiso, #tCrav, #tLisoCruza { --size: var(--S); --y: 100%; }
+  #tLiso, #tLisoCruza { --x: calc(50vw - var(--S) * .33); }
+  #tCrav { --x: calc(50vw + var(--S) * .33); }
+  #tLisoCruza { clip-path: inset(0 0 50% 50%); }
+
+  /* 2 · rodas: só o aro da foto (o cubo dela, visto de cima, sai); cubo e 30 raios (um por furo do aro) desenhados por código */
+  #wheel .aro { -webkit-mask-image: radial-gradient(circle at 49.9% 49.9%, transparent 0 16%, #000 16.5%); mask-image: radial-gradient(circle at 49.9% 49.9%, transparent 0 16%, #000 16.5%); }
+  #wheel .floor svg { position: absolute; left: 0; top: 0; width: 100%; height: auto; aspect-ratio: 1; }
+  .raios { overflow: visible; }
+  .raios .r { stroke: #c4c7cc; stroke-width: 3.2; stroke-linecap: round; }
+  .raios .r.longe { stroke: #8e9197; }
+  .raios .np { fill: #d9dbdf; }
+  .raios .flash { fill: #fff; }
+
+  /* 3 · freios: texto em cima à direita; embaixo, a roda vista de frente com o V-brake (fotos 1254×1254, mesmo enquadramento).
+     Cada braço é a mesma foto recortada (sem o pneu) e gira no próprio parafuso de baixo; o pneu desce até a borda */
+  #cp3 { top: max(11%, 92px); translate: 0 0; }
+  .vbx { position: absolute; width: min(42vh, 26vw); aspect-ratio: 1; right: 2vw; bottom: 0; opacity: 0; }   /* de canto, sem disputar com o texto */
+  .vbx img { position: absolute; inset: 0; width: 100%; height: 100%; }
+  .vb-cabo { clip-path: inset(18% 26% 78.5% 43%); }   /* o cabo fica parado por baixo: com os braços abertos não abre um vão no meio */
+  .vb-braco.esq { clip-path: polygon(0 0, 50% 0, 50% 22.7%, 36.4% 22.7%, 36.4% 68.6%, 32.9% 68.6%, 32.9% 100%, 0 100%); transform-origin: 24.3% 80.5%; }
+  .vb-braco.dir { clip-path: polygon(50% 0, 100% 0, 100% 100%, 67% 100%, 67% 68.6%, 64% 68.6%, 64% 22.7%, 50% 22.7%); transform-origin: 77% 80.5%; }
+
+  /* 4 · transmissão: tudo num SVG em milímetros (520 × 360), no canto de baixo à direita; a borda de baixo corta o braço do pedivela */
+  .drive { position: absolute; right: 1vw; bottom: 0; height: min(78vh, 52vw); aspect-ratio: 520 / 360; }
+  .drive svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
+  .drive .po { stroke: #8d9097; stroke-linecap: round; }
+  .drive .pi { stroke: #34353a; stroke-linecap: round; }
+  .drive .rl { fill: #cfd2d7; }
+  .drive .pn { fill: #5d6066; }
+
+  /* rótulo pequeno embaixo/em cima de cada peça */
+  .tag { position: absolute; left: var(--x); top: var(--y); translate: -50% 0; font-size: 13px; letter-spacing: .06em; text-transform: uppercase; color: var(--mute); white-space: nowrap; opacity: var(--o, 0); transition: opacity 300ms var(--out); }
+  .tag b { color: var(--fg); font-weight: 500; }
+
+  /* setas finas */
+  .co { position: absolute; inset: 0; pointer-events: none; overflow: visible; }
+  .co g { opacity: var(--co, 0); transition: opacity 300ms var(--out); }
+  .co path { stroke: rgba(255,255,255,.55); stroke-width: 1.2; fill: none; vector-effect: non-scaling-stroke; }
+  .co circle { fill: var(--yellow); }
+  .co text { fill: var(--fg); font-family: var(--font); font-weight: 500; }
+
+  .intro { display: grid; place-items: center; text-align: center; }
+  .intro h1 { margin: 0; font-size: clamp(56px, 7.5vw, 124px); font-weight: 500; letter-spacing: -.045em; line-height: .94; }
+  .intro p { margin: 22px auto 0; font-size: 19px; color: var(--mute); max-width: 440px; line-height: 1.5; }
+
+  /* corrente: faixa que corre, faz as vezes da esteira nesta estação */
+  .chain { position: absolute; left: 0; right: 0; height: 34px; background: url(linha-producao/img/p/transmissao-corrente.webp) repeat-x; background-size: auto 100%; background-position-x: var(--cx, 0px); filter: brightness(1.15); }
+
+  /* montagem final em 3D: a cena ocupa a estação inteira, o estúdio aparece por trás */
+  .m3d { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  /* nome da peça que está chegando */
+  .m3d-tag { position: absolute; left: 50%; bottom: 13%; translate: -50% 0; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--fg); opacity: var(--o, 0); transition: opacity 250ms var(--out); white-space: nowrap; }
+  .cta { display: inline-flex; margin-top: 22px; padding: 12px 20px; border-radius: 999px; background: var(--fg); color: #111; font-size: 15px; font-weight: 500; text-decoration: none; }
+
+  /* variante ?fundo=branco: estúdio branco (o padrão é o escuro) */
+  .lp.claro { --studio: #ffffff; --fg: #0a0a0b; --mute: #6e6e73; color: var(--fg); color-scheme: light; }
+  .lp.claro .pin { background: radial-gradient(120% 90% at 50% 40%, #ffffff 0%, #f1f1f3 75%); }
+  .lp.claro .belt { background: repeating-linear-gradient(90deg, rgba(10,10,11,.08) 0 22px, transparent 22px 44px); background-position-x: var(--belt, 0px); }
+  .lp.claro .halo { display: none; }                       /* brilho branco: some no branco */
+  .lp.claro .floor { opacity: .1; }
+  .lp.claro .co path { stroke: rgba(10,10,11,.45); }
+  .lp.claro .draft { color: #8a6d00; background: rgba(245,197,24,.2); }
+  .lp.claro .cta { background: #0a0a0b; color: #fff; }
+  .lp.claro .rail .bar { background: rgba(10,10,11,.12); }
+  .lp.claro .rail .skip { border-color: rgba(10,10,11,.18); }
+  .lp.claro ::selection { color: #111; }
+
+  /* trilho: nomes clicáveis + pular */
+  .rail { position: absolute; left: 6vw; right: 6vw; bottom: 30px; display: flex; align-items: center; gap: 18px; font-size: 12px; letter-spacing: .08em; text-transform: uppercase; color: var(--mute); }
+  .rail button { all: unset; cursor: pointer; padding: 6px 0; transition: color 300ms var(--out); }
+  .rail button:hover, .rail button.on { color: var(--fg); }
+  .rail { display: none !important; }   /* a legenda de baixo com as estações saiu */
+  .rail button:focus-visible { outline: 1px solid var(--fg); outline-offset: 4px; border-radius: 4px; }
+  .rail .bar { flex: 1; min-width: 40px; height: 2px; background: rgba(255,255,255,.12); border-radius: 9px; overflow: hidden; }
+  .rail .bar i { display: block; height: 100%; background: var(--fg); transform-origin: 0 50%; transform: scaleX(var(--p, 0)); }
+  .rail .skip { margin-left: 8px; padding: 6px 12px; border: 1px solid rgba(255,255,255,.18); border-radius: 999px; }
+
+
+  /* ---------- celular: peça em cima, texto embaixo; mesma esteira lateral ---------- */
+  @media (max-width: 760px) {
+    .copy, .copy.top, .copy.center { left: 20px !important; right: 20px; width: auto !important; top: auto; bottom: 96px; translate: none; text-align: left; }
+    .copy h2 { font-size: 28px; } .copy p { font-size: 15px; margin-top: 10px; }
+    .stat { margin-top: 14px; } .stat b { font-size: 34px; }
+    .draft { margin-top: 12px; }
+    .intro h1 { font-size: 46px; } .intro p { font-size: 16px; padding: 0 24px; }
+    .rail { left: 20px; right: 20px; bottom: 22px; }
+    .rail button:not(.skip) { display: none; }
+    .tag { font-size: 11px; }
+    .belt { bottom: 10%; }
+    /* 1 · pneus: texto em cima, pneus embaixo cortados só pela borda inferior */
+    #cp1 { top: max(9%, 80px); bottom: auto; }
+    #st1 { --S: 84vw; }
+    /* 2 · rodas */
+    #wheel { --size: 84vw !important; --x: 50vw !important; --y: 29% !important; }
+    /* 3 · freios: o disco termina cortado ao meio pela borda esquerda, em cima */
+    #disc { --size: 66vw !important; --x: 50vw !important; --y: 28% !important; }
+    #vb { --size: 24vw !important; --x: 85vw !important; --y: 9% !important; }
+    /* 4 · transmissão */
+    #crank { --size: 56vw !important; --x: 30vw !important; --y: 24% !important; }
+    #cog { --size: 30vw !important; --x: 76vw !important; --y: 17% !important; }
+    #der { --size: 30vw !important; --x: 77vw !important; --y: 36% !important; }
+    #chain { top: 50% !important; height: 24px; }
+    /* 5 · contato */
+    #pedal { --size: 40vw !important; --x: 26vw !important; --y: 18% !important; }
+    #seat { --size: 38vw !important; --x: 74vw !important; --y: 18% !important; }
+    #bar { --size: 88vw !important; --x: 50vw !important; --y: 40% !important; }
+    #tagPedal { --x: 26vw !important; --y: 28% !important; }
+    #tagSeat { --x: 74vw !important; --y: 28% !important; }
+    #tagBar { --x: 50vw !important; --y: 47% !important; }
+    #tagPedal, #tagSeat, #tagBar { white-space: normal; text-align: center; width: 44vw; }
+    /* 6 · montagem */
+    #cp6a, #cp6c { top: max(10%, 80px); bottom: auto; }
+    #cp6b { bottom: 110px; text-align: center; }
+  }
+
+  :host { display: block; color: var(--fg); font-family: var(--font); -webkit-font-smoothing: antialiased; }
+</style>
+<section class="lp" id="lp">
+  <div class="pin" id="pin">
+    <div class="belt" id="belt"></div>
+    <div class="track" id="track">
+
+      <article class="station intro" data-name="Início">
+        <div><h1>É aqui que tudo<br />ganha forma.</h1><p>Conheça de perto o processo de fabricação das bicicletas VULLZ, e prepare-se para descobrir novos caminhos.</p></div>
+      </article>
+
+      <!-- 1 · PNEUS: lado a lado, cortados só embaixo -->
+      <article class="station" data-name="Pneus" id="st1">
+        <div class="part" data-img="pneus-liso" data-spin id="tLiso"></div>
+        <div class="part" data-img="pneus-cravos" data-spin id="tCrav"></div>
+        <!-- o liso de novo, só no quarto de cima à direita: passa por cima do cravos no cruzamento de cima (no de baixo, fica por baixo) -->
+        <div class="part" data-img="pneus-liso" data-spin id="tLisoCruza" aria-hidden="true"></div>
+        <div class="copy top center" id="cp1">
+          <div class="n">01 · Pneus</div>
+          <h2>Cada terreno pede o pneu adequado.</h2>
+          <p>Do asfalto às trilhas, mais liberdade para pedalar do seu jeito.</p>
+        </div>
+      </article>
+
+      <!-- 2 · RODAS: os raios entram um a um -->
+      <article class="station" data-name="Rodas" id="st2">
+        <div class="part" id="wheel" style="--size:min(78vh,46vw);--x:32vw;--y:47%">
+          <div class="floor"><img class="spin aro" src="linha-producao/img/p/rodas-aro-cubo.webp" alt="" /><svg class="spin raios" viewBox="0 0 1000 1000" aria-hidden="true"></svg></div>
+          <img class="spin aro" src="linha-producao/img/p/rodas-aro-cubo.webp" alt="Aro" />
+          <svg class="spin raios" viewBox="0 0 1000 1000" role="img" aria-label="Raios entrando um a um entre o cubo e o aro"></svg>
+        </div>
+        <div class="copy" style="left:60vw" id="cp2">
+          <div class="n">02 · Rodas</div>
+          <h2>Montada do zero, é aqui que começamos.</h2>
+          <p>Cada raio, cubo e aro e cada ajuste têm sua importância. Afinal, são os detalhes que fazem a diferença.</p>
+          <div class="stat"><b id="statSpokes">0</b><span>de 30 raios</span></div>
+        </div>
+      </article>
+
+      <!-- 3 · FREIOS: disco gira e termina cortado ao meio; V-brake ao lado -->
+      <article class="station" data-name="Freios" id="st3">
+        <div class="part" data-img="freios-disco" data-spin data-floor id="disc" style="--size:min(66vh,600px)">
+          <svg class="co" viewBox="0 0 100 100" id="coDisc"></svg>
+        </div>
+        <div class="copy" style="left:56vw" id="cp3">
+          <div class="n">03 · Freios</div>
+          <h2>Trabalhamos com freio à disco, ou <span style="white-space:nowrap">v-brake</span>.</h2>
+          <p>Cada modelo VULLZ recebe um sistema de frenagem de acordo com sua configuração.</p>
+          <div class="stat"><b id="statDisc">0</b><span>mm de rotor</span></div>
+        </div>
+        <!-- V-brake na roda vista de frente: a roda gira (borrada); no fim os braços fecham e ela para (nítida) -->
+        <div class="vbx" id="vb">
+          <img class="vb-roda" src="linha-producao/img/p/freios-roda-frente.webp" alt="" />
+          <img class="vb-roda" id="vbBorrada" src="linha-producao/img/p/freios-roda-frente-borrada.webp" alt="" />
+          <img class="vb-cabo" src="linha-producao/img/p/freios-vbrake-frente.webp" alt="" />
+          <img class="vb-braco esq" id="vbEsq" src="linha-producao/img/p/freios-vbrake-frente.webp" alt="V-brake montado na roda" />
+          <img class="vb-braco dir" id="vbDir" src="linha-producao/img/p/freios-vbrake-frente.webp" alt="" />
+        </div>
+      </article>
+
+      <!-- 4 · TRANSMISSÃO: montada como na bike (frente à esquerda); a corrente, desenhada elo por elo, se monta e troca de marcha -->
+      <article class="station" data-name="Transmissão" id="st4">
+        <div class="drive" id="drive"><svg viewBox="0 0 520 360" id="driveSvg" aria-label="Pedivela, corrente, catraca e câmbio montados"></svg></div>
+        <div class="copy top" style="left:6vw" id="cp4">
+          <div class="n">04 · Transmissão</div>
+          <h2>Você escolhe o ritmo, a VULLZ acompanha.</h2>
+          <p>Nossas bikes contam com um sistema de transmissão preciso, para proporcionar uma pedalada mais confortável.</p>
+          <div class="stat"><b id="statGears">0</b><span>marchas · 3 × 7</span></div>
+        </div>
+      </article>
+
+      <!-- 5 · PONTOS DE CONTATO: pedal, guidão e selim; a luz passa por um de cada vez -->
+      <article class="station" data-name="Contato" id="st5">
+        <div class="part" data-img="contato-pedal" data-floor id="pedal" style="--size:min(24vw,40vh);--ar:1214/940;--x:19vw;--y:58%"></div>
+        <div class="part" data-img="contato-guidao" data-floor id="bar" style="--size:min(36vw,64vh);--ar:1254/461;--x:50vw;--y:60%"></div>
+        <div class="part" data-img="contato-selim" data-floor id="seat" style="--size:min(22vw,40vh);--ar:1208/994;--x:81vw;--y:57%"></div>
+        <div class="tag" id="tagPedal" style="--x:19vw;--y:79%"><b>Pedal</b> · plataforma</div>
+        <div class="tag" id="tagBar" style="--x:50vw;--y:79%"><b>Guidão</b> · manoplas e trocadores</div>
+        <div class="tag" id="tagSeat" style="--x:81vw;--y:79%"><b>Selim</b> · espuma e canote</div>
+        <div class="copy top center" id="cp5">
+          <div class="n">05 · Pontos de contato</div>
+          <h2>O conforto está nos detalhes.</h2>
+          <p>É você, a bike e a vontade de pedalar.</p>
+        </div>
+      </article>
+
+      <!-- 6 · MONTAGEM em 3D (montagem3d.js): a Oregon real montada peça por peça, os adesivos
+           entram da esquerda para a direita e a bike dá um giro completo -->
+      <article class="station" data-name="Montagem" id="st6">
+        <canvas class="m3d" id="m3d" aria-label="Bicicleta Oregon sendo montada peça por peça"></canvas>
+        <div class="m3d-tag" id="m3dTag"></div>
+        <div class="copy top" style="left:6vw;width:min(520px,40vw)" id="cp6a">
+          <div class="n">06 · Montagem</div>
+          <h2>É assim que sua próxima bicicleta ganha forma.</h2>
+        </div>
+        <div class="copy top" style="left:6vw;width:min(520px,40vw)" id="cp6c">
+          <h2>E aos poucos…</h2>
+        </div>
+        <div class="copy top center" id="cp6b">
+          <h2>Tudo isso vira uma VULLZ.</h2>
+          <a class="cta" href="/catalogo-interativo.html">Ver bicicletas</a>
+        </div>
+      </article>
+    </div>
+    <nav class="rail" id="rail" aria-label="Estações"><div class="bar"><i id="railbar"></i></div><button class="skip" id="skip">Pular</button></nav>
+  </div>
+</section>
+</template>
+<script>
+(() => {
+  const host = document.getElementById("linhaHost");
+  const root = host.attachShadow({ mode: "open" });
+  root.append(document.getElementById("linhaTpl").content.cloneNode(true));
+  const lpTop = () => host.getBoundingClientRect().top + scrollY;
+
+  const $ = (s) => root.querySelector(s);
+  const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const smooth = (t) => t * t * (3 - 2 * t);
+  const easeInOut = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const NS = "http://www.w3.org/2000/svg";
+
+  /* monta as camadas de luz de cada peça a partir do nome da imagem */
+  root.querySelectorAll(".part[data-img]").forEach((el) => {
+    const src = `linha-producao/img/p/${el.dataset.img}`, sp = el.hasAttribute("data-spin") ? ' class="spin"' : "";
+    el.insertAdjacentHTML("afterbegin",
+      (el.hasAttribute("data-floor") ? `<div class="floor"><img${sp} src="${src}.webp" alt="" /></div>` : "") +
+      `<img${sp} src="${src}.webp" alt="" />`);   // sem halo nem faixas de luz: a peça limpa
+  });
+
+  function callouts(svg, items) {
+    return items.map(([x, y, tx, ty, label, anchor]) => {
+      const g = document.createElementNS(NS, "g");
+      g.innerHTML = `<path d="M${x} ${y} L${tx} ${ty}" /><circle cx="${x}" cy="${y}" r=".9" /><text x="${tx + (anchor === "end" ? -1.2 : 1.2)}" y="${ty + 1}" text-anchor="${anchor || "start"}" font-size="2.6">${label}</text>`;
+      svg.append(g); return g;
+    });
+  }
+  const coDisc = callouts($("#coDisc"), [[50, 50, 72, 8, "cubo de 6 parafusos"], [88, 38, 104, 24, "furos de ventilação"]]);
+  // texto das setas com tamanho fixo na tela, mesmo com a peça ampliada
+  function fitLabels(svg, base, scale) { const fs = 14 / ((base / 100) * scale); svg.querySelectorAll("text").forEach((t) => t.setAttribute("font-size", fs)); }
+
+  /* ---------- 2 · raios: um raio para cada um dos 30 furos do aro, medidos na própria foto (viewBox 1000 = foto 1168 px).
+     Furos pares vão para o flange de perto (saem do cubo 72° adiantados), ímpares para o de longe (72° atrasados):
+     os dois lados se cruzam como numa roda real e nenhum furo, do aro ou do cubo, recebe dois raios ---------- */
+  const raios = (() => {
+    const C = [499.3, 499.1], R_FL = 44;
+    const FUROS = [[500.6,44.0],[599.1,54.5],[691.9,89.8],[778.0,138.7],[850.7,208.8],[904.6,290.0],[940.0,379.3],[955.1,474.0],[950.7,567.3],[924.3,659.9],
+      [880.5,745.8],[819.5,820.7],[749.8,877.7],[671.8,920.5],[587.5,946.2],[499.0,956.0],[410.5,946.5],[326.2,920.5],[248.1,878.5],[180.2,820.4],
+      [118.5,745.3],[74.2,659.1],[48.4,566.2],[43.6,472.8],[59.0,378.5],[93.4,289.3],[147.0,208.0],[220.3,138.4],[306.5,88.4],[401.2,57.8]];
+    const N = FUROS.length;
+    const pt = (r, deg, c = C) => [c[0] + r * Math.sin(deg * Math.PI / 180), c[1] - r * Math.cos(deg * Math.PI / 180)];
+    const LONGE = [C[0] + 5, C[1] - 4];   // flange de trás um pouco deslocado: dá profundidade
+    const spokes = FUROS.map((b, i) => {
+      const aro = Math.atan2(b[0] - C[0], C[1] - b[1]) * 180 / Math.PI, perto = i % 2 === 0, k = i >> 1;
+      const hubAng = aro + (perto ? 72 : -72);
+      const u = [(C[0] - b[0]) / Math.hypot(C[0] - b[0], C[1] - b[1]), (C[1] - b[1]) / Math.hypot(C[0] - b[0], C[1] - b[1])];   // do furo para o centro
+      return { i, perto, hubAng, a: pt(R_FL, hubAng, perto ? C : LONGE), b, n0: [b[0] + u[0] * 24, b[1] + u[1] * 24], n1: [b[0] - u[0] * 2, b[1] - u[1] * 2], grupo: (perto ? 0 : 2) + (k % 2) };
+    });
+    // ordem de montador: um raio a cada quatro furos de um lado, depois o outro lado, depois os cruzados de cada lado
+    const ordem = [0, 2, 1, 3].flatMap((g) => spokes.filter((s) => s.grupo === g));
+    ordem.forEach((s, j) => (s.j = j));
+    // cada flange tem um furo para cada raio dele, exatamente onde o raio sai
+    const flange = (c, cls, lado) => `<g class="${cls}"><circle cx="${c[0]}" cy="${c[1]}" r="58" fill="${cls === "fl-longe" ? "#7d8086" : "#b8bbc1"}" stroke="#5e6167" stroke-width="2" />` +
+      lado.map((s) => { const [x, y] = pt(R_FL, s.hubAng, c); return `<circle cx="${x.toFixed(1)}" cy="${y.toFixed(1)}" r="4.5" fill="#2c2d30" />`; }).join("") + `</g>`;
+    const line = (s) => `<line class="r${s.perto ? "" : " longe"}" data-j="${s.j}" x1="${s.a[0].toFixed(1)}" y1="${s.a[1].toFixed(1)}" x2="${s.a[0].toFixed(1)}" y2="${s.a[1].toFixed(1)}" />`;
+    const nip = (s) => `<line class="np-l" data-j="${s.j}" x1="${s.n0[0].toFixed(1)}" y1="${s.n0[1].toFixed(1)}" x2="${s.n1[0].toFixed(1)}" y2="${s.n1[1].toFixed(1)}" stroke="#dcdee2" stroke-width="7" stroke-linecap="round" opacity="0" />` +
+      `<circle class="flash" data-j="${s.j}" cx="${s.b[0].toFixed(1)}" cy="${s.b[1].toFixed(1)}" r="10" opacity="0" />`;
+    const longe = spokes.filter((s) => !s.perto), perto = spokes.filter((s) => s.perto);
+    // de trás para a frente: flange de longe, seus raios, flange de perto (cobre o começo deles), raios de perto, corpo do cubo
+    const html = flange(LONGE, "fl-longe", longe) + longe.map(line).join("") + flange(C, "fl-perto", perto) + perto.map(line).join("") +
+      `<circle cx="${C[0]}" cy="${C[1]}" r="26" fill="#cfd2d6" stroke="#6b6e74" stroke-width="2" /><circle cx="${C[0]}" cy="${C[1]}" r="11" fill="#1d1e20" /><circle cx="${C[0] - 3}" cy="${C[1] - 3}" r="3" fill="#fff" opacity=".5" />` +
+      spokes.map(nip).join("");
+    const svgs = [...root.querySelectorAll("#wheel .raios")];
+    svgs.forEach((svg) => (svg.innerHTML = html));
+    const els = svgs.map((svg) => ({ r: [...svg.querySelectorAll(".r")], np: [...svg.querySelectorAll(".np-l")], fl: [...svg.querySelectorAll(".flash")] }));
+    const byJ = ordem;
+    // t: andamento da montagem (0–1); tensao: brilho que corre por todos os raios no fim (0–1)
+    return (t, tensao) => {
+      const W = 3;   // cada raio leva o tempo de 3 entradas para correr do cubo ao aro (entram encavalados)
+      const brilho = tensao > 0 && tensao < 1 ? Math.sin(tensao * Math.PI) : 0;
+      els.forEach(({ r, np, fl }) => {
+        r.forEach((el) => {
+          const s = byJ[+el.dataset.j], u = clamp((t * (N + W - 1) - s.j) / W), e = 1 - Math.pow(1 - u, 3);
+          el.setAttribute("x2", (s.a[0] + (s.b[0] - s.a[0]) * e).toFixed(1));
+          el.setAttribute("y2", (s.a[1] + (s.b[1] - s.a[1]) * e).toFixed(1));
+          el.style.opacity = u > 0 ? 1 : 0;
+          el.style.stroke = brilho ? `color-mix(in srgb, #fff ${Math.round(brilho * 70)}%, ${s.perto ? "#c4c7cc" : "#8e9197"})` : "";
+        });
+        np.forEach((el) => { const j = +el.dataset.j, u = clamp((t * (N + W - 1) - j) / W); el.setAttribute("opacity", u >= 1 ? 1 : 0); });
+        fl.forEach((el) => {
+          const j = +el.dataset.j, x = t * (N + W - 1) - j - W;   // depois que o raio encaixa: um clarão curto no niple
+          el.setAttribute("opacity", x > 0 && x < 1.6 ? (0.85 * (1 - x / 1.6)).toFixed(2) : 0);
+        });
+      });
+    };
+  })();
+
+  /* ---------- 4 · transmissão montada como na bike, vista do lado da corrente com a frente à esquerda.
+     Tudo em mm: coroa grande (pitch 97 mm) em A, catraca em B (pinhões de 69 a 24 mm), câmbio espelhado preso
+     no eixo da catraca, com as roldanas de cima (P1) e de baixo (P2). A corrente faz o laço real:
+     topo da coroa → topo e traseira da catraca → frente da roldana de cima → traseira da de baixo → volta por baixo ---------- */
+  const transmissao = (() => {
+    const svg = $("#driveSvg"), A = [130, 170], B = [420, 120], RA = 97;
+    const COGS = [69, 57.8, 50.2, 42.6, 35.6, 29.3, 24.2];
+    const sC = 0.2553, sK = 0.1268, sD = 0.1035;   // mm por pixel de cada foto
+    const H = [981, 235], U = [166, 450], L = [446, 975];   // no câmbio espelhado: gancho do eixo, roldana de cima e de baixo (px)
+    const dx0 = B[0] - H[0] * sD, dy0 = B[1] - H[1] * sD;
+    const P1_0 = [dx0 + U[0] * sD, dy0 + U[1] * sD], P2_0 = [dx0 + L[0] * sD, dy0 + L[1] * sD];
+    svg.innerHTML =
+      `<image id="drCoroa" href="linha-producao/img/p/transmissao-pedivela.webp" x="${A[0] - 777 * sC}" y="${A[1] - 778 * sC}" width="${1580 * sC}" height="${1580 * sC}" />` +
+      `<image id="drCatraca" href="linha-producao/img/p/transmissao-catraca.webp" x="${B[0] - 580.5 * sK}" y="${B[1] - 580.5 * sK}" width="${1161 * sK}" height="${1161 * sK}" />` +
+      `<g id="drCorrente"></g>` +
+      `<image id="drCambio" href="linha-producao/img/p/transmissao-cambio-espelhado.webp" x="${dx0}" y="${dy0}" width="${1051 * sD}" height="${1189 * sD}" />`;
+    const coroa = $("#drCoroa"), catraca = $("#drCatraca"), cambio = $("#drCambio"), corrente = $("#drCorrente");
+    const N = 74, PITCH = 12.7;
+    const NS2 = "http://www.w3.org/2000/svg";
+    const placas = [...Array(N)].map((_, i) => { const l = document.createElementNS(NS2, "line"); l.setAttribute("class", i % 2 ? "pi" : "po"); l.setAttribute("stroke-width", i % 2 ? 6.2 : 7.6); corrente.append(l); return l; });
+    const rolos = [...Array(N)].map(() => { const g = document.createElementNS(NS2, "g"); g.innerHTML = `<circle class="rl" r="2.5" /><circle class="pn" r="1.1" />`; corrente.append(g); return g; });
+    const rot = (p, c, a) => [c[0] + (p[0] - c[0]) * Math.cos(a) - (p[1] - c[1]) * Math.sin(a), c[1] + (p[0] - c[0]) * Math.sin(a) + (p[1] - c[1]) * Math.cos(a)];
+    // tangente entre dois círculos com raio com sinal (lado em que a corrente abraça cada um)
+    function tangente(c1, r1, c2, r2) {
+      const dx = c2[0] - c1[0], dy = c2[1] - c1[1], Lh = Math.hypot(dx, dy), ux = dx / Lh, uy = dy / Lh;
+      const a = (r1 - r2) / Lh, b = -Math.sqrt(Math.max(0, 1 - a * a));
+      const n = [a * ux - b * uy, a * uy + b * ux];
+      return [[c1[0] + r1 * n[0], c1[1] + r1 * n[1]], [c2[0] + r2 * n[0], c2[1] + r2 * n[1]]];
+    }
+    // monta o caminho como uma lista de pontos (retas + arcos) e o comprimento acumulado
+    function caminho(circs) {
+      const tg = circs.map((c, i) => tangente(c.c, c.r, circs[(i + 1) % circs.length].c, circs[(i + 1) % circs.length].r));
+      const pts = [];
+      circs.forEach((c, i) => {
+        const [p1, p2] = tg[i]; pts.push(p1, p2);
+        const nx = circs[(i + 1) % circs.length], out = tg[(i + 1) % circs.length][0];
+        const t = [p2[0] - p1[0], p2[1] - p1[1]], v = [p2[0] - nx.c[0], p2[1] - nx.c[1]];
+        const sentido = Math.sign(v[0] * t[1] - v[1] * t[0]) || 1;
+        let a0 = Math.atan2(v[1], v[0]), a1 = Math.atan2(out[1] - nx.c[1], out[0] - nx.c[0]);
+        let da = a1 - a0; if (sentido > 0) { while (da < 0) da += 2 * Math.PI; } else { while (da > 0) da -= 2 * Math.PI; }
+        const R = Math.abs(nx.r), n = Math.max(2, Math.ceil(Math.abs(da) * R / 3));
+        for (let k = 1; k < n; k++) { const a = a0 + (da * k) / n; pts.push([nx.c[0] + R * Math.cos(a), nx.c[1] + R * Math.sin(a)]); }
+      });
+      const cum = [0]; for (let i = 1; i <= pts.length; i++) { const p = pts[i - 1], q = pts[i % pts.length]; cum.push(cum[i - 1] + Math.hypot(q[0] - p[0], q[1] - p[1])); }
+      return { pts, cum, L: cum[cum.length - 1] };
+    }
+    function ponto(cm, s) {
+      s = ((s % cm.L) + cm.L) % cm.L;
+      let lo = 0, hi = cm.cum.length - 1; while (hi - lo > 1) { const m = (lo + hi) >> 1; if (cm.cum[m] <= s) lo = m; else hi = m; }
+      const p = cm.pts[lo], q = cm.pts[(lo + 1) % cm.pts.length], f = (s - cm.cum[lo]) / ((cm.cum[lo + 1] - cm.cum[lo]) || 1);
+      return [p[0] + (q[0] - p[0]) * f, p[1] + (q[1] - p[1]) * f];
+    }
+    let rbAtual = COGS[0], ultimo = null, angCoroa = 0, angCatraca = 0;
+    // ofs: quanto a corrente andou (mm); monta: 0–1 (a corrente aparece pelo caminho); g: pinhão (0 = maior)
+    return (ofs, monta, g) => {
+      rbAtual += (COGS[g] - rbAtual) * 0.25;   // a corrente "pula" para o pinhão novo em poucos quadros
+      const RB = rbAtual;
+      // o câmbio acompanha: gira no eixo para esticar a corrente e a roldana de cima fica sempre logo abaixo do pinhão
+      const ang = (COGS[0] - RB) * 0.012;
+      let P1 = rot(P1_0, B, ang), P2 = rot(P2_0, B, ang);
+      const dist = Math.hypot(P1[0] - B[0], P1[1] - B[1]), alvo = RB + 19, k = (alvo - dist) / dist;
+      const tx = (P1[0] - B[0]) * k, ty = (P1[1] - B[1]) * k;
+      P1 = [P1[0] + tx, P1[1] + ty]; P2 = [P2[0] + tx, P2[1] + ty];
+      cambio.setAttribute("transform", `translate(${tx.toFixed(2)} ${ty.toFixed(2)}) rotate(${(ang * 180 / Math.PI).toFixed(2)} ${B[0]} ${B[1]})`);
+      const cm = caminho([{ c: A, r: RA }, { c: B, r: RB }, { c: P1, r: -12 }, { c: P2, r: 14 }]);
+      const p = cm.L / N, o = ofs;
+      for (let i = 0; i < N; i++) {
+        const s0 = o + i * p, s1 = s0 + p, a = ponto(cm, s0), b = ponto(cm, s1);
+        const pos = ((s0 % cm.L) + cm.L) % cm.L, vis = pos < monta * cm.L ? 1 : 0;   // aparece a partir do topo da coroa
+        placas[i].setAttribute("x1", a[0].toFixed(2)); placas[i].setAttribute("y1", a[1].toFixed(2));
+        placas[i].setAttribute("x2", b[0].toFixed(2)); placas[i].setAttribute("y2", b[1].toFixed(2));
+        placas[i].style.opacity = vis; rolos[i].style.opacity = vis;
+        rolos[i].setAttribute("transform", `translate(${a[0].toFixed(2)} ${a[1].toFixed(2)})`);
+      }
+      // coroa e catraca giram na velocidade da corrente (a catraca, mais rápido quanto menor o pinhão)
+      const dOfs = ultimo === null ? 0 : ofs - ultimo; ultimo = ofs;
+      angCoroa += dOfs / RA; angCatraca += dOfs / RB;
+      coroa.setAttribute("transform", `rotate(${(angCoroa * 180 / Math.PI).toFixed(2)} ${A[0]} ${A[1]})`);
+      catraca.setAttribute("transform", `rotate(${(angCatraca * 180 / Math.PI).toFixed(2)} ${B[0]} ${B[1]})`);
+    };
+  })();
+
+  /* ---------- esteira: rolagem por trecho (px). Cada trecho = viagem + parada na estação seguinte ---------- */
+  const lp = $("#lp"), track = $("#track"), stations = [...track.children], N = stations.length;
+  const LEN = [380, 440, 460, 440, 420, 1450]; // entrada em cada estação 1–6; a última: 13 peças + adesivos + giro → ~3590px
+  const TRAVEL = 150;                           // px de cada trecho gastos andando a esteira
+  const CUM = LEN.reduce((a, l) => (a.push(a[a.length - 1] + l), a), [0]);
+  const TOTAL = CUM[CUM.length - 1];
+  /* simulador de celular: quando a página roda dentro dele, conversa por mensagens (rolar até, estado atual) */
+  if (parent !== window) {
+    const post = () => parent.postMessage({ linha: "state", y: scrollY, max: document.documentElement.scrollHeight - innerHeight,
+      starts: CUM.slice(0, -1).map((c) => lpTop() + c + TRAVEL), end: lpTop() + TOTAL, names: [...track.children].slice(1).map((st) => st.dataset.name) }, "*");
+    addEventListener("message", (e) => {
+      const m = e.data || {};
+      if (m.linha === "scrollTo") scrollTo({ top: m.y, behavior: m.smooth ? "smooth" : "instant" });
+      if (m.linha === "hello") post();
+    });
+    addEventListener("scroll", post, { passive: true });
+    addEventListener("load", post);
+  }
+
+  const rail = $("#rail");
+  stations.slice(1).forEach((st, i) => {
+    const b = document.createElement("button"); b.textContent = st.dataset.name;
+    // clicar leva ao início da parada daquela estação
+    b.onclick = () => scrollTo({ top: lpTop() + CUM[i] + TRAVEL + 1, behavior: "smooth" });
+    rail.insertBefore(b, $("#skip"));
+  });
+  $("#skip").onclick = () => scrollTo({ top: lpTop() + lp.offsetHeight, behavior: "smooth" });
+  const railNames = [...rail.querySelectorAll("button:not(.skip)")];
+  function size() { lp.style.height = `${innerHeight + TOTAL}px`; }
+
+  let mx = 0, mxS = 0;
+  addEventListener("pointermove", (e) => { if (e.pointerType === "mouse") { mx = e.clientX / innerWidth - 0.5; wake(); } }, { passive: true });
+
+  // rolagem suavizada: a roda do mouse anda em degraus; a esteira persegue com mola
+  let ys = null, lastYs = 0, vel = 0, spin = 0, queued = false;
+  const spins = (el) => el.querySelectorAll(".spin");
+  const P = { tLiso: $("#tLiso"), tCrav: $("#tCrav"), tLisoCruza: $("#tLisoCruza"), wheel: $("#wheel"), disc: $("#disc"), vb: $("#vb"), crank: $("#crank"), cog: $("#cog"), der: $("#der"),
+              pedal: $("#pedal"), bar: $("#bar"), seat: $("#seat") };
+
+  /* montagem em 3D: o módulo (e os ~9 MB do modelo) só carrega quando a esteira chega perto */
+  const CLARO = new URLSearchParams(location.search).get("fundo") === "branco";   // padrão: estúdio escuro (?fundo=branco para comparar)
+  if (CLARO) lp.classList.add("claro");
+  // na home (linha dentro do hospedeiro): o menu e as passagens de fundo também ficam claros
+  if (CLARO && typeof host !== "undefined") host.dataset.theme = "light";
+  let m3d = null, m3dLoading = false;
+  let giroFreio = 0, spinAntes = 0;   // giro do disco da estação 3: acompanha a rolagem até a freada
+  function loadM3d() {
+    if (m3dLoading) return; m3dLoading = true;
+    import("./linha-producao/montagem3d.js").then((m) => { m3d = m.start($("#m3d"), { wake: () => wake(), tag: $("#m3dTag"), claro: CLARO }); wake(); });
+  }
+  const setL = (el, L) => el.style.setProperty("--L", L + mxS * 0.25);
+  const show = (el, t) => el.style.setProperty("--t", t);
+
+  function frame() {
+    queued = false;
+    const y = clamp(scrollY - lpTop(), 0, TOTAL - 1);
+    if (ys === null) ys = y;
+    ys = reduce ? y : ys + (y - ys) * 0.16;
+    if (Math.abs(y - ys) < 0.3) ys = y;
+    const dy = ys - lastYs; lastYs = ys;
+    vel = reduce ? 0 : vel * 0.92 + dy * 0.16;
+    spin += vel;
+    mxS += (mx - mxS) * 0.1;
+
+    let seg = 0; while (seg < LEN.length - 1 && ys >= CUM[seg + 1]) seg++;
+    const local = ys - CUM[seg];
+    const travel = easeInOut(clamp(local / TRAVEL));
+    const dwell = clamp((local - TRAVEL) / (LEN[seg] - TRAVEL));
+    const pos = seg + travel;
+    track.style.transform = `translateX(${-pos * innerWidth}px)`;
+    $("#belt").style.setProperty("--belt", `${-pos * innerWidth}px`);
+    $("#belt").style.opacity = 1 - smooth(clamp(1 - Math.abs(pos - 4))); // some na transmissão: a corrente é a esteira
+    $("#railbar").style.setProperty("--p", ys / (TOTAL - 1));
+    railNames.forEach((b, i) => b.classList.toggle("on", Math.round(pos) === i + 1));
+    const dw = (k) => (seg + 1 === k ? dwell : seg + 1 > k ? 1 : 0);
+
+    /* 1 · PNEUS — giram juntos; a luz atravessa os dois */
+    {
+      const d = dw(1), a = smooth(clamp(pos - 0)); // sobem um pouco ao chegar
+      [P.tLiso, P.tCrav, P.tLisoCruza].forEach((el, k) => {
+        const i = k === 1 ? 1 : 0;   // a cópia do cruzamento acompanha o liso
+        spins(el).forEach((im) => (im.style.transform = `rotate(${spin}deg)`));
+        setL(el, lerp(-0.2, 1.2, clamp(d * 1.1 - i * 0.12)));
+        el.style.transform = `translateY(${(1 - a) * 12}vh)`;
+      });
+      show($("#cp1"), clamp(d / 0.35));
+    }
+
+    /* 2 · RODAS — os raios correm do cubo ao aro um a um (ordem de montador), brilham ao tensionar e a roda acelera */
+    {
+      const d = dw(2);
+      const n = Math.min(30, Math.max(0, Math.floor(clamp((d - 0.05) / 0.75) * 32 - 3) + 1));   // raios já encaixados
+      raios(clamp((d - 0.05) / 0.75), clamp((d - 0.8) / 0.12));
+      // no fim a roda, já tensionada, ganha um empurrão a mais no giro
+      const extra = 140 * smooth(clamp((d - 0.8) / 0.2));
+      spins(P.wheel).forEach((im) => (im.style.transform = `rotate(${spin * 0.5 + extra}deg)`));
+      setL(P.wheel, lerp(-0.1, 1.15, d));
+      $("#statSpokes").textContent = n;
+      show($("#cp2"), clamp(d / 0.2));
+    }
+
+    /* 3 · FREIOS — disco gira, aproxima e termina cortado ao meio pela borda esquerda */
+    {
+      const d = dw(3), disc = P.disc;
+      // freada: no fim os braços do V-brake fecham e a roda e o disco desaceleram até parar
+      const freia = smooth(clamp((d - 0.72) / 0.18));
+      giroFreio += (spin - spinAntes) * (1 - freia); spinAntes = spin;
+      spins(disc).forEach((im) => (im.style.transform = `rotate(${giroFreio}deg)`));
+      setL(disc, lerp(-0.1, 1.15, clamp(d / 0.9)));
+      const z = reduce ? 0 : smooth(clamp((d - 0.15) / 0.6));
+      const base = disc.offsetWidth || 1;
+      const mobile = innerWidth <= 760;
+      // no celular o disco fica em cima e termina cortado ao meio pela borda esquerda, maior em relação à tela
+      const endR = mobile ? Math.min(innerWidth * 0.66, innerHeight * 0.3) : Math.min(innerHeight * 0.88, innerWidth * 0.5 - 56);
+      const sc = lerp(1, (endR * 2) / base, z);
+      disc.style.transform = `translateX(${lerp(0, -0.5 * innerWidth, z)}px) scale(${sc})`;
+      disc.querySelector(".floor").style.opacity = 0.16 * (1 - smooth(clamp(z / 0.3)));
+      $("#cp3").style.left = mobile ? "" : `${Math.max(innerWidth * 0.56, endR + 64)}px`;
+      const t = clamp((d - 0.5) / 0.25);
+      show($("#cp3"), t);
+      $("#statDisc").textContent = Math.round(160 * smooth(t));
+      coDisc.forEach((g) => g.style.setProperty("--co", clamp((d - 0.0) / 0.08) * (1 - clamp((d - 0.15) / 0.08))));
+      fitLabels($("#coDisc"), base, sc);
+      // o V-brake e a roda sobem da borda de baixo junto com o texto, no canto de baixo à direita
+      const vIn = smooth(clamp((d - 0.45) / 0.3));
+      P.vb.style.opacity = vIn;
+      P.vb.style.transform = `translateY(${(1 - vIn) * 14}vh)`;
+      // braços abertos um pouco para fora; na freada voltam para o centro e as sapatas apertam o aro
+      $("#vbEsq").style.transform = `rotate(${(-2.4 * (1 - freia)).toFixed(2)}deg)`;
+      $("#vbDir").style.transform = `rotate(${(2.4 * (1 - freia)).toFixed(2)}deg)`;
+      // a roda girando aparece borrada; conforme freia, o borrão some e ela fica parada e nítida
+      $("#vbBorrada").style.opacity = (1 - freia).toFixed(3);
+    }
+
+    /* 4 · TRANSMISSÃO — a corrente se monta elo por elo; depois troca de pinhão em pinhão, do maior ao menor */
+    {
+      const d = dw(4);
+      const monta = smooth(clamp((d - 0.02) / 0.4));
+      const troca = clamp((d - 0.5) / 0.38);              // 7 pinhões ao longo da troca
+      const g = troca > 0 ? Math.min(6, Math.floor(troca * 7)) : 0;
+      transmissao(-spin * 1.0, monta, g);
+      show($("#cp4"), clamp(d / 0.3));
+      $("#statGears").textContent = troca > 0 ? 3 * (g + 1) : 0;
+    }
+
+    /* 5 · CONTATO — luz passa por pedal, guidão e selim, um de cada vez */
+    {
+      const d = dw(5);
+      [P.pedal, P.bar, P.seat].forEach((el, i) => setL(el, lerp(-0.2, 1.2, clamp((d - i * 0.22) / 0.45))));
+      ["#tagPedal", "#tagBar", "#tagSeat"].forEach((s, i) => $(s).style.setProperty("--o", clamp((d - 0.05 - i * 0.15) / 0.15)));
+      show($("#cp5"), clamp(d / 0.25));
+    }
+
+    /* 6 · MONTAGEM */
+    {
+      const d = dw(6);
+      if (pos > 2.5) loadM3d();
+      if (m3d && pos > 4.9) m3d(d);
+      // o título acompanha a montagem e sai antes do giro
+      show($("#cp6a"), clamp(d / 0.04) * (1 - clamp((d - 0.55) / 0.05)));
+      show($("#cp6c"), clamp((d - 0.6) / 0.05) * (1 - clamp((d - 0.84) / 0.05)));   // durante o giro
+      show($("#cp6b"), clamp((d - 0.9) / 0.06));
+    }
+
+    if (ys !== y || Math.abs(vel) > 0.02 || Math.abs(mx - mxS) > 0.001) wake();
+  }
+  function wake() { if (!queued) { queued = true; requestAnimationFrame(frame); } }
+  addEventListener("scroll", wake, { passive: true });
+  addEventListener("resize", () => { size(); wake(); });
+  size(); frame();
+
+})();
+</script>
+
+<!-- ============================ 2 · LINHA ============================ -->
+<section class="lineup" id="linha" data-theme="light">
+  <div class="pin">
+    <div class="head">
+      <h2>A linha completa.<br /><em>Do aro 16 ao 29.</em></h2>
+      <p>Oito modelos para cada fase, do primeiro pedal à trilha de fim de semana.</p>
+    </div>
+    <div class="track" id="track"></div>
+    <div class="rail" id="rail">
+      <button data-aro="29">Aro 29</button><button data-aro="26">Aro 26</button><button data-aro="20">Aro 20</button><button data-aro="16">Aro 16</button>
+      <div class="bar"><i id="railbar"></i></div>
+      <span class="hint"><svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M5 4.5L1.5 8L5 11.5M11 4.5L14.5 8L11 11.5M2 8h12" stroke="currentColor" stroke-width="1.4" stroke-linecap="round" stroke-linejoin="round"/></svg>Role ou arraste</span>
+    </div>
+  </div>
+</section>
+
+<!-- ============================ 3 · ELÉTRICOS ============================ -->
+<section class="ev" id="eletricos" data-theme="light">
+  <div class="pin">
+    <div>
+      <h2>Mobilidade<br />sem esforço.</h2>
+      <p class="sub">Cinco elétricos, do scooter de todo dia ao triciclo com espaço pra dois.</p>
+      <ol id="evlist"></ol>
+      <a class="btn dark more" href="/catalogo-eletricos.html">Explorar elétricos
+        <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3.5 8H12.5M8.5 3.5L13 8L8.5 12.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+    </div>
+    <div class="visual" id="evvisual"></div>
+  </div>
+</section>
+
+<!-- ============================ 4 · FRASE ============================ -->
+<section class="statement" id="statement" data-theme="dark">
+  <div class="pin"><p id="phrase"></p></div>
+</section>
+
+<!-- ============================ 5 · HUB ============================ -->
+<section class="hub" id="hub" data-theme="dark">
+  <div class="grid">
+    <div class="tile pdf">
+      <div>
+        <h3>Toda a linha<br />de bicicletas<br />num arquivo só.</h3>
+        <p>O catálogo em PDF, pra ver com calma, imprimir ou mandar pra alguém.</p>
+      </div>
+      <div class="row">
+        <a class="chip" href="/catalogos/catalogo-bicicletas-2026.pdf" target="_blank" rel="noopener">Visualizar <svg viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3.5 8H12.5M8.5 3.5L13 8L8.5 12.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></a>
+        <a class="chip dl" href="#" id="dl" data-state="idle">
+          <span class="fill"></span>
+          <span class="stack"><span data-when="idle">Baixar · 20 MB</span><span data-when="loading" class="tabular" data-role="pct">0%</span><span data-when="done">Pronto</span></span>
+          <span class="stack">
+            <svg data-when="idle" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 2.5V10.5M4.5 7.5L8 11L11.5 7.5M2.5 13.5H13.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <svg data-when="loading" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M8 2.5V10.5M4.5 7.5L8 11L11.5 7.5M2.5 13.5H13.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+            <svg data-when="done" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3 8.5L6.5 12L13 4.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>
+          </span>
+        </a>
+      </div>
+      <div class="book" aria-hidden="true">
+        <div class="page"></div><div class="page"></div>
+        <div class="page"><img class="plogo" src="img/home2/logo-escuro.webp" alt="" /><div class="ptitle">Catálogo<br />2026<small>BICICLETAS VULLZ</small></div><img src="img/home2/linha/street.webp" alt="" /></div>
+      </div>
+    </div>
+    <div class="tile">
+      <h3>Ficou com dúvida?<br />Chama a gente.</h3>
+      <div class="row">
+        <a class="chip" href="https://wa.me/45998604743?text=Ol%C3%A1!%20Vi%20o%20cat%C3%A1logo%20da%20Vullz%20e%20queria%20saber%20mais." target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="#25D366" aria-hidden="true"><path d="M12.04 2C6.58 2 2.13 6.45 2.13 11.91c0 1.75.46 3.45 1.33 4.95L2.05 22l5.28-1.38a9.9 9.9 0 0 0 4.7 1.2h.01c5.46 0 9.91-4.45 9.91-9.91S17.5 2 12.04 2Zm4.52 11.97c-.25-.12-1.46-.72-1.69-.8-.23-.08-.39-.12-.56.13-.16.24-.64.8-.78.96-.14.16-.29.18-.53.06-.25-.12-1.04-.38-1.98-1.22-.73-.65-1.230-1.46-1.37-1.7-.14-.25-.02-.38.11-.5.11-.11.25-.29.37-.43.12-.15.16-.25.24-.41.08-.16.04-.31-.02-.43-.06-.12-.56-1.36-.77-1.86-.2-.49-.41-.42-.56-.43h-.48c-.16 0-.43.06-.65.31-.23.24-.86.84-.86 2.050 0 1.21.88 2.38 1 2.54.12.16 1.73 2.65 4.2 3.71.59.25 1.04.4 1.4.52.59.19 1.12.16 1.55.1.47-.07 1.46-.6 1.66-1.17.21-.58.21-1.08.15-1.18-.06-.1-.23-.16-.48-.28Z"/></svg>WhatsApp</a>
+        <a class="chip" href="https://www.instagram.com/vullzbikes/" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5" stroke="#E1306C" stroke-width="1.6"/><circle cx="12" cy="12" r="4.2" stroke="#E1306C" stroke-width="1.6"/><circle cx="17.15" cy="6.85" r="1.1" fill="#E1306C"/></svg>Instagram</a>
+      </div>
+    </div>
+    <a class="tile link" href="#linha">
+      <div><h3>Bicicletas<br />e elétricos.</h3><p>Cores, ficha técnica e detalhes de cada modelo.</p></div>
+      <span class="btn primary" style="pointer-events:none">Abrir catálogo <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3.5 8H12.5M8.5 3.5L13 8L8.5 12.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg></span>
+    </a>
+  </div>
+</section>
+<footer><img src="img/home2/logo-branco.png" alt="Vullz" /><span>© 2026 Vullz Bikes. Todos os direitos reservados.</span></footer>
+
+<script>
+  const EASE = "cubic-bezier(0.16, 1, 0.3, 1)";
+  const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
+  const $ = (s) => document.querySelector(s);
+  const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
+  const lerp = (a, b, t) => a + (b - a) * t;
+  const ease = (t) => 1 - Math.pow(1 - t, 3);
+
+  /* ---------------------------------------------------------------
+     Mola (Apple: "damping" + "response" em vez de massa/rigidez).
+     damping 1 = sem quique; < 1 = quica. Sempre parte do valor ATUAL,
+     então dá pra interromper e redirecionar a qualquer instante.
+     --------------------------------------------------------------- */
+  function spring(value, { damping = 1, response = 0.4 } = {}) {
+    const k = Math.pow((2 * Math.PI) / response, 2), c = (4 * Math.PI * damping) / response;
+    return {
+      x: value, v: 0, target: value,
+      step(dt) {
+        const a = -k * (this.x - this.target) - c * this.v;
+        this.v += a * dt; this.x += this.v * dt;
+        if (Math.abs(this.v) < 0.01 && Math.abs(this.x - this.target) < 0.01) { this.x = this.target; this.v = 0; return false; }
+        return true;
+      },
+    };
+  }
+  // projeção de impulso (código de exemplo da WWDC "Designing Fluid Interfaces")
+  const project = (v, d = 0.998) => ((v / 1000) * d) / (1 - d);
+  // resistência elástica nas bordas
+  const rubber = (over, dim, c = 0.55) => (over * dim * c) / (dim + c * Math.abs(over));
+
+  /* ---------------- dados ---------------- */
+  const COLORS = [
+    { id: "laranja", name: "Laranja Neon", sw: "#fc3901" },
+    { id: "verde", name: "Verde Neon", sw: "#82fc03" },
+    { id: "rosa", name: "Rosa Neon", sw: "#fa1589" },
+    { id: "branco", name: "Branco", sw: "#fcfefd" },
+    { id: "quadro-preto-azul-dourado", name: "Preto · Azul e Dourado", sw: "conic-gradient(#060606 0 34%, #0084d2 0 67%, #d9a553 0)" },
+    { id: "quadro-branco-azul-dourado", name: "Branco · Azul e Dourado", sw: "conic-gradient(#fcfefd 0 34%, #0084d2 0 67%, #d9a553 0)" },
+  ];
+  const BIKES = [
+    { id: "oregon", name: "Oregon", aro: 29, tag: "Mountain bike" },
+    { id: "slim", name: "Slim", aro: 29, tag: "Mountain bike" },
+    { id: "street", name: "Street", aro: 26, tag: "Urbana" },
+    { id: "doble", name: "Doble", aro: 26, tag: "Full suspension" },
+    { id: "pulse", name: "Pulse", aro: 20, tag: "Infantojuvenil" },
+    { id: "majestic", name: "Majestic", aro: 20, tag: "Infantojuvenil" },
+    { id: "pro-kids", name: "Pro Kids", aro: 16, tag: "Infantil" },
+    { id: "love-kids", name: "Love Kids", aro: 16, tag: "Infantil" },
+  ];
+  const EVS = [
+    { id: "urban-volt-v50", name: "Urban Volt (V-50)" },
+    { id: "urban-drive", name: "Urban Drive" },
+    { id: "urban-citycoco", name: "Urban Citycoco" },
+    { id: "urban-plus", name: "Urban Plus" },
+    { id: "urban-max", name: "Urban Max" },
+  ];
+  const ARROW = `<svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true"><path d="M3.5 8H12.5M8.5 3.5L13 8L8.5 12.5" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"/></svg>`;
+
+  /* ---------------- montagem ---------------- */
+  const bike = $("#bike"), swatches = $("#swatches"), cname = $("#cname");
+  COLORS.forEach((c, i) => {
+    const img = new Image(); img.alt = i ? "" : "Bicicleta Oregon aro 29"; img.decoding = "async"; if (!i) img.className = "on";
+    bike.append(img);
+    const b = document.createElement("button");
+    b.className = "sw"; b.setAttribute("aria-label", c.name); b.setAttribute("aria-pressed", String(!i));
+    b.innerHTML = `<i style="background:${c.sw}"></i>`;
+    // troca no pointer-down: resposta imediata
+    b.addEventListener("pointerdown", () => setColor(i));
+    b.addEventListener("keydown", (e) => { if (e.key === "Enter" || e.key === " ") { e.preventDefault(); setColor(i); } });
+    swatches.append(b);
+  });
+  let current = 0;
+  /* ---------------- passeio de cores (rolagem, bike no zoom) ---------------- */
+  // ZOOM_END e TOUR_START em alturas de tela; o passo de cor é em PIXELS, pra
+  // não depender do tamanho do monitor. 220px ≈ 2 cliques de rodinha no
+  // Windows (~100px/clique), 3 num mouse de Mac (40–100px) ou um gesto curto
+  // de trackpad.
+  const ZOOM_END = 1.1, TOUR_START = 1.25, TOUR_STEP_PX = 220, TOUR_HOLD = 0.35, N = COLORS.length;
+  function sizeHero() {
+    if (reduce) return;
+    hero.style.height = `${innerHeight * (1 + TOUR_START + TOUR_HOLD) + (N - 1) * TOUR_STEP_PX + TOUR_STEP_PX / 2}px`;
+  }
+  let tourK = -1, shown = 0;
+  const tour = $("#tour"), tourNames = $("#tourNames"), tourSws = $("#tourSws"), tourRing = $("#tourRing");
+  let seqFrom = -1, seq = [];
+  // a sequência começa pela cor que a pessoa escolheu no topo: nada pula ao entrar
+  function buildTour() {
+    seqFrom = current; seq = COLORS.map((_, k) => (current + k) % N);
+    tourNames.replaceChildren(...seq.map((ci) => { const e = document.createElement("span"); e.textContent = COLORS[ci].name; return e; }));
+    tourK = -1;
+    tourSws.querySelectorAll(".sw").forEach((b) => b.remove());
+    seq.forEach((ci, k) => {
+      const b = document.createElement("button");
+      b.className = "sw"; b.setAttribute("aria-label", COLORS[ci].name);
+      b.innerHTML = `<i style="background:${COLORS[ci].sw}"></i>`;
+      b.addEventListener("click", () => goStop(k));
+      tourSws.append(b);
+    });
+  }
+  const heroTop = () => hero.getBoundingClientRect().top + scrollY;
+  function goStop(k) {
+    // meio da faixa daquela cor
+    scrollS.x = scrollY; scrollS.v = 0; scrollS.target = heroTop() + TOUR_START * innerHeight + k * TOUR_STEP_PX + TOUR_STEP_PX / 2;
+    scrollAnimating = true; wake();
+  }
+  function show(ci) {
+    if (ci === shown) return;
+    const imgs = bike.querySelectorAll("img");
+    imgs[shown].classList.remove("on"); imgs[ci].classList.add("on"); shown = ci;
+    window.__hero3d?.(ci);   // a bike 3D troca a cor junto (suave)
+  }
+  function setColor(i) {
+    if (i === current) return;
+    show(i);
+    swatches.children[current].setAttribute("aria-pressed", "false"); swatches.children[i].setAttribute("aria-pressed", "true");
+    [...cname.children].slice(0, -1).forEach((n) => n.remove()); // toques rápidos: não acumula
+    const old = cname.lastElementChild, nu = document.createElement("span");
+    nu.textContent = COLORS[i].name; nu.style.cssText = "transform:translateY(100%);opacity:0;margin-top:-28px";
+    cname.append(nu);
+    requestAnimationFrame(() => requestAnimationFrame(() => {
+      old.style.transform = "translateY(-100%)"; old.style.opacity = "0";
+      nu.style.transform = "none"; nu.style.opacity = "1";
+    }));
+    setTimeout(() => { if (old.isConnected) old.remove(); nu.style.marginTop = "0"; }, 500);
+    current = i;
+  }
+
+  const track = $("#track");
+  BIKES.forEach((b) => {
+    track.insertAdjacentHTML("beforeend", `
+      <a class="card" href="/catalogo-interativo.html" data-aro="${b.aro}" draggable="false">
+        <div class="top"><img class="mlogo" src="img/home2/logos/${b.id}.webp" alt="${b.name}" /><span class="aro">Aro ${b.aro}</span></div>
+        <div class="ph"><img src="img/home2/linha/${b.id}.webp" alt="" /></div>
+        <div class="bottom"><span>${b.tag}</span><span class="go">${ARROW}</span></div>
+      </a>`);
+  });
+  track.insertAdjacentHTML("beforeend", `
+    <a class="card end" href="/catalogo-interativo.html" draggable="false">
+      <div><h3>Encontre<br />a sua.</h3><p>Cores, ficha técnica e detalhes de cada modelo no catálogo interativo.</p></div>
+      <span class="btn primary" style="align-self:flex-start;pointer-events:none">Abrir catálogo ${ARROW}</span>
+    </a>`);
+
+  const evlist = $("#evlist"), evvisual = $("#evvisual");
+  EVS.forEach((e, i) => {
+    evlist.insertAdjacentHTML("beforeend", `<li class="${i ? "" : "on"}"><button type="button" data-i="${i}">${e.name}</button></li>`);
+    const img = new Image(); img.src = `img/home2/eletricos/${e.id}.webp`; img.alt = i ? "" : e.name; if (!i) img.className = "on";
+    evvisual.append(img);
+  });
+  const evImgs = [...evvisual.querySelectorAll("img")], evItems = [...evlist.children];
+
+  const PHRASE = "Do primeiro pedal ao trajeto de todo dia, existe uma Vullz feita pra você.";
+  const phrase = $("#phrase");
+  PHRASE.split(" ").forEach((w, i, arr) => {
+    const s = document.createElement("span"); s.textContent = w + (i < arr.length - 1 ? " " : "");
+    if (/Vullz|você/.test(w)) s.className = "y";
+    phrase.append(s);
+  });
+  const words = [...phrase.children];
+
+  /* ---------------- referências ---------------- */
+  const hero = $("#hero"), bikeWrap = $("#bikeWrap"), copy = $("#copy"), picker = $("#picker"), cue = $("#scrollcue");
+  const line = $("#linha"), railbar = $("#railbar"), railBtns = [...document.querySelectorAll("#rail button")];
+  const ev = $("#eletricos"), statement = $("#statement"), nav = $("#nav");
+  const cards = () => [...track.querySelectorAll(".card")];
+
+  /* ---------------- geometria da linha ---------------- */
+  let dist = 0;
+  function sizeLine() {
+    if (reduce) return;
+    dist = track.scrollWidth - innerWidth + 56;
+    line.style.height = `${dist + innerHeight}px`;
+  }
+  const lineTop = () => line.getBoundingClientRect().top + scrollY;
+  const prog = (el) => { const r = el.getBoundingClientRect(); return clamp(-r.top / (r.height - innerHeight)); };
+
+  /* ---------------- cursor: luz e inclinação, em molas ---------------- */
+
+  /* ---------------- arrastar a linha (1:1, impulso, encaixe, elástico) ---------------- */
+  const scrollS = spring(0, { damping: 1, response: 0.55 });   // sem quique: no passeio de cores um quique faria a cor "voltar"
+  const edgeS = spring(0, { damping: 1, response: 0.35 });      // volta do elástico
+  let scrollAnimating = false, drag = null, edge = 0;
+
+  track.addEventListener("pointerdown", (e) => {
+    if (reduce || e.button !== 0) return;
+    scrollAnimating = false; edgeS.x = edgeS.target = edge; // agarrou no meio do voo: parte de onde está
+    drag = { id: e.pointerId, x0: e.clientX, y0: e.clientY, s0: scrollY, e0: edge, moved: false, hist: [[performance.now(), scrollY]] };
+  });
+  addEventListener("pointermove", (e) => {
+    if (!drag || e.pointerId !== drag.id) return;
+    const dx = e.clientX - drag.x0, dy = e.clientY - drag.y0;
+    if (!drag.moved) {
+      if (Math.hypot(dx, dy) < 8) return;               // histerese antes de decidir
+      if (Math.abs(dy) > Math.abs(dx)) { drag = null; return; } // era rolagem vertical
+      drag.moved = true; track.classList.add("dragging");
+      try { track.setPointerCapture(e.pointerId); } catch {}
+    }
+    const top = lineTop(), min = top, max = top + dist;
+    let want = drag.s0 - dx + (drag.e0 ? -drag.e0 : 0);
+    const over = want < min ? want - min : want > max ? want - max : 0;
+    edge = over ? -rubber(over, innerWidth) : 0;
+    scrollTo(0, clamp(want, min, max));
+    const now = performance.now(); drag.hist.push([now, drag.s0 - dx]); drag.hist = drag.hist.filter(([t]) => now - t < 100);
+    wake();
+  });
+  function endDrag(e) {
+    if (!drag || (e && e.pointerId !== drag.id)) return;
+    const d = drag; drag = null;
+    if (!d.moved) return;
+    setTimeout(() => track.classList.remove("dragging"), 0);
+    const h = d.hist, [t0, s0] = h[0], [t1, s1] = h[h.length - 1];
+    // px/s, com teto: um peteleco forte avança uns 3 cards, não a linha inteira
+    const v = clamp(t1 > t0 ? ((s1 - s0) / (t1 - t0)) * 1000 : 0, -4000, 4000);
+    // encaixa no card mais próximo de ONDE O GESTO IA PARAR, não de onde soltou
+    const top = lineTop(), projected = scrollY + project(v);
+    const snaps = cards().map((c) => clamp(top + c.offsetLeft - 56, top, top + dist));
+    const target = snaps.reduce((a, b) => (Math.abs(b - projected) < Math.abs(a - projected) ? b : a));
+    scrollS.x = scrollY; scrollS.v = v; scrollS.target = target; scrollAnimating = true;  // herda a velocidade do dedo
+    edgeS.x = edge; edgeS.v = 0; edgeS.target = 0;
+    wake();
+  }
+  addEventListener("pointerup", endDrag); addEventListener("pointercancel", endDrag);
+  track.addEventListener("click", (e) => { if (track.classList.contains("dragging")) e.preventDefault(); }, true);
+  track.addEventListener("dragstart", (e) => e.preventDefault());
+  // roda do mouse/trackpad interrompe o encaixe na hora
+  addEventListener("wheel", () => { scrollAnimating = false; }, { passive: true });
+  addEventListener("keydown", () => { scrollAnimating = false; });
+  // trackpad horizontal também anda a linha
+  track.addEventListener("wheel", (e) => {
+    if (reduce || Math.abs(e.deltaX) <= Math.abs(e.deltaY)) return;
+    e.preventDefault(); scrollBy(0, e.deltaX);
+  }, { passive: false });
+  // atalhos do trilho: pular para um aro
+  railBtns.forEach((b) => b.addEventListener("click", () => {
+    const c = cards().find((c) => c.dataset.aro === b.dataset.aro); if (!c) return;
+    scrollS.x = scrollY; scrollS.v = 0; scrollS.target = clamp(lineTop() + c.offsetLeft - 56, lineTop(), lineTop() + dist); scrollAnimating = true; wake();
+  }));
+  // lista de elétricos clicável: rola até o trecho daquele modelo
+  evlist.addEventListener("click", (e) => {
+    const b = e.target.closest("button"); if (!b) return;
+    const top = ev.getBoundingClientRect().top + scrollY, range = ev.offsetHeight - innerHeight;
+    scrollS.x = scrollY; scrollS.v = 0; scrollS.target = top + range * ((+b.dataset.i + 0.5) / EVS.length); scrollAnimating = true; wake();
+  });
+
+  /* ---------------- entrada do hero (o momento autoral) ---------------- */
+  function introBike() {
+    // fill "backwards": segura o 1º quadro durante o atraso e, ao terminar,
+    // devolve o elemento ao estilo normal — a rolagem continua mandando nele
+    const T = (el, kf, o) => { if (!el) return; const a = el.animate(kf, { fill: "backwards", easing: EASE, ...o }); return a; };
+    // a bike chega pedalando: entra da esquerda com desfoque de movimento e assenta
+    T(document.querySelector(".hero3d"), [
+      { transform: "translateX(-62vw)", filter: "blur(10px)", opacity: 0 },
+      { transform: "translateX(-8vw)", filter: "blur(3px)", opacity: 1, offset: 0.55 },
+      { transform: "translateX(0.6vw) rotate(-0.5deg)", filter: "blur(0px)", offset: 0.82 },
+      { transform: "none", filter: "blur(0px)", opacity: 1 },
+    ], { duration: 1700, delay: 0 });
+  }
+  function introTexto() {
+    const T = (el, kf, o) => { if (!el) return; return el.animate(kf, { fill: "backwards", easing: EASE, ...o }); };
+    T($(".hero h1"), [{ opacity: 0, transform: "translateY(14px)" }, { opacity: 1, transform: "none" }], { duration: 900, delay: 700 });
+    document.querySelectorAll(".hero .opt").forEach((o, i) => T(o, [{ opacity: 0, transform: "translateY(18px)" }, { opacity: 1, transform: "none" }], { duration: 900, delay: 820 + i * 80 }));
+    T($(".picker .swatches"), [{ opacity: 0, transform: "translateY(12px)" }, { opacity: 1, transform: "none" }], { duration: 900, delay: 1500 });
+    T($(".picker .model"), [{ opacity: 0 }, { opacity: 1 }], { duration: 900, delay: 1500 });
+    T($(".picker .cname"), [{ opacity: 0 }, { opacity: 1 }], { duration: 900, delay: 1560 });
+    T(cue, [{ opacity: 0 }, { opacity: 1 }], { duration: 900, delay: 2100 });
+  }
+
+  /* ---------------- quadro: só roda quando algo mudou ---------------- */
+  let last = performance.now(), queued = false, evIndex = 0;
+  function wake() { if (!queued) { queued = true; requestAnimationFrame(frame); } }
+
+  function frame(now) {
+    queued = false;
+    const dt = Math.min(0.032, (now - last) / 1000); last = now;
+    let busy = false;
+
+    // molas do cursor
+
+    // encaixe da linha (rolagem guiada por mola)
+    if (scrollAnimating) { const moving = scrollS.step(dt); scrollTo(0, scrollS.x); if (!moving) scrollAnimating = false; busy = busy || moving; }
+    if (!drag && edge !== 0) { busy = edgeS.step(dt) || busy; edge = edgeS.x; }
+
+    // HERO
+    const u = reduce ? 0 : Math.max(0, -hero.getBoundingClientRect().top) / innerHeight;  // rolagem em telas
+    const z = ease(clamp(u / ZOOM_END));
+    bikeWrap.style.transform = `translate(${lerp(0, -27, z)}vw, ${lerp(0, 12, z)}vh) scale(${lerp(1, 2.3, z)})`;
+    window.__hero3dFrame?.();   // a câmera 3D segue o mesmo zoom
+    const fade = clamp(1 - u / 0.35);
+    copy.style.opacity = fade; copy.style.transform = `translateY(${(1 - fade) * -40}px)`;
+    picker.style.opacity = fade; cue.style.opacity = clamp(1 - u / 0.06);
+
+    // passeio de cores: cada faixa de 220px é uma cor; ao cruzar, a cor vira
+    if (u > 0.02 && !reduce) {
+      if (seqFrom !== current) buildTour();
+      bike.classList.add("tour-on");
+      const px = u * innerHeight - TOUR_START * innerHeight;
+      const k = clamp(Math.floor(px / TOUR_STEP_PX), 0, N - 1);
+      if (k !== tourK) {
+        tourK = k; show(seq[k]);
+        tourRing.style.transform = `translateX(${k * 40}px)`;   // 30px da bolinha + 10px de vão
+        [...tourNames.children].forEach((e, n) => e.classList.toggle("on", n === k));
+      }
+      const to = clamp((u - (TOUR_START - 0.3)) / 0.25);
+      tour.style.opacity = to; tour.style.transform = `translateX(${(1 - to) * 24}px)`; tour.classList.toggle("live", to > 0.5);
+    } else if (bike.classList.contains("tour-on")) {
+      bike.classList.remove("tour-on"); show(current); tourK = -1;
+      tour.style.opacity = 0; tour.classList.remove("live");
+    }
+
+    // LINHA
+    if (!reduce) {
+      const lp = prog(line);
+      track.style.transform = `translateX(${-lp * dist + edge}px)`;
+      railbar.style.transform = `scaleX(${lp})`;
+      let aro = 29; cards().forEach((c) => { if (c.dataset.aro && c.getBoundingClientRect().left < innerWidth * 0.5) aro = +c.dataset.aro; });
+      railBtns.forEach((b) => b.classList.toggle("on", +b.dataset.aro === aro));
+    }
+
+    // ELÉTRICOS
+    const idx = Math.min(EVS.length - 1, Math.floor(prog(ev) * EVS.length * 0.999));
+    if (idx !== evIndex) {
+      evImgs.forEach((im, i) => im.classList.toggle("on", i === idx));
+      evItems.forEach((li, i) => li.classList.toggle("on", i === idx));
+      evIndex = idx;
+    }
+
+    // FRASE
+    const lit = Math.round(clamp(prog(statement) / 0.8) * words.length);
+    words.forEach((w, i) => w.classList.toggle("lit", i < lit));
+
+    // NAV
+    const under = document.elementsFromPoint(innerWidth / 2, 70).find((el) => el.closest("[data-theme]"));
+    nav.classList.toggle("light", (under ? under.closest("[data-theme]").dataset.theme : "light") === "light");
+    nav.style.setProperty("--edge", scrollY > 8 ? 1 : 0);
+
+    if (busy) wake();
+  }
+  addEventListener("scroll", wake, { passive: true });
+
+  addEventListener("resize", () => { sizeLine(); sizeHero(); wake(); });
+
+  /* ---------------- download (simulado, só pra ver o andamento) ---------------- */
+  document.querySelectorAll(".dl").forEach((dl) => dl.addEventListener("click", (e) => {
+    e.preventDefault();
+    if (dl.dataset.state !== "idle") return;
+    const pct = dl.querySelector("[data-role='pct']");
+    let p = 0; dl.dataset.state = "loading";
+    const tick = () => {
+      p = Math.min(1, p + 0.018 + Math.random() * 0.02); dl.style.setProperty("--p", p); pct.textContent = `${Math.round(p * 100)}%`;
+      if (p < 1) return setTimeout(tick, 40);
+      dl.dataset.state = "done";
+      // a animação termina e o PDF baixa de verdade
+      const a = document.createElement("a"); a.href = "/catalogos/catalogo-bicicletas-2026.pdf"; a.download = "catalogo-vullz-bicicletas-2026.pdf"; document.body.append(a); a.click(); a.remove();
+      setTimeout(() => { dl.dataset.state = "idle"; dl.style.setProperty("--p", 0); }, 1600);
+    };
+    tick();
+  }));
+
+  /* ---------------- start ---------------- */
+  // medidas na hora; só a entrada espera a foto (com teto, pra rede lenta não segurar a página)
+  sizeLine(); sizeHero(); wake();
+  document.fonts.ready.then(() => { sizeLine(); wake(); });
+  // catálogos entram na hora; a bike 3D entra assim que o modelo termina de carregar
+  if (!reduce) introTexto();
+  // a bike 3D entra quando o modelo está pronto E o topo da bike aparece na tela (a abertura vem antes)
+  addEventListener("hero3d-pronto", () => {
+    const h = document.getElementById("hero");
+    if (reduce) { h.classList.add("has3d"); return wake(); }
+    // a bike só aparece junto com a entrada (senão ela sumiria e voltaria voando)
+    const io = new IntersectionObserver((es) => { if (es.some((e) => e.isIntersecting)) { io.disconnect(); h.classList.add("has3d"); introBike(); wake(); } }, { threshold: 0.2 });
+    io.observe(h);
+  }, { once: true });
+</script>
+
+<!-- bike 3D do topo (three.js) -->
+<script type="module">if (new URLSearchParams(location.search).get("abertura") === "3d") import("./js/abertura3d.js");   // variante: close em 3D com a câmera girando</script>
+</body>
+</html>

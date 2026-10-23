@@ -3,6 +3,12 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+    <!-- No computador a página inicial é a home nova (public/home/). No celular continua esta
+         página até a versão mobile da home nova ficar pronta. Fica depois do viewport: antes dele o
+         celular ainda mede 980px de largura e cairia no redirecionamento. -->
+    <script>
+      if (matchMedia("(min-width: 761px)").matches && screen.width > 760) location.replace("/home/" + location.hash);
+    </script>
 
     <title>Catálogos Digitais | Vullz Bikes</title>
     <meta
