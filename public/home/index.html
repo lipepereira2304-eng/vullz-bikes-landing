@@ -4,6 +4,8 @@
 <meta charset="utf-8" />
 <script type="importmap">{ "imports": { "three": "https://cdn.jsdelivr.net/npm/three@0.165.0/build/three.module.js", "three/addons/": "https://cdn.jsdelivr.net/npm/three@0.165.0/examples/jsm/" } }</script>
 <meta name="viewport" content="width=device-width, initial-scale=1" />
+<!-- aparelho mais fraco (celular, ou poucos núcleos / pouca memória): a página tira os efeitos de vidro desfocado -->
+<script>if (matchMedia("(max-width: 760px)").matches || (navigator.hardwareConcurrency || 8) <= 4 || (navigator.deviceMemory || 8) <= 4) document.documentElement.classList.add("leve");</script>
 <title>Vullz Bikes | Bicicletas e elétricos</title>
 <meta name="description" content="Vullz Bikes: bicicletas e elétricos para o seu estilo, o seu ritmo e o seu caminho. Conheça a linha de produção e os catálogos interativos." />
 <meta name="theme-color" content="#000000" />
@@ -14,8 +16,11 @@
 <link rel="icon" href="/favicon.ico" sizes="32x32" /><link rel="icon" type="image/svg+xml" href="/favicon.svg?v=2" />
 <link rel="apple-touch-icon" href="/apple-touch-icon.png?v=2" /><link rel="manifest" href="/manifest.webmanifest" />
 <style>
-  @font-face { font-family: "TT Firs Neue"; src: url(fonts/tt-firs-neue-regular.woff2) format("woff2"); font-weight: 400; font-display: block; }
-  @font-face { font-family: "TT Firs Neue"; src: url(fonts/tt-firs-neue-medium.woff2) format("woff2"); font-weight: 500 800; font-display: block; }
+  /* Red Hat Display (fonte padrão do site; licença aberta OFL), variável do 300 ao 900, hospedada junto com o site */
+  @font-face { font-family: "Red Hat Display"; src: url(fonts/red-hat-display-latin.woff2) format("woff2"); font-weight: 300 900; font-display: block;
+    unicode-range: U+0000-00FF, U+0131, U+0152-0153, U+02BB-02BC, U+02C6, U+02DA, U+02DC, U+0304, U+0308, U+0329, U+2000-206F, U+20AC, U+2122, U+2191, U+2193, U+2212, U+2215, U+FEFF, U+FFFD; }
+  @font-face { font-family: "Red Hat Display"; src: url(fonts/red-hat-display-latin-ext.woff2) format("woff2"); font-weight: 300 900; font-display: block;
+    unicode-range: U+0100-02BA, U+02BD-02C5, U+02C7-02CC, U+02CE-02D7, U+02DD-02FF, U+1E00-1E9F, U+1EF2-1EFF, U+2020, U+20A0-20AB, U+20AD-20C4, U+2113, U+2C60-2C7F, U+A720-A7FF; }
 
   :root {
     --ink: #0a0a0b;
@@ -30,7 +35,7 @@
     --yellow: #f5c518;
     --glide: cubic-bezier(0.16, 1, 0.3, 1);   /* chegada confiante (expo-out) */
     --out: cubic-bezier(0.33, 1, 0.68, 1);
-    --font: "TT Firs Neue", -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+    --font: "Red Hat Display", -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
   }
   * { box-sizing: border-box; }
   html { background: var(--paper); scrollbar-width: thin; scrollbar-color: rgba(10,10,11,.28) transparent; }
@@ -64,6 +69,10 @@
   .nav ul a:hover { opacity: 1; }
   .nav .cta { font-size: 13px; font-weight: 500; padding: 9px 16px; border-radius: 999px; background: #fff; color: var(--ink); transition: background-color 500ms var(--glide), color 500ms var(--glide), transform 150ms var(--out); }
   .nav.light { background: rgba(255,255,255,.72); color: var(--ink); }
+  /* aparelho fraco: o desfoque do vidro é refeito a cada quadro da rolagem; no lugar, fundo quase opaco */
+  html.leve .nav, html.leve .tour, html.leve .abertura .opt { -webkit-backdrop-filter: none; backdrop-filter: none; }
+  html.leve .nav { background: rgba(10,10,11,.92); }
+  html.leve .nav.light { background: rgba(255,255,255,.94); }
   .nav.light::after { background: var(--line-light); }
   .nav.light .brand .on-dark { opacity: 0; }
   .nav.light .brand .on-light { opacity: 1; }
@@ -97,14 +106,14 @@
   /* posição medida na própria foto (1600×940, cover): --u = 1 pixel da foto na tela.
      O preto livre fica à esquerda da suspensão (x < ~440) e acima do pneu, que sobe em arco até y ~490 perto da suspensão */
   .abertura { container-type: size; --u: max(100cqw / 1600, 100cqh / 940); --fx: calc(50cqw - 800 * var(--u)); --fy: calc(50cqh - 470 * var(--u)); }
-  .abertura .marca { position: absolute; z-index: 2; left: max(24px, calc(var(--fx) + 70 * var(--u))); top: 96px;   /* perto da faixa de cima */
-    width: calc(var(--fx) + 410 * var(--u) - max(24px, calc(var(--fx) + 70 * var(--u)))); }
+  .abertura .marca { position: absolute; z-index: 2; left: max(24px, calc(var(--fx) + 70 * var(--u))); top: 120px;   /* perto da faixa de cima */
+    width: calc(var(--fx) + 410 * var(--u) - max(24px, calc(var(--fx) + 70 * var(--u)))); min-width: 268px; }   /* em janelas estreitas não espreme os botões */
   .abertura .marca h1 span { display: block; }   /* uma frase por linha */
   .abertura .marca h1 { margin: 0; font-size: clamp(20px, calc(31 * var(--u)), 34px); font-weight: 500; line-height: 1.15; letter-spacing: -.02em; text-wrap: balance; }
   .abertura .marca p { margin: 16px 0 0; max-width: 19ch; font-size: clamp(15px, 1.2vw, 19px); line-height: 1.25; letter-spacing: -.015em; color: rgba(255,255,255,.82); text-wrap: balance;
     animation: abSurge 1s var(--glide) .8s backwards; }
   /* os dois catálogos interativos logo abaixo da frase */
-  .abertura .marca .options { display: grid; grid-template-columns: min(290px, 100%); gap: 12px; margin-top: 16px; }
+  .abertura .marca .options { display: grid; grid-template-columns: min(236px, 100%); gap: 12px; margin-top: 16px; }
   /* botões no laranja do logo da Vullz */
   .abertura .marca .opt { padding: 16px 20px; border-radius: 18px; background: #f2a412; color: #0a0a0b; box-shadow: none; -webkit-backdrop-filter: none; backdrop-filter: none; }
   .abertura .marca .opt .t { font-size: 21px; font-weight: 600; }
@@ -115,13 +124,13 @@
   .abertura .marca .opt:nth-child(1) { animation-delay: 1s; }
   .abertura .marca .opt:nth-child(2) { animation-delay: 1.12s; }
   @media (max-width: 760px) {
-    .abertura .marca { left: 20px; right: 20px; width: auto; top: 88px; bottom: auto; }
+    .abertura .marca { left: 20px; right: 20px; width: auto; top: 104px; bottom: auto; }
     /* no celular não sobra preto ao lado da bike: a foto desce e o texto fica numa faixa preta em cima */
     .abertura .foto, .abertura .reflexo { top: 40%; height: 60%; }
     .abertura .foto { -webkit-mask-image: linear-gradient(transparent, #000 22%); mask-image: linear-gradient(transparent, #000 22%); }
     .abertura .marca h1 { font-size: 22px; }
     .abertura .marca p { margin-top: 12px; font-size: 15px; }
-    .abertura .marca .options { grid-template-columns: 220px; gap: 8px; margin-top: 10px; }
+    .abertura .marca .options { grid-template-columns: 188px; gap: 8px; margin-top: 10px; }
     .abertura .marca p.convite { margin-top: 18px; font-size: 13px; }
     .abertura .marca .opt { padding: 11px 44px 11px 12px; }
     .abertura .marca .opt .s { font-size: 11px; white-space: nowrap; }
@@ -380,14 +389,17 @@
     .card:hover .ph img, .btn:hover svg { transform: none; }
   }
 
+  /* Red Hat Display: títulos, botões e números em peso forte e letras mais juntas (o restante segue o peso de cada bloco).
+     Com !important porque cada seção define o próprio peso dos títulos com seletores mais específicos */
+  h1, h2, h3, .opt .t, .cta, .btn, .ev li button { font-weight: 800 !important; letter-spacing: -.025em !important; }
+
   /* passagem para o estúdio escuro da linha de produção e de volta */
   .lp-fade { height: 45vh; }
   .lp-fade-in { background: linear-gradient(to bottom, #000, #060607); height: 12vh; }   /* topo já é preto: só um respiro */
-  .lp-fade-out { background: linear-gradient(to bottom, #060607, var(--frost)); }
+  .lp-fade-out { background: linear-gradient(to bottom, #f1f1f3, var(--frost)); height: 12vh; }   /* a linha termina no estúdio branco */
   /* variante ?fundo=branco: linha inteira no branco */
-  #linhaHost[data-theme="light"] { background: #fff; }
-  .lp-fade-in:has(+ #linhaHost[data-theme="light"]) { background: var(--paper); height: 10vh; }
-  #linhaHost[data-theme="light"] + .lp-fade-out { background: linear-gradient(to bottom, #f1f1f3, var(--frost)); }
+  #linhaHost.todo-claro { background: #fff; }
+  .lp-fade-in:has(+ #linhaHost.todo-claro) { background: var(--paper); height: 10vh; }
   #linhaHost { background: #060607; }
   .nav { opacity: calc(1 - var(--lp-bo, 0)); }
   /* menu no celular: só a marca e o botão (os links ficam nas seções) */
@@ -509,6 +521,7 @@
 <div id="linhaHost" data-theme="dark"></div>
 <div class="lp-fade lp-fade-out" data-theme="dark" aria-hidden="true"></div>
 <template id="linhaTpl"><style>
+  /* Red Hat Display (fonte padrão do site; licença aberta OFL), variável do 300 ao 900, hospedada junto com o site */
 
   /* Estúdio escuro preso na tela. A esteira anda, PARA em cada estação, a peça faz
      o seu momento e a esteira segue. Rolagem curta: ~28 cliques de roda no total. */
@@ -519,7 +532,7 @@
     --mute: #9a9ba2;
     --yellow: #f5c518;
     --out: cubic-bezier(0.33, 1, 0.68, 1);
-    --font: "TT Firs Neue", -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+    --font: "Red Hat Display", -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
   }
   * { box-sizing: border-box; }
   img { display: block; user-select: none; -webkit-user-drag: none; }
@@ -550,10 +563,12 @@
 
   /* ---------- texto ---------- */
   .copy { position: absolute; top: 50%; translate: 0 -50%; width: min(380px, 32vw); opacity: var(--t, 0); transform: translateY(calc((1 - var(--t, 0)) * 18px)); }
-  .copy.top { top: max(9%, 92px); translate: 0 0; }   /* abaixo do menu fixo da home */
+  .copy.top { top: max(9%, 92px); translate: 0 0; }
+  .copy { margin-top: 24px; }   /* todos os textos um pouco mais para baixo */   /* abaixo do menu fixo da home */
   .copy.center { left: 50%; translate: -50% 0; text-align: center; width: min(560px, 80vw); }
   .n { font-size: 12px; letter-spacing: .12em; text-transform: uppercase; color: var(--mute); }
   .copy h2 { margin: 12px 0 0; font-size: clamp(32px, 3.2vw, 52px); font-weight: 500; letter-spacing: -.035em; line-height: 1.03; text-wrap: balance; }
+  .copy h2:first-child { margin-top: 0; }
   .copy p { margin: 14px 0 0; font-size: 17px; line-height: 1.55; color: var(--mute); text-wrap: pretty; }
   .stat { margin-top: 20px; display: flex; align-items: baseline; gap: 8px; }
   .center .stat { justify-content: center; }
@@ -569,6 +584,7 @@
   #tCrav { --x: calc(50vw + var(--S) * .33); }
   #tLisoCruza { clip-path: inset(0 0 50% 50%); }
 
+  /* 2 · rodas: a roda fica no meio do espaço entre o menu de cima (64 px) e a borda de baixo (--y no próprio elemento) */
   /* 2 · rodas: só o aro da foto (o cubo dela, visto de cima, sai); cubo e 30 raios (um por furo do aro) desenhados por código */
   #wheel .aro { -webkit-mask-image: radial-gradient(circle at 49.9% 49.9%, transparent 0 16%, #000 16.5%); mask-image: radial-gradient(circle at 49.9% 49.9%, transparent 0 16%, #000 16.5%); }
   #wheel .floor svg { position: absolute; left: 0; top: 0; width: 100%; height: auto; aspect-ratio: 1; }
@@ -589,11 +605,22 @@
 
   /* 4 · transmissão: tudo num SVG em milímetros (520 × 360), no canto de baixo à direita; a borda de baixo corta o braço do pedivela */
   .drive { position: absolute; right: 1vw; bottom: 0; height: min(78vh, 52vw); aspect-ratio: 520 / 360; }
-  .drive svg { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; }
-  .drive .po { stroke: #8d9097; stroke-linecap: round; }
-  .drive .pi { stroke: #34353a; stroke-linecap: round; }
-  .drive .rl { fill: #cfd2d7; }
-  .drive .pn { fill: #5d6066; }
+  /* o canvas passa 60 mm de cada lado da área de 520 × 360: o pedivela girando e o câmbio podem sair dela */
+  .drive canvas { position: absolute; left: -11.538%; top: -16.667%; width: 123.077%; height: 133.333%; pointer-events: none; }
+
+  /* 5 · contato: selim atrás e em cima, guidão na frente e em cima, pedal embaixo no meio (posições da bike) */
+  #seat { --size: min(19vw, 34vh); --x: 30vw; --y: 50%; }
+  #bar { --size: min(34vw, 62vh); --x: 68vw; --y: 45%; }
+  #pedal { --size: min(14vw, 26vh); --x: 48vw; --y: 80%; }
+  .triangulo { position: absolute; inset: 0; width: 100%; height: 100%; overflow: visible; pointer-events: none; }
+  .triangulo path { fill: none; stroke: rgba(255,255,255,.32); stroke-width: 1.5; stroke-dasharray: 1; stroke-dashoffset: calc(1 - var(--tri, 0)); }
+  .triangulo circle { r: 5px; fill: #f2a412; stroke: rgba(242,164,18,.3); stroke-width: 8px; opacity: 0; transition: opacity 250ms var(--out); }
+  .ponto { position: absolute; display: grid; gap: 4px; opacity: var(--o, 0); transform: translateY(calc((1 - var(--o, 0)) * 10px)); }
+  .ponto b { font-size: 22px; font-weight: 500; letter-spacing: -.02em; }
+  .ponto span { font-size: 14px; color: var(--mute); }
+  #ptSeat { right: calc(100vw - 30vw + min(19vw, 34vh) / 2 + 20px); top: 50%; translate: 0 -50%; text-align: right; }
+  #ptBar { left: calc(68vw + min(34vw, 62vh) / 2 - 40px); top: calc(45% + min(34vw, 62vh) * 461 / 1254 / 2 + 14px); }
+  #ptPedal { left: calc(48vw + min(14vw, 26vh) / 2 + 20px); top: 80%; translate: 0 -50%; }
 
   /* rótulo pequeno embaixo/em cima de cada peça */
   .tag { position: absolute; left: var(--x); top: var(--y); translate: -50% 0; font-size: 13px; letter-spacing: .06em; text-transform: uppercase; color: var(--mute); white-space: nowrap; opacity: var(--o, 0); transition: opacity 300ms var(--out); }
@@ -615,6 +642,15 @@
 
   /* montagem final em 3D: a cena ocupa a estação inteira, o estúdio aparece por trás */
   .m3d { position: absolute; inset: 0; width: 100%; height: 100%; display: block; }
+  /* palco: feixe de luz vindo de cima até a bike (no estúdio escuro); --luz vai de penumbra a aceso */
+  .palco { position: absolute; inset: 0; pointer-events: none; opacity: var(--luz, .45);
+    background: radial-gradient(ellipse 22% 70% at 50% 0%, rgba(255, 243, 228, .13), rgba(255, 243, 228, .04) 60%, transparent 100%),
+                radial-gradient(ellipse 40% 16% at 50% 84%, rgba(255, 243, 228, .07), transparent 70%); }
+  .lp.claro .palco { display: none; }
+  /* fim da montagem: o estúdio inteiro vira branco (passa liso para a seção clara que vem depois); --b vai de 0 a 1 */
+  .estudio-branco { position: absolute; inset: 0; pointer-events: none; opacity: var(--b, 0); background: radial-gradient(120% 90% at 50% 40%, #ffffff 0%, #f1f1f3 75%); }
+  #st6 .copy h2 { color: color-mix(in srgb, #0a0a0b calc(var(--b, 0) * 100%), var(--fg)); }
+  #st6 .cta { background: color-mix(in srgb, #0a0a0b calc(var(--b, 0) * 100%), var(--fg)); color: color-mix(in srgb, #fff calc(var(--b, 0) * 100%), #111); }
   /* nome da peça que está chegando */
   .m3d-tag { position: absolute; left: 50%; bottom: 13%; translate: -50% 0; font-size: 13px; letter-spacing: .08em; text-transform: uppercase; color: var(--fg); opacity: var(--o, 0); transition: opacity 250ms var(--out); white-space: nowrap; }
   .cta { display: inline-flex; margin-top: 22px; padding: 12px 20px; border-radius: 999px; background: var(--fg); color: #111; font-size: 15px; font-weight: 500; text-decoration: none; }
@@ -645,7 +681,7 @@
 
   /* ---------- celular: peça em cima, texto embaixo; mesma esteira lateral ---------- */
   @media (max-width: 760px) {
-    .copy, .copy.top, .copy.center { left: 20px !important; right: 20px; width: auto !important; top: auto; bottom: 96px; translate: none; text-align: left; }
+    .copy, .copy.top, .copy.center { left: 20px !important; right: 20px; width: auto !important; top: auto; bottom: 80px; translate: none; text-align: left; margin-top: 16px; }
     .copy h2 { font-size: 28px; } .copy p { font-size: 15px; margin-top: 10px; }
     .stat { margin-top: 14px; } .stat b { font-size: 34px; }
     .draft { margin-top: 12px; }
@@ -654,37 +690,45 @@
     .rail button:not(.skip) { display: none; }
     .tag { font-size: 11px; }
     .belt { bottom: 10%; }
-    /* 1 · pneus: texto em cima, pneus embaixo cortados só pela borda inferior */
+    /* 1 · pneus: texto em cima; embaixo os dois lado a lado, cada um cortado ao meio pela borda da sua lateral,
+       entrelaçados no centro (centros a 0,66 do diâmetro: os cruzamentos de cima e de baixo ficam na tela) */
     #cp1 { top: max(9%, 80px); bottom: auto; }
-    #st1 { --S: 84vw; }
+    #st1 { overflow: hidden; --S: 150vw; }
+    #tLiso, #tCrav, #tLisoCruza { --y: calc(max(9%, 80px) + 190px + (100% - max(9%, 80px) - 190px) / 2); }
+    #tLiso, #tLisoCruza { --x: 0vw; }
+    #tCrav { --x: 100vw; }
     /* 2 · rodas */
     #wheel { --size: 84vw !important; --x: 50vw !important; --y: 29% !important; }
     /* 3 · freios: o disco termina cortado ao meio pela borda esquerda, em cima */
     #disc { --size: 66vw !important; --x: 50vw !important; --y: 28% !important; }
-    #vb { --size: 24vw !important; --x: 85vw !important; --y: 9% !important; }
+    #cp3, #cp4 { top: auto; bottom: 80px; }   /* no celular o texto fica embaixo, como nas outras estações */
+    /* V-brake à direita do disco, acima do texto; o pneu some num degradê em vez de terminar seco */
+    .vbx { width: 46vw; right: 2vw; bottom: auto; top: 20%;
+      -webkit-mask-image: linear-gradient(#000 70%, transparent); mask-image: linear-gradient(#000 70%, transparent); }
     /* 4 · transmissão */
-    #crank { --size: 56vw !important; --x: 30vw !important; --y: 24% !important; }
-    #cog { --size: 30vw !important; --x: 76vw !important; --y: 17% !important; }
-    #der { --size: 30vw !important; --x: 77vw !important; --y: 36% !important; }
-    #chain { top: 50% !important; height: 24px; }
-    /* 5 · contato */
-    #pedal { --size: 40vw !important; --x: 26vw !important; --y: 18% !important; }
-    #seat { --size: 38vw !important; --x: 74vw !important; --y: 18% !important; }
-    #bar { --size: 88vw !important; --x: 50vw !important; --y: 40% !important; }
-    #tagPedal { --x: 26vw !important; --y: 28% !important; }
-    #tagSeat { --x: 74vw !important; --y: 28% !important; }
-    #tagBar { --x: 50vw !important; --y: 47% !important; }
-    #tagPedal, #tagSeat, #tagBar { white-space: normal; text-align: center; width: 44vw; }
+    /* a transmissão inteira em cima, na largura da tela; o texto embaixo */
+    .drive { right: auto; left: 0; bottom: auto; top: max(16%, 120px); width: 100vw; height: auto; }
+    /* 5 · contato: o triângulo em cima, o texto embaixo */
+    #seat { --size: 38vw; --x: 25vw; --y: 39%; }
+    #bar { --size: 64vw; --x: 66vw; --y: 30%; }
+    #pedal { --size: 30vw; --x: 45vw; --y: 58%; }
+    .ponto b { font-size: 17px; } .ponto span { font-size: 12px; max-width: 34vw; }
+    #ptSeat { right: auto; left: 6vw; top: calc(39% + 21vw); translate: none; text-align: left; }
+    #ptBar { left: auto; right: 5vw; top: calc(30% + 13vw); text-align: right; }
+    #ptPedal { left: 64vw; top: 58%; }
     /* 6 · montagem */
     #cp6a, #cp6c { top: max(10%, 80px); bottom: auto; }
-    #cp6b { bottom: 110px; text-align: center; }
+    #cp6b { bottom: 94px; text-align: center; }
   }
+
+  /* Red Hat Display: títulos, rótulos, números e botões em peso forte e letras mais juntas */
+  h1, h2, h3, .ponto b, .stat b, .cta { font-weight: 800 !important; letter-spacing: -.025em !important; }
 
   :host { display: block; color: var(--fg); font-family: var(--font); -webkit-font-smoothing: antialiased; }
 </style>
 <section class="lp" id="lp">
   <div class="pin" id="pin">
-    <div class="belt" id="belt"></div>
+    <div class="estudio-branco" id="branco" aria-hidden="true"></div>
     <div class="track" id="track">
 
       <article class="station intro" data-name="Início">
@@ -694,11 +738,10 @@
       <!-- 1 · PNEUS: lado a lado, cortados só embaixo -->
       <article class="station" data-name="Pneus" id="st1">
         <div class="part" data-img="pneus-liso" data-spin id="tLiso"></div>
-        <div class="part" data-img="pneus-cravos" data-spin id="tCrav"></div>
+        <div class="part" data-img="pneus-garras" data-spin id="tCrav"></div>
         <!-- o liso de novo, só no quarto de cima à direita: passa por cima do cravos no cruzamento de cima (no de baixo, fica por baixo) -->
         <div class="part" data-img="pneus-liso" data-spin id="tLisoCruza" aria-hidden="true"></div>
         <div class="copy top center" id="cp1">
-          <div class="n">01 · Pneus</div>
           <h2>Cada terreno pede o pneu adequado.</h2>
           <p>Do asfalto às trilhas, mais liberdade para pedalar do seu jeito.</p>
         </div>
@@ -706,13 +749,12 @@
 
       <!-- 2 · RODAS: os raios entram um a um -->
       <article class="station" data-name="Rodas" id="st2">
-        <div class="part" id="wheel" style="--size:min(78vh,46vw);--x:32vw;--y:47%">
-          <div class="floor"><img class="spin aro" src="linha-producao/img/p/rodas-aro-cubo.webp" alt="" /><svg class="spin raios" viewBox="0 0 1000 1000" aria-hidden="true"></svg></div>
-          <img class="spin aro" src="linha-producao/img/p/rodas-aro-cubo.webp" alt="Aro" />
+        <div class="part" id="wheel" style="--size:min(78vh,46vw);--x:32vw;--y:calc(50% + 32px)">
+          <div class="floor"><img class="spin aro" data-src="linha-producao/img/p/rodas-aro-cubo.webp" alt="" /><svg class="spin raios" viewBox="0 0 1000 1000" aria-hidden="true"></svg></div>
+          <img class="spin aro" data-src="linha-producao/img/p/rodas-aro-cubo.webp" alt="Aro" />
           <svg class="spin raios" viewBox="0 0 1000 1000" role="img" aria-label="Raios entrando um a um entre o cubo e o aro"></svg>
         </div>
         <div class="copy" style="left:60vw" id="cp2">
-          <div class="n">02 · Rodas</div>
           <h2>Montada do zero, é aqui que começamos.</h2>
           <p>Cada raio, cubo e aro e cada ajuste têm sua importância. Afinal, são os detalhes que fazem a diferença.</p>
           <div class="stat"><b id="statSpokes">0</b><span>de 30 raios</span></div>
@@ -722,45 +764,44 @@
       <!-- 3 · FREIOS: disco gira e termina cortado ao meio; V-brake ao lado -->
       <article class="station" data-name="Freios" id="st3">
         <div class="part" data-img="freios-disco" data-spin data-floor id="disc" style="--size:min(66vh,600px)">
-          <svg class="co" viewBox="0 0 100 100" id="coDisc"></svg>
         </div>
         <div class="copy" style="left:56vw" id="cp3">
-          <div class="n">03 · Freios</div>
-          <h2>Trabalhamos com freio à disco, ou <span style="white-space:nowrap">v-brake</span>.</h2>
+          <h2>Trabalhamos com freio à disco, ou <span style="white-space:nowrap">V-BRAKE</span>.</h2>
           <p>Cada modelo VULLZ recebe um sistema de frenagem de acordo com sua configuração.</p>
           <div class="stat"><b id="statDisc">0</b><span>mm de rotor</span></div>
         </div>
         <!-- V-brake na roda vista de frente: a roda gira (borrada); no fim os braços fecham e ela para (nítida) -->
         <div class="vbx" id="vb">
-          <img class="vb-roda" src="linha-producao/img/p/freios-roda-frente.webp" alt="" />
-          <img class="vb-roda" id="vbBorrada" src="linha-producao/img/p/freios-roda-frente-borrada.webp" alt="" />
-          <img class="vb-cabo" src="linha-producao/img/p/freios-vbrake-frente.webp" alt="" />
-          <img class="vb-braco esq" id="vbEsq" src="linha-producao/img/p/freios-vbrake-frente.webp" alt="V-brake montado na roda" />
-          <img class="vb-braco dir" id="vbDir" src="linha-producao/img/p/freios-vbrake-frente.webp" alt="" />
+          <img class="vb-roda" data-src="linha-producao/img/p/freios-roda-frente.webp" alt="" />
+          <img class="vb-roda" id="vbBorrada" data-src="linha-producao/img/p/freios-roda-frente-borrada.webp" alt="" />
+          <img class="vb-cabo" data-src="linha-producao/img/p/freios-vbrake-frente.webp" alt="" />
+          <img class="vb-braco esq" id="vbEsq" data-src="linha-producao/img/p/freios-vbrake-frente.webp" alt="V-brake montado na roda" />
+          <img class="vb-braco dir" id="vbDir" data-src="linha-producao/img/p/freios-vbrake-frente.webp" alt="" />
         </div>
       </article>
 
       <!-- 4 · TRANSMISSÃO: montada como na bike (frente à esquerda); a corrente, desenhada elo por elo, se monta e troca de marcha -->
       <article class="station" data-name="Transmissão" id="st4">
-        <div class="drive" id="drive"><svg viewBox="0 0 520 360" id="driveSvg" aria-label="Pedivela, corrente, catraca e câmbio montados"></svg></div>
+        <div class="drive" id="drive"><canvas id="driveCv" role="img" aria-label="Pedivela, corrente, catraca e câmbio montados"></canvas></div>
         <div class="copy top" style="left:6vw" id="cp4">
-          <div class="n">04 · Transmissão</div>
           <h2>Você escolhe o ritmo, a VULLZ acompanha.</h2>
           <p>Nossas bikes contam com um sistema de transmissão preciso, para proporcionar uma pedalada mais confortável.</p>
           <div class="stat"><b id="statGears">0</b><span>marchas · 3 × 7</span></div>
         </div>
       </article>
 
-      <!-- 5 · PONTOS DE CONTATO: pedal, guidão e selim; a luz passa por um de cada vez -->
+      <!-- 5 · PONTOS DE CONTATO: as três peças entram onde ficam na bike (frente à direita, como na montagem a seguir);
+           uma linha liga as três e forma o triângulo do ajuste ao corpo: mãos, quadril e pés -->
       <article class="station" data-name="Contato" id="st5">
-        <div class="part" data-img="contato-pedal" data-floor id="pedal" style="--size:min(24vw,40vh);--ar:1214/940;--x:19vw;--y:58%"></div>
-        <div class="part" data-img="contato-guidao" data-floor id="bar" style="--size:min(36vw,64vh);--ar:1254/461;--x:50vw;--y:60%"></div>
-        <div class="part" data-img="contato-selim" data-floor id="seat" style="--size:min(22vw,40vh);--ar:1208/994;--x:81vw;--y:57%"></div>
-        <div class="tag" id="tagPedal" style="--x:19vw;--y:79%"><b>Pedal</b> · plataforma</div>
-        <div class="tag" id="tagBar" style="--x:50vw;--y:79%"><b>Guidão</b> · manoplas e trocadores</div>
-        <div class="tag" id="tagSeat" style="--x:81vw;--y:79%"><b>Selim</b> · espuma e canote</div>
+        <svg class="triangulo" id="triangulo" aria-hidden="true"><path id="triLinha" pathLength="1" /></svg>
+        <div class="part" data-img="contato-selim" id="seat" style="--ar:1208/994"></div>
+        <div class="part" data-img="contato-guidao" id="bar" style="--ar:1254/461"></div>
+        <div class="part" data-img="contato-pedal" id="pedal" style="--ar:1214/940"></div>
+        <svg class="triangulo" id="triPontos" aria-hidden="true"><circle /><circle /><circle /></svg>
+        <div class="ponto" id="ptSeat"><b>Quadril</b><span>Selim com espuma e canote</span></div>
+        <div class="ponto" id="ptBar"><b>Mãos</b><span>Guidão, manoplas e comandos</span></div>
+        <div class="ponto" id="ptPedal"><b>Pés</b><span>Pedal plataforma</span></div>
         <div class="copy top center" id="cp5">
-          <div class="n">05 · Pontos de contato</div>
           <h2>O conforto está nos detalhes.</h2>
           <p>É você, a bike e a vontade de pedalar.</p>
         </div>
@@ -769,10 +810,10 @@
       <!-- 6 · MONTAGEM em 3D (montagem3d.js): a Oregon real montada peça por peça, os adesivos
            entram da esquerda para a direita e a bike dá um giro completo -->
       <article class="station" data-name="Montagem" id="st6">
+        <div class="palco" id="palco" aria-hidden="true"></div>
         <canvas class="m3d" id="m3d" aria-label="Bicicleta Oregon sendo montada peça por peça"></canvas>
         <div class="m3d-tag" id="m3dTag"></div>
         <div class="copy top" style="left:6vw;width:min(520px,40vw)" id="cp6a">
-          <div class="n">06 · Montagem</div>
           <h2>É assim que sua próxima bicicleta ganha forma.</h2>
         </div>
         <div class="copy top" style="left:6vw;width:min(520px,40vw)" id="cp6c">
@@ -799,6 +840,7 @@
   const clamp = (v, a = 0, b = 1) => Math.min(b, Math.max(a, v));
   const lerp = (a, b, t) => a + (b - a) * t;
   const smooth = (t) => t * t * (3 - 2 * t);
+  const out3 = (t) => 1 - Math.pow(1 - t, 3);
   const easeInOut = (t) => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
   const reduce = matchMedia("(prefers-reduced-motion: reduce)").matches;
   const NS = "http://www.w3.org/2000/svg";
@@ -807,20 +849,16 @@
   root.querySelectorAll(".part[data-img]").forEach((el) => {
     const src = `linha-producao/img/p/${el.dataset.img}`, sp = el.hasAttribute("data-spin") ? ' class="spin"' : "";
     el.insertAdjacentHTML("afterbegin",
-      (el.hasAttribute("data-floor") ? `<div class="floor"><img${sp} src="${src}.webp" alt="" /></div>` : "") +
-      `<img${sp} src="${src}.webp" alt="" />`);   // sem halo nem faixas de luz: a peça limpa
+      (el.hasAttribute("data-floor") ? `<div class="floor"><img${sp} data-src="${src}.webp" alt="" /></div>` : "") +
+      `<img${sp} data-src="${src}.webp" alt="" />`);   // sem halo nem faixas de luz: a peça limpa
   });
-
-  function callouts(svg, items) {
-    return items.map(([x, y, tx, ty, label, anchor]) => {
-      const g = document.createElementNS(NS, "g");
-      g.innerHTML = `<path d="M${x} ${y} L${tx} ${ty}" /><circle cx="${x}" cy="${y}" r=".9" /><text x="${tx + (anchor === "end" ? -1.2 : 1.2)}" y="${ty + 1}" text-anchor="${anchor || "start"}" font-size="2.6">${label}</text>`;
-      svg.append(g); return g;
-    });
+  /* as fotos da linha só são pedidas quando a página chega perto dela (abrir a home baixa só a primeira tela) */
+  let fotosPedidas = false;
+  function pedirFotos() {
+    if (fotosPedidas) return; fotosPedidas = true;
+    root.querySelectorAll("#lp img[data-src]").forEach((im) => { im.decoding = "async"; im.src = im.dataset.src; im.removeAttribute("data-src"); });
+    transmissao.carregar();
   }
-  const coDisc = callouts($("#coDisc"), [[50, 50, 72, 8, "cubo de 6 parafusos"], [88, 38, 104, 24, "furos de ventilação"]]);
-  // texto das setas com tamanho fixo na tela, mesmo com a peça ampliada
-  function fitLabels(svg, base, scale) { const fs = 14 / ((base / 100) * scale); svg.querySelectorAll("text").forEach((t) => t.setAttribute("font-size", fs)); }
 
   /* ---------- 2 · raios: um raio para cada um dos 30 furos do aro, medidos na própria foto (viewBox 1000 = foto 1168 px).
      Furos pares vão para o flange de perto (saem do cubo 72° adiantados), ímpares para o de longe (72° atrasados):
@@ -879,26 +917,31 @@
   })();
 
   /* ---------- 4 · transmissão montada como na bike, vista do lado da corrente com a frente à esquerda.
-     Tudo em mm: coroa grande (pitch 97 mm) em A, catraca em B (pinhões de 69 a 24 mm), câmbio espelhado preso
-     no eixo da catraca, com as roldanas de cima (P1) e de baixo (P2). A corrente faz o laço real:
-     topo da coroa → topo e traseira da catraca → frente da roldana de cima → traseira da de baixo → volta por baixo ---------- */
+     Tudo em mm. As escalas das fotos saem dos dentes: a coroa grande tem 43 dentes e o pinhão maior 30, e o passo
+     da corrente (12,7 mm) tem que caber exatamente entre dois vales. Os vales de cada dente foram medidos nas fotos
+     (VA, VB: ângulo de cada vale em graus, em torno do centro da peça na foto). A cada quadro, coroa e catraca giram
+     até que os vales fiquem embaixo dos roletes que estão abraçando a peça. A corrente é a foto real, elo por elo.
+     Desenhado num canvas: as fotos são reduzidas uma vez para o tamanho da tela e cada quadro só gira e carimba. ---------- */
   const transmissao = (() => {
-    const svg = $("#driveSvg"), A = [130, 170], B = [420, 120], RA = 97;
-    const COGS = [69, 57.8, 50.2, 42.6, 35.6, 29.3, 24.2];
-    const sC = 0.2553, sK = 0.1268, sD = 0.1035;   // mm por pixel de cada foto
-    const H = [981, 235], U = [166, 450], L = [446, 975];   // no câmbio espelhado: gancho do eixo, roldana de cima e de baixo (px)
-    const dx0 = B[0] - H[0] * sD, dy0 = B[1] - H[1] * sD;
-    const P1_0 = [dx0 + U[0] * sD, dy0 + U[1] * sD], P2_0 = [dx0 + L[0] * sD, dy0 + L[1] * sD];
-    svg.innerHTML =
-      `<image id="drCoroa" href="linha-producao/img/p/transmissao-pedivela.webp" x="${A[0] - 777 * sC}" y="${A[1] - 778 * sC}" width="${1580 * sC}" height="${1580 * sC}" />` +
-      `<image id="drCatraca" href="linha-producao/img/p/transmissao-catraca.webp" x="${B[0] - 580.5 * sK}" y="${B[1] - 580.5 * sK}" width="${1161 * sK}" height="${1161 * sK}" />` +
-      `<g id="drCorrente"></g>` +
-      `<image id="drCambio" href="linha-producao/img/p/transmissao-cambio-espelhado.webp" x="${dx0}" y="${dy0}" width="${1051 * sD}" height="${1189 * sD}" />`;
-    const coroa = $("#drCoroa"), catraca = $("#drCatraca"), cambio = $("#drCambio"), corrente = $("#drCorrente");
-    const N = 74, PITCH = 12.7;
-    const NS2 = "http://www.w3.org/2000/svg";
-    const placas = [...Array(N)].map((_, i) => { const l = document.createElementNS(NS2, "line"); l.setAttribute("class", i % 2 ? "pi" : "po"); l.setAttribute("stroke-width", i % 2 ? 6.2 : 7.6); corrente.append(l); return l; });
-    const rolos = [...Array(N)].map(() => { const g = document.createElementNS(NS2, "g"); g.innerHTML = `<circle class="rl" r="2.5" /><circle class="pn" r="1.1" />`; corrente.append(g); return g; });
+    const cv = $("#driveCv"), ctx = cv.getContext("2d"), A = [130, 172], B = [420, 122];
+    const W0 = 520, M = 60;   // largura da área em mm (a do .drive) e margem em volta: o pedivela e o câmbio passam da borda
+    const sC = 0.2198, sK = 0.111, sD = 0.15;   // mm por pixel de cada foto
+    const CA = [790, 787.3], CK = [580.6, 580.5];   // centro da coroa e da catraca nas fotos (px)
+    const VA = [7.4, 15.7, 23.9, 32.15, 40.45, 48.7, 56.95, 65.2, 73.65, 82.01, 90.38, 98.74, 107.1, 115.45, 123.85, 132.25, 140.5, 148.8, 157.1, 165.3, 173.65, 182.0, 190.2, 198.5, 206.85, 215.25, 223.75, 232.15, 240.45, 248.85, 257.0, 265.45, 273.7, 281.9, 290.2, 298.8, 307.8, 316.8, 325.4, 333.9, 342.35, 350.7, 359.15];
+    const VB = [[11.1, 22.9, 34.7, 46.6, 58.8, 71.1, 83.8, 96.4, 109.0, 121.2, 133.4, 145.4, 157.2, 169.1, 180.9, 192.6, 204.4, 216.2, 228.1, 240.1, 252.1, 264.1, 276.2, 288.3, 300.3, 312.3, 324.1, 336.0, 347.8, 359.5], [11.9, 26.7, 41.9, 56.9, 72.2, 87.9, 103.1, 118.2, 133.5, 148.8, 163.8, 178.9, 193.8, 208.4, 223.3, 238.3, 253.1, 268.1, 283.2, 298.2, 312.9, 327.6, 342.5, 357.2], [14.2, 34.0, 53.7, 73.4, 93.1, 111.3, 129.1, 144.6, 160.1, 177.4, 194.5, 212.0, 229.4, 247.2, 265.4, 283.6, 302.0, 320.5, 338.4, 356.1], [8.0, 28.8, 50.1, 74.1, 99.1, 122.2, 142.8, 162.8, 182.6, 202.5, 223.0, 243.9, 265.1, 285.8, 306.6, 327.2, 347.7], [13.8, 40.0, 67.0, 94.1, 120.4, 146.3, 172.2, 197.7, 222.9, 248.5, 273.8, 298.5, 323.8, 348.6], [28.4, 59.5, 94.2, 128.6, 158.7, 187.0, 215.3, 244.2, 273.2, 301.1, 329.8, 359.3]];
+    // raio onde o rolete encosta = fundo do vale (medido em cima) + raio do rolete (3,9 mm)
+    const RA = 378.6 * sC + 3.9, COGS = [512.5, 427, 357, 298.5, 239.5, 196.5].map((r) => r * sK + 3.9);
+    // câmbio espelhado: roldana de cima e de baixo (px). Como numa bike de verdade, a roldana de cima fica logo
+    // abaixo do pinhão maior, um pouco para a frente (o câmbio fica preso na gancheira, atrás e abaixo do eixo)
+    const U = [166, 450], L = [446, 975], FRENTE = 0.42, d0 = COGS[0] + 27, RR = 20.5;   // RR: raio das roldanas (11 dentes)
+    const T0 = [B[0] - d0 * Math.sin(FRENTE), B[1] + d0 * Math.cos(FRENTE)];
+    const dx0 = T0[0] - U[0] * sD, dy0 = T0[1] - U[1] * sD;
+    const P1_0 = T0, P2_0 = [dx0 + L[0] * sD, dy0 + L[1] * sD];
+    // elos: recortes da foto da corrente (2172 × 99 px). Externo entre os pinos de 231 e 320 px, interno entre 320 e 400
+    const ELO = [[231, 89], [320, 80]], CY = 51, RP = 35, PASSO = 12.7;
+    const BRACO = [[724, 860], [856, 860], [856, 1200], [866, 1420], [866, 1580], [710, 1580], [712, 1420], [724, 1200]];   // px na foto do pedivela
+    const POLI = { gaiola: [0, .193, .267, .193, .267, .521, .362, .555, .686, .74, .686, 1, 0, 1],
+                   corpo: [.267, 0, 1, 0, 1, 1, .686, 1, .686, .74, .362, .555, .267, .521] };
     const rot = (p, c, a) => [c[0] + (p[0] - c[0]) * Math.cos(a) - (p[1] - c[1]) * Math.sin(a), c[1] + (p[0] - c[0]) * Math.sin(a) + (p[1] - c[1]) * Math.cos(a)];
     // tangente entre dois círculos com raio com sinal (lado em que a corrente abraça cada um)
     function tangente(c1, r1, c2, r2) {
@@ -907,57 +950,137 @@
       const n = [a * ux - b * uy, a * uy + b * ux];
       return [[c1[0] + r1 * n[0], c1[1] + r1 * n[1]], [c2[0] + r2 * n[0], c2[1] + r2 * n[1]]];
     }
-    // monta o caminho como uma lista de pontos (retas + arcos) e o comprimento acumulado
-    function caminho(circs) {
-      const tg = circs.map((c, i) => tangente(c.c, c.r, circs[(i + 1) % circs.length].c, circs[(i + 1) % circs.length].r));
-      const pts = [];
-      circs.forEach((c, i) => {
-        const [p1, p2] = tg[i]; pts.push(p1, p2);
-        const nx = circs[(i + 1) % circs.length], out = tg[(i + 1) % circs.length][0];
+    // o laço como segmentos exatos: reta até o próximo círculo e arco em volta dele (sem gerar pontos)
+    function laco(circs) {
+      const n = circs.length, tg = circs.map((c, i) => tangente(c.c, c.r, circs[(i + 1) % n].c, circs[(i + 1) % n].r));
+      const segs = []; let Lt = 0;
+      for (let i = 0; i < n; i++) {
+        const [p1, p2] = tg[i], len = Math.hypot(p2[0] - p1[0], p2[1] - p1[1]);
+        segs.push({ arco: false, p: p1, q: p2, s: Lt, len }); Lt += len;
+        const k = (i + 1) % n, nx = circs[k], out = tg[k][0];
         const t = [p2[0] - p1[0], p2[1] - p1[1]], v = [p2[0] - nx.c[0], p2[1] - nx.c[1]];
         const sentido = Math.sign(v[0] * t[1] - v[1] * t[0]) || 1;
-        let a0 = Math.atan2(v[1], v[0]), a1 = Math.atan2(out[1] - nx.c[1], out[0] - nx.c[0]);
-        let da = a1 - a0; if (sentido > 0) { while (da < 0) da += 2 * Math.PI; } else { while (da > 0) da -= 2 * Math.PI; }
-        const R = Math.abs(nx.r), n = Math.max(2, Math.ceil(Math.abs(da) * R / 3));
-        for (let k = 1; k < n; k++) { const a = a0 + (da * k) / n; pts.push([nx.c[0] + R * Math.cos(a), nx.c[1] + R * Math.sin(a)]); }
-      });
-      const cum = [0]; for (let i = 1; i <= pts.length; i++) { const p = pts[i - 1], q = pts[i % pts.length]; cum.push(cum[i - 1] + Math.hypot(q[0] - p[0], q[1] - p[1])); }
-      return { pts, cum, L: cum[cum.length - 1] };
+        const a0 = Math.atan2(v[1], v[0]);
+        let da = Math.atan2(out[1] - nx.c[1], out[0] - nx.c[0]) - a0;
+        if (sentido > 0) { while (da < 0) da += 2 * Math.PI; } else { while (da > 0) da -= 2 * Math.PI; }
+        const R = Math.abs(nx.r), la = Math.abs(da) * R;
+        segs.push({ arco: true, c: nx.c, R, a0, da, k, s: Lt, len: la }); Lt += la;
+      }
+      return { segs, L: Lt };
     }
+    // ponto a s mm do começo (topo da coroa); o terceiro valor diz em volta de qual círculo ele está (-1 nas retas)
     function ponto(cm, s) {
       s = ((s % cm.L) + cm.L) % cm.L;
-      let lo = 0, hi = cm.cum.length - 1; while (hi - lo > 1) { const m = (lo + hi) >> 1; if (cm.cum[m] <= s) lo = m; else hi = m; }
-      const p = cm.pts[lo], q = cm.pts[(lo + 1) % cm.pts.length], f = (s - cm.cum[lo]) / ((cm.cum[lo + 1] - cm.cum[lo]) || 1);
-      return [p[0] + (q[0] - p[0]) * f, p[1] + (q[1] - p[1]) * f];
+      let g = cm.segs[0]; for (const sg of cm.segs) { if (sg.s <= s) g = sg; else break; }
+      const f = (s - g.s) / (g.len || 1);
+      if (!g.arco) return [g.p[0] + (g.q[0] - g.p[0]) * f, g.p[1] + (g.q[1] - g.p[1]) * f, -1];
+      const a = g.a0 + g.da * f;
+      return [g.c[0] + g.R * Math.cos(a), g.c[1] + g.R * Math.sin(a), g.k];
     }
-    let rbAtual = COGS[0], ultimo = null, angCoroa = 0, angCatraca = 0;
-    // ofs: quanto a corrente andou (mm); monta: 0–1 (a corrente aparece pelo caminho); g: pinhão (0 = maior)
-    return (ofs, monta, g) => {
-      rbAtual += (COGS[g] - rbAtual) * 0.25;   // a corrente "pula" para o pinhão novo em poucos quadros
-      const RB = rbAtual;
-      // o câmbio acompanha: gira no eixo para esticar a corrente e a roldana de cima fica sempre logo abaixo do pinhão
-      const ang = (COGS[0] - RB) * 0.012;
-      let P1 = rot(P1_0, B, ang), P2 = rot(P2_0, B, ang);
-      const dist = Math.hypot(P1[0] - B[0], P1[1] - B[1]), alvo = RB + 19, k = (alvo - dist) / dist;
-      const tx = (P1[0] - B[0]) * k, ty = (P1[1] - B[1]) * k;
-      P1 = [P1[0] + tx, P1[1] + ty]; P2 = [P2[0] + tx, P2[1] + ty];
-      cambio.setAttribute("transform", `translate(${tx.toFixed(2)} ${ty.toFixed(2)}) rotate(${(ang * 180 / Math.PI).toFixed(2)} ${B[0]} ${B[1]})`);
-      const cm = caminho([{ c: A, r: RA }, { c: B, r: RB }, { c: P1, r: -12 }, { c: P2, r: 14 }]);
-      const p = cm.L / N, o = ofs;
-      for (let i = 0; i < N; i++) {
-        const s0 = o + i * p, s1 = s0 + p, a = ponto(cm, s0), b = ponto(cm, s1);
-        const pos = ((s0 % cm.L) + cm.L) % cm.L, vis = pos < monta * cm.L ? 1 : 0;   // aparece a partir do topo da coroa
-        placas[i].setAttribute("x1", a[0].toFixed(2)); placas[i].setAttribute("y1", a[1].toFixed(2));
-        placas[i].setAttribute("x2", b[0].toFixed(2)); placas[i].setAttribute("y2", b[1].toFixed(2));
-        placas[i].style.opacity = vis; rolos[i].style.opacity = vis;
-        rolos[i].setAttribute("transform", `translate(${a[0].toFixed(2)} ${a[1].toFixed(2)})`);
+    const circulos = (RB, P1, P2) => [{ c: A, r: RA }, { c: B, r: RB }, { c: P1, r: -RR }, { c: P2, r: RR }];
+    // número de elos: o que fecha o laço no pinhão maior com a gaiola na posição da foto (sempre par)
+    const N = 2 * Math.round(laco(circulos(COGS[0], P1_0, P2_0)).L / (2 * PASSO));
+    // giro (graus) que põe um vale embaixo de cada rolete que abraça a peça; média, perto do giro anterior
+    const dif = (a, b) => ((a - b + 540) % 360) - 180;
+    function encaixe(rolos, qual, c, vales, antes) {
+      let soma = 0, peso = 0;
+      for (const p of rolos) {
+        if (p[2] !== qual) continue;   // só os roletes que estão no arco desta peça
+        const th = Math.atan2(p[1] - c[1], p[0] - c[0]) * 180 / Math.PI;
+        let melhor = null;
+        for (const v of vales) { const phi = antes + dif(th - v, antes); if (melhor === null || Math.abs(phi - antes) < Math.abs(melhor - antes)) melhor = phi; }
+        soma += melhor; peso++;
       }
-      // coroa e catraca giram na velocidade da corrente (a catraca, mais rápido quanto menor o pinhão)
-      const dOfs = ultimo === null ? 0 : ofs - ultimo; ultimo = ofs;
-      angCoroa += dOfs / RA; angCatraca += dOfs / RB;
-      coroa.setAttribute("transform", `rotate(${(angCoroa * 180 / Math.PI).toFixed(2)} ${A[0]} ${A[1]})`);
-      catraca.setAttribute("transform", `rotate(${(angCatraca * 180 / Math.PI).toFixed(2)} ${B[0]} ${B[1]})`);
-    };
+      return peso ? soma / peso : null;
+    }
+
+    /* fotos → imagens já no tamanho da tela (refeitas só quando o tamanho muda) */
+    const ORIG = { coroa: [1580, 1580], catraca: [1161, 1161], cambio: [1051, 1189] };   // px das fotos em que tudo foi medido
+    const fonte = {}, nomes = { coroa: "transmissao-pedivela", catraca: "transmissao-catraca", cambio: "transmissao-cambio-espelhado", corrente: "transmissao-corrente" };
+    let faltam = 4, pronto = false, k = 0, pre = null, chave = "";
+    // as fotos só são pedidas junto com as outras da linha (pedirFotos); prontas, são preparadas num momento livre
+    const carregar = () => Object.entries(nomes).forEach(([id, n]) => {
+      const im = new Image(); im.decoding = "async";
+      im.onload = () => { if (--faltam === 0) { pronto = true; chave = ""; (window.requestIdleCallback || setTimeout)(() => { if (!pre) preparar(); }); } };
+      im.src = `linha-producao/img/p/${n}.webp`; fonte[id] = im;
+    });
+    const tela = (w, h) => { const c = document.createElement("canvas"); c.width = Math.max(1, Math.ceil(w)); c.height = Math.max(1, Math.ceil(h)); return c; };
+    function preparar() {
+      const dpr = Math.min(2, devicePixelRatio || 1);
+      cv.width = Math.round(cv.clientWidth * dpr); cv.height = Math.round(cv.clientHeight * dpr);
+      k = cv.width / (W0 + 2 * M);   // px do canvas por mm
+      // tamanhos sempre pelas fotos originais (as medidas dos dentes foram feitas nelas); o arquivo pode estar reduzido
+      const peca = (im, s, [w, h]) => { const c = tela(w * s * k, h * s * k), x = c.getContext("2d"); x.imageSmoothingQuality = "high"; x.drawImage(im, 0, 0, c.width, c.height); return c; };
+      const metade = (pts) => {
+        const im = fonte.cambio, c = tela(ORIG.cambio[0] * sD * k, ORIG.cambio[1] * sD * k), x = c.getContext("2d");
+        x.beginPath(); for (let i = 0; i < pts.length; i += 2) x.lineTo(pts[i] * c.width, pts[i + 1] * c.height); x.closePath(); x.clip();
+        x.imageSmoothingQuality = "high"; x.drawImage(im, 0, 0, c.width, c.height); return c;
+      };
+      // cada elo recortado em cápsula, já com a sombra macia em volta (assenta a corrente sobre as peças)
+      const elo = ([x0, len]) => {
+        const e = (PASSO / len) * k, pad = 2 * k, w = (len + 2 * RP) * e, h = 2 * RP * e;
+        const c = tela(w + 2 * pad, h + 2 * pad), x = c.getContext("2d");
+        x.shadowColor = "rgba(0,0,0,.75)"; x.shadowBlur = 1.6 * k;
+        x.beginPath(); x.roundRect(pad, pad, w, h, RP * e); x.fillStyle = "#000"; x.fill();
+        x.shadowColor = "transparent"; x.clip(); x.imageSmoothingQuality = "high";
+        x.drawImage(fonte.corrente, x0 - RP, CY - RP, len + 2 * RP, 2 * RP, pad, pad, w, h);
+        return { c, ox: -(RP * e + pad), oy: -(RP * e + pad) };
+      };
+      // o braço do pedivela recortado da mesma foto: vai por cima da corrente (na bike ele fica do lado de fora dela)
+      const braco = (base) => {
+        const c = tela(base.width, base.height), x = c.getContext("2d"), f = sC * k;
+        x.beginPath(); BRACO.forEach(([px, py]) => x.lineTo(px * f, py * f)); x.closePath(); x.clip();
+        x.drawImage(base, 0, 0); return c;
+      };
+      const coroa = peca(fonte.coroa, sC, ORIG.coroa);
+      pre = { coroa, braco: braco(coroa), catraca: peca(fonte.catraca, sK, ORIG.catraca), gaiola: metade(POLI.gaiola), corpo: metade(POLI.corpo), elos: ELO.map(elo) };
+    }
+    addEventListener("resize", () => { pre = null; chave = ""; });
+
+    let rbAtual = COGS[0], giroA = 0, giroB = 0;
+    // ofs: quanto a corrente andou (mm); monta: 0–1 (a corrente aparece pelo caminho); g: pinhão (0 = maior)
+    return Object.assign((ofs, monta, g) => {
+      if (!pronto) return;
+      rbAtual += (COGS[g] - rbAtual) * 0.25;   // a corrente "pula" para o pinhão novo em poucos quadros
+      if (Math.abs(COGS[g] - rbAtual) < 0.01) rbAtual = COGS[g];
+      const nova = `${ofs.toFixed(2)}|${monta.toFixed(3)}|${rbAtual.toFixed(3)}`;
+      if (nova === chave && pre) return;   // nada mudou: não redesenha
+      chave = nova;
+      if (!pre) preparar();
+      const RB = rbAtual;
+      // nos pinhões menores o câmbio sobe só um pouco (o corpo fica na gancheira; quem anda é a gaiola); a gaiola gira
+      // em torno da roldana de cima até a corrente ficar esticada com o mesmo número de elos, como faz a mola do câmbio
+      const sobe = (RB - COGS[0]) * 0.15, tx = -sobe * Math.sin(FRENTE), ty = sobe * Math.cos(FRENTE);
+      const P1 = [P1_0[0] + tx, P1_0[1] + ty], P2 = [P2_0[0] + tx, P2_0[1] + ty];
+      const comp = (al) => laco(circulos(RB, P1, rot(P2, P1, al))).L - N * PASSO;
+      let lo = -1.5, hi = 1.5, flo = comp(lo), fhi = comp(hi), al;
+      if (Math.sign(flo) === Math.sign(fhi)) al = Math.abs(flo) < Math.abs(fhi) ? lo : hi;
+      else { for (let it = 0; it < 22; it++) { const m = (lo + hi) / 2, fm = comp(m); if (Math.sign(fm) === Math.sign(flo)) { lo = m; flo = fm; } else hi = m; } al = (lo + hi) / 2; }
+      const cm = laco(circulos(RB, P1, rot(P2, P1, al)));
+      const p = cm.L / N, rolos = [];
+      for (let i = 0; i < N; i++) rolos.push(ponto(cm, ofs + i * p));
+      const gA = encaixe(rolos, 0, A, VA, giroA), gB = encaixe(rolos, 1, B, VB[g], giroB);
+      giroA = gA ?? giroA; giroB = gB ?? giroB;
+
+      // desenho: coroa, catraca, corrente (internos por baixo, externos por cima), gaiola e corpo do câmbio
+      const X = (mm) => (mm + M) * k;
+      const carimbo = (c, cx, cy, ang, ox, oy) => { ctx.setTransform(1, 0, 0, 1, X(cx), X(cy)); if (ang) ctx.rotate(ang); ctx.drawImage(c, ox, oy); };
+      ctx.setTransform(1, 0, 0, 1, 0, 0); ctx.clearRect(0, 0, cv.width, cv.height);
+      carimbo(pre.coroa, A[0], A[1], giroA * Math.PI / 180, -CA[0] * sC * k, -CA[1] * sC * k);
+      carimbo(pre.catraca, B[0], B[1], giroB * Math.PI / 180, -CK[0] * sK * k, -CK[1] * sK * k);
+      for (const tipo of [1, 0]) {
+        const t = pre.elos[tipo];
+        for (let i = tipo; i < N; i += 2) {
+          const s0 = ((ofs + i * p) % cm.L + cm.L) % cm.L;
+          if (s0 >= monta * cm.L) continue;   // aparece a partir do topo da coroa
+          const a = rolos[i], b = rolos[(i + 1) % N];
+          carimbo(t.c, a[0], a[1], Math.atan2(b[1] - a[1], b[0] - a[0]), t.ox, t.oy);
+        }
+      }
+      carimbo(pre.braco, A[0], A[1], giroA * Math.PI / 180, -CA[0] * sC * k, -CA[1] * sC * k);
+      carimbo(pre.gaiola, P1[0], P1[1], al, (dx0 - P1_0[0]) * k, (dy0 - P1_0[1]) * k);
+      carimbo(pre.corpo, dx0 + tx, dy0 + ty, 0, 0, 0);
+    }, { carregar });
   })();
 
   /* ---------- esteira: rolagem por trecho (px). Cada trecho = viagem + parada na estação seguinte ---------- */
@@ -995,7 +1118,18 @@
 
   // rolagem suavizada: a roda do mouse anda em degraus; a esteira persegue com mola
   let ys = null, lastYs = 0, vel = 0, spin = 0, queued = false;
-  const spins = (el) => el.querySelectorAll(".spin");
+  const spinsCache = new Map(), spins = (el) => spinsCache.get(el) || spinsCache.set(el, [...el.querySelectorAll(".spin")]).get(el);
+  /* triângulo do contato: liga o centro das três peças (medido no layout; refeito quando a tela muda) */
+  // vértices nos pontos onde o corpo encosta: topo do selim, centro do guidão, plataforma do pedal (fração da peça)
+  const triCirc = [...root.querySelectorAll("#triPontos circle")];
+  const TOQUE = { "#seat": [0.02, -0.28], "#bar": [0.02, -0.1], "#pedal": [-0.05, -0.08] };
+  function triangulo() {
+    const st = $("#st5"), pts = Object.entries(TOQUE).map(([s, [fx, fy]]) => { const el = $(s); return [el.offsetLeft + fx * el.offsetWidth, el.offsetTop + fy * el.offsetHeight]; });
+    ["#triangulo", "#triPontos"].forEach((id) => $(id).setAttribute("viewBox", `0 0 ${st.clientWidth} ${st.clientHeight}`));
+    $("#triLinha").setAttribute("d", `M${pts.map((p) => p.join(" ")).join(" L")} Z`);
+    triCirc.forEach((c, i) => { c.setAttribute("cx", pts[i][0]); c.setAttribute("cy", pts[i][1]); });
+  }
+  triangulo(); addEventListener("resize", triangulo);
   const P = { tLiso: $("#tLiso"), tCrav: $("#tCrav"), tLisoCruza: $("#tLisoCruza"), wheel: $("#wheel"), disc: $("#disc"), vb: $("#vb"), crank: $("#crank"), cog: $("#cog"), der: $("#der"),
               pedal: $("#pedal"), bar: $("#bar"), seat: $("#seat") };
 
@@ -1003,7 +1137,7 @@
   const CLARO = new URLSearchParams(location.search).get("fundo") === "branco";   // padrão: estúdio escuro (?fundo=branco para comparar)
   if (CLARO) lp.classList.add("claro");
   // na home (linha dentro do hospedeiro): o menu e as passagens de fundo também ficam claros
-  if (CLARO && typeof host !== "undefined") host.dataset.theme = "light";
+  if (CLARO && typeof host !== "undefined") { host.dataset.theme = "light"; host.classList.add("todo-claro"); }
   let m3d = null, m3dLoading = false;
   let giroFreio = 0, spinAntes = 0;   // giro do disco da estação 3: acompanha a rolagem até a freada
   function loadM3d() {
@@ -1015,6 +1149,7 @@
 
   function frame() {
     queued = false;
+    if (!fotosPedidas && scrollY > lpTop() - innerHeight * 0.8) pedirFotos();   // a linha começa logo depois da abertura
     const y = clamp(scrollY - lpTop(), 0, TOTAL - 1);
     if (ys === null) ys = y;
     ys = reduce ? y : ys + (y - ys) * 0.16;
@@ -1030,14 +1165,12 @@
     const dwell = clamp((local - TRAVEL) / (LEN[seg] - TRAVEL));
     const pos = seg + travel;
     track.style.transform = `translateX(${-pos * innerWidth}px)`;
-    $("#belt").style.setProperty("--belt", `${-pos * innerWidth}px`);
-    $("#belt").style.opacity = 1 - smooth(clamp(1 - Math.abs(pos - 4))); // some na transmissão: a corrente é a esteira
     $("#railbar").style.setProperty("--p", ys / (TOTAL - 1));
     railNames.forEach((b, i) => b.classList.toggle("on", Math.round(pos) === i + 1));
     const dw = (k) => (seg + 1 === k ? dwell : seg + 1 > k ? 1 : 0);
 
     /* 1 · PNEUS — giram juntos; a luz atravessa os dois */
-    {
+    if (Math.abs(pos - 1) < 1) {
       const d = dw(1), a = smooth(clamp(pos - 0)); // sobem um pouco ao chegar
       [P.tLiso, P.tCrav, P.tLisoCruza].forEach((el, k) => {
         const i = k === 1 ? 1 : 0;   // a cópia do cruzamento acompanha o liso
@@ -1049,7 +1182,7 @@
     }
 
     /* 2 · RODAS — os raios correm do cubo ao aro um a um (ordem de montador), brilham ao tensionar e a roda acelera */
-    {
+    if (Math.abs(pos - 2) < 1) {
       const d = dw(2);
       const n = Math.min(30, Math.max(0, Math.floor(clamp((d - 0.05) / 0.75) * 32 - 3) + 1));   // raios já encaixados
       raios(clamp((d - 0.05) / 0.75), clamp((d - 0.8) / 0.12));
@@ -1062,14 +1195,14 @@
     }
 
     /* 3 · FREIOS — disco gira, aproxima e termina cortado ao meio pela borda esquerda */
-    {
+    if (Math.abs(pos - 3) < 1) {
       const d = dw(3), disc = P.disc;
       // freada: no fim os braços do V-brake fecham e a roda e o disco desaceleram até parar
       const freia = smooth(clamp((d - 0.72) / 0.18));
       giroFreio += (spin - spinAntes) * (1 - freia); spinAntes = spin;
       spins(disc).forEach((im) => (im.style.transform = `rotate(${giroFreio}deg)`));
       setL(disc, lerp(-0.1, 1.15, clamp(d / 0.9)));
-      const z = reduce ? 0 : smooth(clamp((d - 0.15) / 0.6));
+      const z = reduce ? 0 : smooth(clamp(d / 0.55));   // já chega crescendo em direção à borda esquerda
       const base = disc.offsetWidth || 1;
       const mobile = innerWidth <= 760;
       // no celular o disco fica em cima e termina cortado ao meio pela borda esquerda, maior em relação à tela
@@ -1078,13 +1211,11 @@
       disc.style.transform = `translateX(${lerp(0, -0.5 * innerWidth, z)}px) scale(${sc})`;
       disc.querySelector(".floor").style.opacity = 0.16 * (1 - smooth(clamp(z / 0.3)));
       $("#cp3").style.left = mobile ? "" : `${Math.max(innerWidth * 0.56, endR + 64)}px`;
-      const t = clamp((d - 0.5) / 0.25);
+      const t = clamp((d - 0.3) / 0.25);
       show($("#cp3"), t);
       $("#statDisc").textContent = Math.round(160 * smooth(t));
-      coDisc.forEach((g) => g.style.setProperty("--co", clamp((d - 0.0) / 0.08) * (1 - clamp((d - 0.15) / 0.08))));
-      fitLabels($("#coDisc"), base, sc);
       // o V-brake e a roda sobem da borda de baixo junto com o texto, no canto de baixo à direita
-      const vIn = smooth(clamp((d - 0.45) / 0.3));
+      const vIn = smooth(clamp((d - 0.3) / 0.3));
       P.vb.style.opacity = vIn;
       P.vb.style.transform = `translateY(${(1 - vIn) * 14}vh)`;
       // braços abertos um pouco para fora; na freada voltam para o centro e as sapatas apertam o aro
@@ -1092,24 +1223,28 @@
       $("#vbDir").style.transform = `rotate(${(2.4 * (1 - freia)).toFixed(2)}deg)`;
       // a roda girando aparece borrada; conforme freia, o borrão some e ela fica parada e nítida
       $("#vbBorrada").style.opacity = (1 - freia).toFixed(3);
-    }
+    } else spinAntes = spin;   // fora da tela: o disco não acumula o giro de longe
 
     /* 4 · TRANSMISSÃO — a corrente se monta elo por elo; depois troca de pinhão em pinhão, do maior ao menor */
-    {
+    if (Math.abs(pos - 4) < 1) {
       const d = dw(4);
       const monta = smooth(clamp((d - 0.02) / 0.4));
       const troca = clamp((d - 0.5) / 0.38);              // 7 pinhões ao longo da troca
-      const g = troca > 0 ? Math.min(6, Math.floor(troca * 7)) : 0;
-      transmissao(-spin * 1.0, monta, g);
+      const g = troca > 0 ? Math.min(6, Math.floor(troca * 7)) : 0;   // 7 trocas pelos 5 pinhões maiores da foto
+      transmissao(-spin * 1.0, monta, Math.round(g * 4 / 6));
       show($("#cp4"), clamp(d / 0.3));
       $("#statGears").textContent = troca > 0 ? 3 * (g + 1) : 0;
     }
 
-    /* 5 · CONTATO — luz passa por pedal, guidão e selim, um de cada vez */
-    {
-      const d = dw(5);
-      [P.pedal, P.bar, P.seat].forEach((el, i) => setL(el, lerp(-0.2, 1.2, clamp((d - i * 0.22) / 0.45))));
-      ["#tagPedal", "#tagBar", "#tagSeat"].forEach((s, i) => $(s).style.setProperty("--o", clamp((d - 0.05 - i * 0.15) / 0.15)));
+    /* 5 · CONTATO — selim, guidão e pedal entram nos seus lugares; a linha do triângulo se desenha e os pontos acendem */
+    if (Math.abs(pos - 5) < 1) {
+      const d = dw(5), ent = (a) => out3(clamp((d - a) / 0.3));
+      const vem = [[P.seat, -14, 0, 0], [P.bar, 14, 0, 0.08], [P.pedal, 0, 16, 0.16]];   // de onde cada uma chega (vw, vh) e quando
+      vem.forEach(([el, vx, vy, a]) => { const u = ent(a); el.style.transform = `translate(${(1 - u) * vx}vw, ${(1 - u) * vy}vh)`; el.style.opacity = u; });
+      const tri = clamp((d - 0.42) / 0.3);
+      $("#triangulo").style.setProperty("--tri", tri);
+      triCirc.forEach((c, i) => (c.style.opacity = tri > i / 3 ? 1 : 0));
+      ["#ptSeat", "#ptBar", "#ptPedal"].forEach((s, i) => $(s).style.setProperty("--o", clamp((d - 0.5 - i * 0.1) / 0.12)));
       show($("#cp5"), clamp(d / 0.25));
     }
 
@@ -1119,8 +1254,14 @@
       if (pos > 2.5) loadM3d();
       if (m3d && pos > 4.9) m3d(d);
       // o título acompanha a montagem e sai antes do giro
-      show($("#cp6a"), clamp(d / 0.04) * (1 - clamp((d - 0.55) / 0.05)));
-      show($("#cp6c"), clamp((d - 0.6) / 0.05) * (1 - clamp((d - 0.84) / 0.05)));   // durante o giro
+      show($("#cp6a"), clamp(d / 0.04) * (1 - clamp((d - 0.2) / 0.04)));
+      show($("#cp6c"), clamp((d - 0.24) / 0.04) * (1 - clamp((d - 0.5) / 0.04)));   // no meio da montagem
+      // no fim o estúdio vira branco (mesmo trecho do montagem3d.js); o feixe do foco some no branco
+      const b = CLARO ? 0 : easeInOut(clamp((d - 0.84) / 0.11));
+      $("#palco").style.setProperty("--luz", 0.45 * (1 - b));
+      $("#branco").style.setProperty("--b", b); $("#st6").style.setProperty("--b", b);
+      // na home: com o fundo já branco, o menu passa para a versão clara
+      if (!CLARO && typeof host !== "undefined") host.dataset.theme = b > 0.5 ? "light" : "dark";
       show($("#cp6b"), clamp((d - 0.9) / 0.06));
     }
 
@@ -1130,6 +1271,8 @@
   addEventListener("scroll", wake, { passive: true });
   addEventListener("resize", () => { size(); wake(); });
   size(); frame();
+  // sem rolar: as fotos da linha vêm sozinhas um pouco depois de a página abrir, num momento livre (não disputam a primeira tela)
+  addEventListener("load", () => setTimeout(() => (window.requestIdleCallback || setTimeout)(pedirFotos), 1500));
 
 })();
 </script>
@@ -1191,7 +1334,7 @@
       </div>
       <div class="book" aria-hidden="true">
         <div class="page"></div><div class="page"></div>
-        <div class="page"><img class="plogo" src="img/home2/logo-escuro.webp" alt="" /><div class="ptitle">Catálogo<br />2026<small>BICICLETAS VULLZ</small></div><img src="img/home2/linha/street.webp" alt="" /></div>
+        <div class="page"><img class="plogo" src="img/home2/logo-escuro.webp" alt="" /><div class="ptitle">Catálogo<br />2026<small>BICICLETAS VULLZ</small></div><img src="img/home2/linha/street.webp" alt="" loading="lazy" decoding="async" /></div>
       </div>
     </div>
     <div class="tile">
@@ -1340,8 +1483,8 @@
   BIKES.forEach((b) => {
     track.insertAdjacentHTML("beforeend", `
       <a class="card" href="/catalogo-interativo.html" data-aro="${b.aro}" draggable="false">
-        <div class="top"><img class="mlogo" src="img/home2/logos/${b.id}.webp" alt="${b.name}" /><span class="aro">Aro ${b.aro}</span></div>
-        <div class="ph"><img src="img/home2/linha/${b.id}.webp" alt="" /></div>
+        <div class="top"><img class="mlogo" src="img/home2/logos/${b.id}.webp" alt="${b.name}" loading="lazy" decoding="async" /><span class="aro">Aro ${b.aro}</span></div>
+        <div class="ph"><img src="img/home2/linha/${b.id}.webp" alt="" loading="lazy" decoding="async" /></div>
         <div class="bottom"><span>${b.tag}</span><span class="go">${ARROW}</span></div>
       </a>`);
   });
@@ -1354,7 +1497,7 @@
   const evlist = $("#evlist"), evvisual = $("#evvisual");
   EVS.forEach((e, i) => {
     evlist.insertAdjacentHTML("beforeend", `<li class="${i ? "" : "on"}"><button type="button" data-i="${i}">${e.name}</button></li>`);
-    const img = new Image(); img.src = `img/home2/eletricos/${e.id}.webp`; img.alt = i ? "" : e.name; if (!i) img.className = "on";
+    const img = new Image(); img.loading = "lazy"; img.decoding = "async"; img.src = `img/home2/eletricos/${e.id}.webp`;   // só baixa perto da seção img.alt = i ? "" : e.name; if (!i) img.className = "on";
     evvisual.append(img);
   });
   const evImgs = [...evvisual.querySelectorAll("img")], evItems = [...evlist.children];
