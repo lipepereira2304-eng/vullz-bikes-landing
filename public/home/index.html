@@ -127,7 +127,7 @@
     .abertura .marca { left: 20px; right: 20px; width: auto; top: 104px; bottom: auto; }
     /* no celular não sobra preto ao lado da bike: a foto desce e o texto fica numa faixa preta em cima */
     .abertura .foto, .abertura .reflexo { top: 40%; height: 60%; }
-    .abertura .foto { -webkit-mask-image: linear-gradient(transparent, #000 22%); mask-image: linear-gradient(transparent, #000 22%); }
+    .abertura .foto, .abertura .reflexo { -webkit-mask-image: linear-gradient(transparent, #000 22%, #000 80%, transparent); mask-image: linear-gradient(transparent, #000 22%, #000 80%, transparent); }
     .abertura .marca h1 { font-size: 22px; }
     .abertura .marca p { margin-top: 12px; font-size: 15px; }
     .abertura .marca .options { grid-template-columns: 188px; gap: 8px; margin-top: 10px; }
@@ -371,6 +371,47 @@
 
   footer { display: flex; justify-content: space-between; align-items: center; padding: 64px 56px 40px; color: rgba(255,255,255,.5); font-size: 12px; background: var(--ink); }
   footer img { height: 22px; opacity: .6; }
+
+  /* ================================================================
+     CELULAR — linha, elétricos, hub e rodapé numa coluna só
+     ================================================================ */
+  @media (max-width: 760px) {
+    .lineup .head { flex-direction: column; align-items: flex-start; gap: 12px; padding: 92px 20px 0; }
+    .lineup .head h2 { font-size: 40px; }
+    .lineup .head p { margin: 0; max-width: none; font-size: 15px; text-align: left; }
+    .lineup .track { padding-left: 20px; }
+    .card { width: 80vw; height: min(56vh, 480px); margin-right: 12px; border-radius: 26px; padding: 24px 22px 22px; }
+    .card .mlogo { height: 26px; max-width: 60%; }
+    .card .aro { font-size: 11px; }
+    .card .bottom { font-size: 14px; }
+    .card .go { width: 40px; height: 40px; flex: none; }
+    .card.end h3 { font-size: 34px; }
+    .card.end p { font-size: 15px; }
+    .lineup .rail { gap: 14px; padding: 0 20px 28px; font-size: 11px; }
+    .lineup .hint { display: none; }
+
+    .ev .pin { grid-template-columns: 1fr; align-items: start; align-content: start; gap: 0; padding: 76px 20px 0; }
+    .ev .visual { order: -1; height: 27vh; margin-bottom: 12px; }
+    .ev h2 { font-size: 38px; }
+    .ev .sub { margin-top: 10px; font-size: 15px; }
+    .ev ol { margin-top: 18px; }
+    .ev li button { padding: 10px 0; font-size: 20px; }
+    .ev li.on button { transform: none; }
+    .ev .more { margin-top: 20px; }
+
+    .hub { padding: 32px 16px 0; }
+    .hub .grid { grid-template-columns: 1fr; gap: 12px; }
+    .tile { padding: 28px 24px; border-radius: 26px; }
+    .tile h3 { font-size: 32px; }
+    .tile p { font-size: 15px; }
+    .tile.pdf { grid-row: auto; min-height: 0; justify-content: flex-start; padding-bottom: 250px; }   /* o catálogo fica embaixo dos botões, sem cobrir nada */
+    .tile.pdf .book { right: 18px; bottom: -70px; width: 210px; height: 272px; }
+    .tile.pdf .page .ptitle { font-size: 22px; }
+    .tile.pdf .page .ptitle small { font-size: 8px; }
+    .tile.link { flex-direction: column; align-items: flex-start; }
+
+    footer { flex-direction: column; align-items: flex-start; gap: 14px; padding: 40px 20px 32px; }
+  }
 
   /* ================================================================
      MENOS MOVIMENTO — alternativa pensada, não "desligar tudo"
@@ -1497,7 +1538,8 @@
   const evlist = $("#evlist"), evvisual = $("#evvisual");
   EVS.forEach((e, i) => {
     evlist.insertAdjacentHTML("beforeend", `<li class="${i ? "" : "on"}"><button type="button" data-i="${i}">${e.name}</button></li>`);
-    const img = new Image(); img.loading = "lazy"; img.decoding = "async"; img.src = `img/home2/eletricos/${e.id}.webp`;   // só baixa perto da seção img.alt = i ? "" : e.name; if (!i) img.className = "on";
+    const img = new Image(); img.loading = "lazy"; img.decoding = "async"; img.src = `img/home2/eletricos/${e.id}.webp`;   // só baixa perto da seção
+    img.alt = i ? "" : e.name; if (!i) img.className = "on";
     evvisual.append(img);
   });
   const evImgs = [...evvisual.querySelectorAll("img")], evItems = [...evlist.children];
@@ -1519,9 +1561,10 @@
 
   /* ---------------- geometria da linha ---------------- */
   let dist = 0;
+  const pad = () => (innerWidth <= 760 ? 20 : 56);   // margem lateral da linha (igual ao CSS)
   function sizeLine() {
     if (reduce) return;
-    dist = track.scrollWidth - innerWidth + 56;
+    dist = track.scrollWidth - innerWidth + pad();
     line.style.height = `${dist + innerHeight}px`;
   }
   const lineTop = () => line.getBoundingClientRect().top + scrollY;
@@ -1566,7 +1609,7 @@
     const v = clamp(t1 > t0 ? ((s1 - s0) / (t1 - t0)) * 1000 : 0, -4000, 4000);
     // encaixa no card mais próximo de ONDE O GESTO IA PARAR, não de onde soltou
     const top = lineTop(), projected = scrollY + project(v);
-    const snaps = cards().map((c) => clamp(top + c.offsetLeft - 56, top, top + dist));
+    const snaps = cards().map((c) => clamp(top + c.offsetLeft - pad(), top, top + dist));
     const target = snaps.reduce((a, b) => (Math.abs(b - projected) < Math.abs(a - projected) ? b : a));
     scrollS.x = scrollY; scrollS.v = v; scrollS.target = target; scrollAnimating = true;  // herda a velocidade do dedo
     edgeS.x = edge; edgeS.v = 0; edgeS.target = 0;
@@ -1586,7 +1629,7 @@
   // atalhos do trilho: pular para um aro
   railBtns.forEach((b) => b.addEventListener("click", () => {
     const c = cards().find((c) => c.dataset.aro === b.dataset.aro); if (!c) return;
-    scrollS.x = scrollY; scrollS.v = 0; scrollS.target = clamp(lineTop() + c.offsetLeft - 56, lineTop(), lineTop() + dist); scrollAnimating = true; wake();
+    scrollS.x = scrollY; scrollS.v = 0; scrollS.target = clamp(lineTop() + c.offsetLeft - pad(), lineTop(), lineTop() + dist); scrollAnimating = true; wake();
   }));
   // lista de elétricos clicável: rola até o trecho daquele modelo
   evlist.addEventListener("click", (e) => {
